@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" role="img" aria-label="Illustrated historian avatar">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f1c66f"/><stop offset=".4" stop-color="#7e422b"/><stop offset="1" stop-color="#0b2740"/></linearGradient>
+    <linearGradient id="coat" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#24475e"/><stop offset="1" stop-color="#081b2e"/></linearGradient>
+    <linearGradient id="skin" x1=".2" y1="0" x2=".8" y2="1"><stop stop-color="#f6cfaa"/><stop offset="1" stop-color="#a95f42"/></linearGradient>
+  </defs>
+  <rect width="400" height="400" fill="url(#bg)"/>
+  <path d="M12 325c45-51 100-72 188-72s148 18 188 72v75H12v-75Z" fill="url(#coat)"/>
+  <path d="M111 332c22-44 48-67 89-67s72 23 90 67v68H111v-68Z" fill="#d8e0db" opacity=".8"/>
+  <path d="M149 231h102v64c-16 21-31 29-51 29s-35-8-51-29v-64Z" fill="url(#skin)"/>
+  <ellipse cx="200" cy="156" rx="84" ry="104" fill="url(#skin)"/>
+  <path d="M123 148c-4-69 42-112 83-112 71 0 104 60 81 125-9-45-37-69-87-69-27 0-54 22-77 56Z" fill="#1a1717"/>
+  <path d="M123 156c0-56 26-93 82-93 56 0 80 39 80 91-19-29-43-48-84-48-29 0-54 16-98 50Z" fill="#2b211f"/>
+  <path d="M159 155c9-6 23-6 32 0M211 155c9-6 23-6 32 0" fill="none" stroke="#422a26" stroke-width="6" stroke-linecap="round"/>
+  <ellipse cx="176" cy="172" rx="5" ry="7" fill="#27201d"/><ellipse cx="226" cy="172" rx="5" ry="7" fill="#27201d"/>
+  <path d="M184 207c10 7 23 7 33 0" fill="none" stroke="#803f38" stroke-width="5" stroke-linecap="round"/>
+  <path d="M168 256 200 294 232 256" fill="#faf2dc"/>
+  <path d="m155 321 45-34 45 34-18 79h-54l-18-79Z" fill="#c24436"/>
+  <path d="M274 292c42 11 77 42 101 75M126 292c-42 11-77 42-101 75" fill="none" stroke="#15344a" stroke-width="22"/>
+  <path d="M40 76h100M266 76h95M45 84h88M270 84h79" stroke="#f8db85" stroke-width="4" opacity=".6"/>
+</svg>

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Republic Builder: a classroom-ready AP U.S. History RPG dashboard prototype."
+    />
+    <title>Republic Builder | APUSH RPG</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="screen-noise" aria-hidden="true"></div>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Primary navigation">
+        <div class="brand-lockup">
+          <img src="assets/brand-seal.svg" alt="Republic Builder seal" class="brand-seal" />
+          <div>
+            <p class="brand-name">Republic</p>
+            <p class="brand-ribbon">Builder</p>
+            <p class="brand-motto">Build. Defend. Reform.</p>
+          </div>
+        </div>
+
+        <nav class="primary-nav">
+          <button class="nav-item active" data-section="dashboard" aria-current="page">
+            <span aria-hidden="true">⌂</span> Dashboard
+          </button>
+          <button class="nav-item" data-section="quests"><span aria-hidden="true">⚔</span> Quests</button>
+          <button class="nav-item" data-section="map"><span aria-hidden="true">⌖</span> Map</button>
+          <button class="nav-item" data-section="inventory"><span aria-hidden="true">▣</span> Inventory</button>
+          <button class="nav-item" data-section="republic"><span aria-hidden="true">⌂</span> Republic</button>
+          <button class="nav-item" data-section="achievements"><span aria-hidden="true">★</span> Achievements</button>
+          <button class="nav-item" data-section="leaderboard"><span aria-hidden="true">▥</span> Leaderboard</button>
+          <button class="nav-item" data-section="library"><span aria-hidden="true">▤</span> History Library</button>
+        </nav>
+
+        <section class="era-card side-card" aria-labelledby="current-era-heading">
+          <p class="micro-label">Current Era</p>
+          <p class="era-number">Era 3</p>
+          <h2 id="current-era-heading">The Road to Revolution</h2>
+          <p class="era-dates">1763–1776</p>
+          <img src="assets/era-revolution.svg" alt="Illustrated colonial-era figures" />
+          <button class="button button-navy full-width" id="eraDetailsButton">View era details</button>
+        </section>
+      </aside>
+
+      <main class="game-board" id="dashboard">
+        <header class="topbar panel panel-navy">
+          <section class="student-profile" aria-label="Student profile">
+            <div class="portrait-frame">
+              <img src="assets/hero-scholar.svg" alt="Illustrated student historian avatar" />
+            </div>
+            <div>
+              <p class="greeting">Welcome back,</p>
+              <h1 id="studentName">Alex Morgan</h1>
+              <button class="archetype" id="editProfileButton">The History Scholar <span aria-hidden="true">✎</span></button>
+            </div>
+          </section>
+
+          <section class="level-display stat-block" aria-label="Level and experience">
+            <div class="shield-level"><span>Level</span><strong id="levelValue">12</strong></div>
+            <div class="xp-area">
+              <div class="meter-label"><span>XP</span><strong id="xpValue">2,450 / 3,200</strong></div>
+              <div class="meter xp-meter" aria-label="Experience progress"><span id="xpMeter"></span></div>
+            </div>
+          </section>
+
+          <section class="currency-display stat-block" aria-label="Republic points">
+            <span class="coin-icon" aria-hidden="true">✦</span>
+            <div><p>Republic points</p><strong id="rpValue">1,285</strong></div>
+          </section>
+
+          <section class="streak-display stat-block" aria-label="Daily streak">
+            <span class="fire-icon" aria-hidden="true">♨</span>
+            <div><p>Streak</p><strong><span id="streakValue">7</span> <small>days</small></strong></div>
+          </section>
+
+          <div class="top-actions">
+            <button class="icon-button" id="settingsButton" aria-label="Open settings">⚙</button>
+            <button class="icon-button" id="helpButton" aria-label="Open help">?</button>
+            <button class="button teacher-button" id="teacherModeButton"><span aria-hidden="true">⌂</span> Teacher mode</button>
+          </div>
+        </header>
+
+        <div class="dashboard-layout">
+          <section class="main-column">
+            <section class="pillars-panel parchment-panel" aria-labelledby="pillars-heading">
+              <div class="ornament-header">
+                <span></span>
+                <h2 id="pillars-heading">Republic Pillars</h2>
+                <span></span>
+              </div>
+              <div class="pillars-grid" id="pillarsGrid"></div>
+            </section>
+
+            <section class="quest-board panel panel-navy" id="quests" aria-labelledby="quest-heading">
+              <div class="board-header">
+                <div>
+                  <p class="micro-label">Your classroom missions</p>
+                  <h2 id="quest-heading">Quest Board</h2>
+                  <p>Complete challenges to earn XP, Republic Points, and powerful historical tools.</p>
+                </div>
+                <div class="board-actions">
+                  <div class="filter-menu" aria-label="Quest filters">
+                    <button class="filter-chip selected" data-filter="all">All</button>
+                    <button class="filter-chip" data-filter="source">Sources</button>
+                    <button class="filter-chip" data-filter="skill">Skills</button>
+                    <button class="filter-chip" data-filter="writing">Writing</button>
+                  </div>
+                  <button class="button button-red" id="refreshQuestsButton">Refresh quests <span aria-hidden="true">↻</span></button>
+                </div>
+              </div>
+
+              <div class="quest-grid" id="questGrid"></div>
+
+              <div class="daily-bonus" aria-live="polite">
+                <div class="bonus-copy"><span class="spark" aria-hidden="true">✦</span><strong>Daily bonus</strong><span>Complete <b id="dailyProgress">0</b> of 3 quests today to earn a bonus 100 RP.</span></div>
+                <div class="bonus-dots" id="bonusDots" aria-label="Daily quest progress"></div>
+                <span class="bonus-chest" aria-hidden="true">▣</span>
+              </div>
+            </section>
+          </section>
+
+          <aside class="right-column" aria-label="Republic status and inventory">
+            <section class="republic-status panel panel-navy" id="republic">
+              <div class="section-title-row"><h2>Republic Status</h2><span class="gold-rule"></span></div>
+              <img src="assets/republic-crest.svg" alt="The Hamilton Republic crest" class="republic-crest" />
+              <h3 id="republicName">The Hamilton Republic</h3>
+              <p class="republic-motto">“E Pluribus Unum”</p>
+              <div class="republic-stats">
+                <div><span>Population</span><strong id="populationValue">12.4M</strong></div>
+                <div><span>Treasury</span><strong id="treasuryValue">8,750</strong></div>
+                <div><span>Stability</span><strong id="stabilityValue">68%</strong></div>
+              </div>
+              <button class="button button-navy full-width" id="viewRepublicButton">View republic</button>
+            </section>
+
+            <section class="inventory-panel panel panel-navy" id="inventory" aria-labelledby="inventory-heading">
+              <div class="section-title-row"><h2 id="inventory-heading">Inventory</h2><button class="text-button" id="viewAllInventoryButton">View all</button></div>
+              <div class="inventory-grid" id="inventoryGrid"></div>
+            </section>
+
+            <section class="upcoming-boss panel panel-navy" aria-labelledby="boss-heading">
+              <div class="section-title-row"><h2 id="boss-heading">Upcoming Boss</h2><span class="gold-rule"></span></div>
+              <div class="boss-preview">
+                <div class="boss-preview-image"><img src="assets/quest-constitution.svg" alt="Illustration of the U.S. Constitution" /></div>
+                <div class="boss-preview-copy">
+                  <p class="boss-tag">DBQ Boss Battle</p>
+                  <h3>The Constitution Test</h3>
+                  <p>Prove your knowledge of the Constitution and the debate over ratification.</p>
+                  <div class="boss-rewards"><span>XP <b>350</b></span><span>RP <b>175</b></span></div>
+                </div>
+              </div>
+              <div class="boss-lock"><span aria-hidden="true">▣</span> Unlocks in: <b id="bossUnlockText">2 quests</b></div>
+            </section>
+          </aside>
+        </div>
+
+        <section class="progression-rail panel panel-navy" id="map" aria-labelledby="map-heading">
+          <div class="rail-heading"><div><p class="micro-label">Nine APUSH units</p><h2 id="map-heading">The American Journey</h2></div><p>Each era unlocks new quests, sources, characters, and boss battles.</p></div>
+          <div class="unit-track" id="unitTrack"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="modalBackdrop" hidden></div>
+
+    <section class="modal quest-modal" id="questModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" hidden>
+      <button class="modal-close" data-close-modal aria-label="Close quest">×</button>
+      <div class="modal-art"><img id="modalImage" src="" alt="" /></div>
+      <div class="modal-content">
+        <p class="micro-label" id="modalCategory"></p>
+        <h2 id="modalTitle"></h2>
+        <p class="modal-description" id="modalDescription"></p>
+        <div class="challenge-box">
+          <p class="challenge-label">Mission prompt</p>
+          <h3 id="modalPrompt"></h3>
+          <div class="answer-list" id="answerList"></div>
+          <p class="feedback" id="questFeedback" aria-live="polite"></p>
+        </div>
+        <div class="modal-footer">
+          <div class="reward-preview" id="modalRewards"></div>
+          <button class="button button-red" id="submitAnswerButton">Submit answer</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="modal teacher-modal" id="teacherModal" role="dialog" aria-modal="true" aria-labelledby="teacherModalTitle" hidden>
+      <button class="modal-close" data-close-modal aria-label="Close teacher mode">×</button>
+      <p class="micro-label">Prototype controls</p>
+      <h2 id="teacherModalTitle">Teacher Mode</h2>
+      <p class="modal-description">These local controls are for demonstrating the interface. A real classroom version should use secure authentication and a student database.</p>
+      <div class="teacher-controls">
+        <button class="button button-navy" data-teacher-action="xp">Award 100 XP</button>
+        <button class="button button-navy" data-teacher-action="rp">Award 100 RP</button>
+        <button class="button button-navy" data-teacher-action="unlock">Unlock next unit</button>
+        <button class="button button-red" data-teacher-action="reset">Reset demo state</button>
+      </div>
+      <div class="teacher-note"><strong>Next build:</strong> class roster, teacher-created quests, due dates, rubric scoring, and cloud saves.</div>
+    </section>
+
+    <section class="modal profile-modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle" hidden>
+      <button class="modal-close" data-close-modal aria-label="Close profile editor">×</button>
+      <p class="micro-label">Character profile</p>
+      <h2 id="profileModalTitle">Customize Your Republic</h2>
+      <form id="profileForm" class="profile-form">
+        <label>Historian name<input id="profileNameInput" maxlength="28" required /></label>
+        <label>Republic name<input id="profileRepublicInput" maxlength="34" required /></label>
+        <label>Republic motto<input id="profileMottoInput" maxlength="42" required /></label>
+        <button class="button button-red" type="submit">Save profile</button>
+      </form>
+    </section>
+
+    <section class="modal info-modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle" hidden>
+      <button class="modal-close" data-close-modal aria-label="Close information">×</button>
+      <p class="micro-label" id="infoModalEyebrow">Republic Builder</p>
+      <h2 id="infoModalTitle">Information</h2>
+      <div id="infoModalContent" class="info-modal-content"></div>
+    </section>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

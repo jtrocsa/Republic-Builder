@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Republic Builder seal">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0ae"/><stop offset=".45" stop-color="#d6a444"/><stop offset="1" stop-color="#8e5d1d"/></linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1e597c"/><stop offset="1" stop-color="#061b2c"/></linearGradient>
+  </defs>
+  <circle cx="90" cy="90" r="82" fill="url(#navy)" stroke="url(#gold)" stroke-width="5"/>
+  <circle cx="90" cy="90" r="68" fill="none" stroke="#e9c96f" stroke-width="1" opacity=".7"/>
+  <path d="M49 65h82L90 38 49 65Zm8 5h66v7H57v-7Zm4 10h10v31H61V80Zm19 0h10v31H80V80Zm19 0h10v31H99V80Zm19 0h10v31h-10V80Zm-67 35h76v8H51v-8Zm-7 13h90v7H44v-7Z" fill="url(#gold)"/>
+  <path d="M39 141c15 15 31 22 51 22s37-7 51-22" fill="none" stroke="#d7ac54" stroke-width="4"/>
+  <path d="M48 142c-12-13-14-28-10-40M132 142c12-13 14-28 10-40" fill="none" stroke="#b88731" stroke-width="3"/>
+  <circle cx="37" cy="49" r="4" fill="#f6df8c"/><circle cx="143" cy="49" r="4" fill="#f6df8c"/><circle cx="90" cy="22" r="4" fill="#f6df8c"/>
+</svg>

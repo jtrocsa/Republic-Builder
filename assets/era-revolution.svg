@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 480" role="img" aria-label="Colonial figures marching at dusk">
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#0a2740"/><stop offset=".52" stop-color="#a44b2e"/><stop offset="1" stop-color="#e2af67"/></linearGradient><linearGradient id="fog" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#d9ba87" stop-opacity=".6"/><stop offset="1" stop-color="#f8dec0" stop-opacity="0"/></linearGradient></defs>
+  <rect width="900" height="480" fill="url(#sky)"/>
+  <circle cx="680" cy="120" r="64" fill="#ffe1a0" opacity=".78"/>
+  <path d="M0 290c160-60 291-34 435-7 178 34 302-2 465-40v237H0V290Z" fill="#183342"/>
+  <path d="M0 328c198-49 323-35 485 9 160 43 292 25 415-5v148H0V328Z" fill="#0a202f"/>
+  <path d="M0 315c145 4 303 39 484 34 122-3 229-18 416-42v79H0v-71Z" fill="url(#fog)"/>
+  <g fill="#0d1822">
+    <path d="M180 310h28l16 57-10 113h-46l-10-113 22-57Zm-20-53c0-25 17-42 35-42 19 0 35 17 35 42l-13 52h-45l-12-52Z"/>
+    <path d="M201 281 245 245l11 12-42 48Zm-9 29-64-15 4-17 62 13Zm23 26 55-25 7 14-60 33Z"/>
+    <path d="M360 304h33l22 64-13 112h-54l-13-112 25-64Zm-15-56c0-28 20-47 41-47s41 19 41 47l-14 55h-55l-13-55Z"/>
+    <path d="m398 273 58-77 12 9-59 85Zm-10 34-74-8 2-18 70 5Zm24 25 70-12 4 16-72 20Z"/>
+    <path d="M575 324h25l18 50-9 106h-43l-9-106 18-50Zm-15-45c0-24 16-39 31-39s31 15 31 39l-10 45h-42l-10-45Z"/>
+    <path d="m604 298 47-68 10 8-48 73Zm-10 31-58 16-5-15 55-20Z"/>
+  </g>
+  <g fill="#d8c292" opacity=".9"><path d="M27 398h160l-21 13H9l18-13Zm654-19h196l-20 13H661l20-13Z"/></g>
+</svg>
