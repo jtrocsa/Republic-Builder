@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" fill="none" role="img" aria-label="Founder crest">
+ <defs>
+  <linearGradient id="fcGold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0b3"/><stop offset=".42" stop-color="#ddb054"/><stop offset="1" stop-color="#8c571d"/></linearGradient>
+  <linearGradient id="fcNavy" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#173c5d"/><stop offset="1" stop-color="#081a2a"/></linearGradient>
+  <filter id="fcShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity=".6"/></filter>
+ </defs>
+ <g filter="url(#fcShadow)">
+  <path d="M100 10 172 44v72c0 49-29 83-72 100-43-17-72-51-72-100V44L100 10Z" fill="#08121d" stroke="url(#fcGold)" stroke-width="7"/>
+  <path d="M100 24 156 51v63c0 38-20 65-56 81-36-16-56-43-56-81V51l56-27Z" fill="url(#fcNavy)" stroke="#9a6727" stroke-width="2"/>
+  <path d="M63 133h74v11H63z" fill="url(#fcGold)"/>
+  <path d="M71 124V87h58v37M81 87v-13h38v13M88 74V61h24v13M95 133V98h10v35M77 98h10v17H77zm36 0h10v17h-10z" stroke="url(#fcGold)" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M54 143h92" stroke="#f2d384" stroke-width="3" opacity=".5"/>
+  <path d="M39 44 21 28M161 44l18-16M100 20V2" stroke="#e2bb5b" stroke-width="3" stroke-linecap="round"/>
+  <path d="M49 160c14 14 31 21 51 21s37-7 51-21" fill="none" stroke="#c58d37" stroke-width="4" stroke-linecap="round"/>
+ </g>
+</svg>

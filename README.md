@@ -15,6 +15,12 @@ This is a **front-end starter**, built with HTML, CSS, JavaScript, SVG assets, a
 - A repeatable content model in `data.js`
 - A swappable save adapter in `storage.js`
 
+## Character Creator
+
+The founder forge now lives as a dedicated feature page at `features/character-forge/character-forge.html` and is opened from the existing game shell. It uses a compact five-step layout with a left-step panel, center preview, and right summary rail, while saving the in-progress creator state locally so refreshes do not erase choices.
+
+The creator flow covers Identity, Profession, Founder Path, Historian Skills, and Review. Historian Skills begin at 5/20, with the chosen primary and secondary skills starting at 7/20. The final founder profile is written back into the same browser storage used by the dashboard.
+
 ## Open the demo
 
 Open `index.html` in a browser, or serve the folder locally:

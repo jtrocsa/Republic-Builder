@@ -1,12 +1,28 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Republic Builder seal">
   <defs>
-    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fff0ae"/><stop offset=".45" stop-color="#d6a444"/><stop offset="1" stop-color="#8e5d1d"/></linearGradient>
-    <linearGradient id="navy" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#1e597c"/><stop offset="1" stop-color="#061b2c"/></linearGradient>
+    <linearGradient id="rbGold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fff2bf"/>
+      <stop offset=".38" stop-color="#e0b154"/>
+      <stop offset="1" stop-color="#8d5b1e"/>
+    </linearGradient>
+    <radialGradient id="rbNavy" cx="35%" cy="28%" r="82%">
+      <stop offset="0" stop-color="#295b83"/>
+      <stop offset="1" stop-color="#071a2a"/>
+    </radialGradient>
+    <filter id="rbSealGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000" flood-opacity=".5"/>
+    </filter>
   </defs>
-  <circle cx="90" cy="90" r="82" fill="url(#navy)" stroke="url(#gold)" stroke-width="5"/>
-  <circle cx="90" cy="90" r="68" fill="none" stroke="#e9c96f" stroke-width="1" opacity=".7"/>
-  <path d="M49 65h82L90 38 49 65Zm8 5h66v7H57v-7Zm4 10h10v31H61V80Zm19 0h10v31H80V80Zm19 0h10v31H99V80Zm19 0h10v31h-10V80Zm-67 35h76v8H51v-8Zm-7 13h90v7H44v-7Z" fill="url(#gold)"/>
-  <path d="M39 141c15 15 31 22 51 22s37-7 51-22" fill="none" stroke="#d7ac54" stroke-width="4"/>
-  <path d="M48 142c-12-13-14-28-10-40M132 142c12-13 14-28 10-40" fill="none" stroke="#b88731" stroke-width="3"/>
-  <circle cx="37" cy="49" r="4" fill="#f6df8c"/><circle cx="143" cy="49" r="4" fill="#f6df8c"/><circle cx="90" cy="22" r="4" fill="#f6df8c"/>
+  <g filter="url(#rbSealGlow)">
+    <circle cx="90" cy="90" r="82" fill="url(#rbNavy)" stroke="url(#rbGold)" stroke-width="6"/>
+    <circle cx="90" cy="90" r="69" fill="none" stroke="#f3dc8b" stroke-width="1.5" opacity=".75"/>
+    <circle cx="90" cy="90" r="56" fill="none" stroke="#c18c37" stroke-width="1" opacity=".45" stroke-dasharray="2 7"/>
+    <path d="M90 30 53 61v52c0 25 10 42 31 55 6 4 11 7 6 17h-7c-23-10-41-25-47-52V53L90 18l54 35v80c-6 27-24 42-47 52h-7c-5-10 0-13 6-17 21-13 31-30 31-55V61L90 30Z" fill="#102334" stroke="#7b4e1c" stroke-width="2" opacity=".92"/>
+    <path d="M52 67h76L90 39 52 67Zm8 6h60v7H60v-7Zm4 10h10v30H64V83Zm18 0h10v30H82V83Zm18 0h10v30H100V83Zm18 0h10v30h-10V83Zm-66 34h74v8H52v-8Zm-8 13h90v7H44v-7Z" fill="url(#rbGold)"/>
+    <path d="M42 140c11 11 23 17 39 20m57-20c-11 11-23 17-39 20" fill="none" stroke="#e8bf63" stroke-width="4" stroke-linecap="round"/>
+    <path d="M49 140c-10-10-13-24-11-38M131 140c10-10 13-24 11-38" fill="none" stroke="#b37b28" stroke-width="3"/>
+    <circle cx="90" cy="21" r="4.5" fill="#f8e6a4"/>
+    <circle cx="37" cy="49" r="4" fill="#f8e6a4"/>
+    <circle cx="143" cy="49" r="4" fill="#f8e6a4"/>
+  </g>
 </svg>

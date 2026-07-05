@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Republic Builder character forge for building a founder, choosing a profession, Founder Path, and APUSH Historian Skills."
+    />
+    <title>Republic Builder | Character Forge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./character-forge.css" />
+  </head>
+  <body class="republic-builder-forge">
+    <div class="forge-noise" aria-hidden="true"></div>
+
+    <section class="forge-shell">
+      <header class="forge-topbar">
+        <div class="forge-brand">
+          <img src="../../assets/brand-seal.svg" alt="" aria-hidden="true" />
+          <div>
+            <p>Republic Builder</p>
+            <span>Founder’s Character Forge</span>
+          </div>
+        </div>
+
+        <nav class="forge-stepper" id="step-nav" aria-label="Character creation steps"></nav>
+
+        <div class="forge-top-actions">
+          <a class="forge-link" href="../../index.html">Return to dashboard</a>
+          <button class="forge-reset" id="reset-character" type="button">Start over</button>
+        </div>
+      </header>
+
+      <main class="forge-grid" id="forge-main" tabindex="-1">
+        <aside class="forge-panel forge-left" aria-label="Character creator summary">
+          <div class="forge-panel-title">
+            <p class="eyebrow" id="forge-step-meta">Step 1 of 5</p>
+            <h1 id="forge-step-title">Identity</h1>
+            <p class="forge-intro">Every founder begins with a name, story, and place in the world. Choices stay local and can be revised before final review.</p>
+          </div>
+
+          <div class="forge-field-group" id="forge-stage"></div>
+
+          <div class="forge-next-box">
+            <span class="forge-next-kicker">Next step</span>
+            <strong id="forge-next-label">Choose a profession to define your role in the republic.</strong>
+            <button class="forge-continue" type="button" data-action="next">Next: Profession</button>
+          </div>
+        </aside>
+
+        <section class="forge-panel forge-center" aria-label="Founder preview">
+          <div class="forge-preview-title">Founder Preview</div>
+          <div class="forge-preview-stage">
+            <div class="forge-background" aria-hidden="true"></div>
+            <div id="forge-avatar" class="forge-avatar-frame" aria-label="Selected founder avatar"></div>
+          </div>
+          <div class="forge-avatar-caption">
+            <strong id="forge-avatar-name">Aria</strong>
+            <span id="forge-avatar-subtitle">of Philadelphia</span>
+          </div>
+
+          <section class="forge-skill-strip" aria-labelledby="forge-skill-strip-title">
+            <div class="forge-section-heading">
+              <p class="eyebrow">Historian Skills (Initial)</p>
+              <h2 id="forge-skill-strip-title">Starting skill values</h2>
+            </div>
+            <div id="forge-skill-strip" class="forge-skill-grid"></div>
+          </section>
+        </section>
+
+        <aside class="forge-panel forge-right" aria-label="Founder summary">
+          <div class="forge-panel-title">
+            <p class="eyebrow">Founder Summary</p>
+            <h2>Your founder at a glance</h2>
+          </div>
+
+          <div class="forge-summary-list" id="forge-summary-list"></div>
+
+          <div class="forge-next-steps" id="forge-next-steps">
+            <p class="eyebrow">Next steps</p>
+            <p>Choose a profession to define your role in the republic.</p>
+          </div>
+        </aside>
+      </main>
+
+      <footer class="forge-footer">
+        <div class="forge-footer-item">
+          <strong>Founder Path</strong>
+          <span>Shapes dialogue, story options, and small bonuses.</span>
+        </div>
+        <div class="forge-footer-item">
+          <strong>Historian Skills</strong>
+          <span>Track APUSH growth and never grant graded-answer advantages.</span>
+        </div>
+        <div class="forge-footer-item">
+          <strong>Fair & balanced</strong>
+          <span>XP is earned through practice and evidence.</span>
+        </div>
+      </footer>
+    </section>
+
+    <template id="toast-template">
+      <div class="forge-toast" role="status" aria-live="polite"></div>
+    </template>
+
+    <script type="module" src="../../js/app.js"></script>
+  </body>
+</html>

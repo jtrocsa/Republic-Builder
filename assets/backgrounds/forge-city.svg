@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" role="img" aria-label="Republic Builder city backdrop">
+ <defs>
+  <linearGradient id="fcSky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#203d55"/><stop offset=".45" stop-color="#334d59"/><stop offset="1" stop-color="#0d1218"/></linearGradient>
+  <radialGradient id="fcGlow" cx="66%" cy="28%" r="30%"><stop stop-color="#f6cf7b" stop-opacity=".8"/><stop offset="1" stop-color="#f6cf7b" stop-opacity="0"/></radialGradient>
+  <linearGradient id="fcHaze" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#d6c194" stop-opacity=".18"/><stop offset="1" stop-color="#d6c194" stop-opacity="0"/></linearGradient>
+  <filter id="fcBlur"><feGaussianBlur stdDeviation="20"/></filter>
+ </defs>
+ <rect width="1600" height="900" fill="url(#fcSky)"/>
+ <rect width="1600" height="900" fill="url(#fcGlow)"/>
+ <path d="M0 322c154-70 314-10 457-72 154-67 281 4 421-54 172-71 312-43 722-104v330H0V322Z" fill="#1a2630" opacity=".88"/>
+ <path d="M0 478 162 352l58 86 52-154 63 180 71-86 66 117 67-193 67 171 79-103 83 103 82-154 56 176 108-121 63 143 88-182 68 128 103-176 74 212 96-132v494H0V478Z" fill="#111922"/>
+ <g fill="#0a1117">
+  <path d="M0 512h158v388H0zM184 426h145v474H184zM356 500h166v400H356zM552 392h194v508H552zM776 459h184v441H776zM988 370h228v530H988zM1245 446h178v454h-178zM1464 372h136v528h-136z"/>
+ </g>
+ <g stroke="#b07a36" stroke-opacity=".36" stroke-width="7">
+  <path d="M40 560h76M218 507h71M394 546h82M602 488h103M842 525h90M1044 476h132M1307 529h91M1510 478h56"/>
+ </g>
+ <path d="M0 746c278-60 453 43 697-6 266-53 437 33 903-18v178H0V746Z" fill="#070d12"/>
+ <g fill="#efd28d" opacity=".22" filter="url(#fcBlur)">
+  <circle cx="172" cy="530" r="23"/>
+  <circle cx="579" cy="508" r="18"/>
+  <circle cx="948" cy="548" r="23"/>
+  <circle cx="1372" cy="513" r="24"/>
+ </g>
+ <path d="M0 280c190-32 332-18 482-40 153-22 293 7 428-15 195-31 327-15 690-37" fill="none" stroke="url(#fcHaze)" stroke-width="120" stroke-linecap="round" opacity=".45"/>
+</svg>

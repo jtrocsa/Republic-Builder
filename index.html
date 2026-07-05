@@ -15,6 +15,7 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="styles.css" />
+    <!-- character-creation.css removed to prevent style conflicts with the forge panels -->
   </head>
   <body>
     <div class="screen-noise" aria-hidden="true"></div>
@@ -50,7 +51,7 @@
             <span id="creationRolePlate">Choose a calling</span>
           </div>
           <section class="trait-panel" aria-labelledby="creationTraitsHeading">
-            <div class="trait-panel-heading"><div><p class="micro-label">Personal traits</p><h2 id="creationTraitsHeading">Founding Attributes</h2></div><span class="trait-cap">Maximum <b>20</b></span></div>
+            <div class="trait-panel-heading"><div><p class="micro-label">Historian growth</p><h2 id="creationTraitsHeading">Historian Skills</h2></div><span class="trait-cap">Maximum <b>20</b></span></div>
             <div class="trait-preview-grid" id="creationTraitsGrid"></div>
           </section>
         </section>
@@ -151,7 +152,7 @@
             <section class="traits-dashboard-panel parchment-panel" aria-labelledby="traits-heading">
               <div class="ornament-header">
                 <span></span>
-                <h2 id="traits-heading">Founder Traits</h2>
+                <h2 id="traits-heading">Historian Skills</h2>
                 <span></span>
               </div>
               <div class="traits-dashboard-grid" id="traitsDashboardGrid"></div>
@@ -274,6 +275,6 @@
 
     <script src="data.js"></script>
     <script src="storage.js"></script>
-    <script src="app.js"></script>
+    <script src="app.js" type="module"></script>
   </body>
 </html>

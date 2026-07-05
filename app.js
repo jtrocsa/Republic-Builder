@@ -1,3 +1,16 @@
+import {
+  clearProfile,
+  createCharacterProfile,
+  createDefaultOutfit,
+  DEFAULT_STORAGE_KEY,
+  HISTORIAN_SKILLS,
+  FOUNDER_PATHS,
+  getProfileFocusSummary,
+  loadProfile,
+  renderCharacterCreation,
+  saveProfile
+} from "./src/index.js";
+
 /*
   REPUBLIC BUILDER — FRONT-END PROTOTYPE
   ------------------------------------------------------------------
@@ -65,6 +78,7 @@
     republicName: '',
     republicMotto: '“E Pluribus Unum”',
     character: initialCharacter(),
+    profile: null,
     level: 1,
     xp: 0,
     rp: 0,
@@ -103,6 +117,7 @@
       ...saved,
       schemaVersion: 2,
       character,
+      profile: saved.profile || null,
       pillars: { ...base.pillars, ...(saved.pillars || {}) },
       completedQuests: Array.isArray(saved.completedQuests) ? saved.completedQuests : [],
       dailyQuestIds: Array.isArray(saved.dailyQuestIds) ? saved.dailyQuestIds : [],
@@ -121,6 +136,9 @@
 
   function saveState() {
     storage.save(STORAGE_KEY, state);
+    if (state.profile) {
+      saveProfile(state.profile, DEFAULT_STORAGE_KEY);
+    }
   }
 
   function getGender(id) {
@@ -191,6 +209,24 @@
   }
 
   let state = loadState();
+  const savedProfile = loadProfile(DEFAULT_STORAGE_KEY);
+  if (savedProfile && !state.profile) {
+    const town = getTown(savedProfile.identity?.town) || data.character.towns[0];
+    state.profile = savedProfile;
+    state.character = {
+      name: savedProfile.identity?.name || '',
+      gender: savedProfile.identity?.gender || 'prefer-not-to-say',
+      town: savedProfile.identity?.town || 'philadelphia',
+      profession: savedProfile.identity?.professionId || 'blacksmith',
+      outfit: clone(savedProfile.identity?.outfit || createDefaultOutfit()),
+      traitGrowth: Object.fromEntries(data.character.traits.map((trait) => [trait.id, 0])),
+      traits: calculateTraits(savedProfile.identity?.professionId || 'blacksmith')
+    };
+    state.studentName = state.character.name;
+    state.republicName = `The ${town.name} Republic`;
+    state.republicMotto = '“E Pluribus Unum”';
+    state.characterCreated = true;
+  }
   let activeQuest = null;
   let selectedAnswer = null;
   let questResolved = false;
@@ -260,9 +296,14 @@
     const currentUnit = data.units.find((unit) => unit.id === state.unlockedUnit) || data.units[0];
     const target = xpTargetForLevel(state.level);
 
+    const profile = state.profile;
+    const profileFocusSummary = getProfileFocusSummary(profile);
+    const pathLabel = profileFocusSummary.founderPath;
+    const focusSummary = profileFocusSummary.focusSummary;
     $('#studentName').textContent = state.character.name || state.studentName || 'Founder';
     $('#characterOrigin').textContent = `${town.name}, ${town.region}`;
-    $('#characterProfession').textContent = profession.name;
+    $('#characterProfession').textContent = [profileFocusSummary.profession || profession.name, pathLabel].filter(Boolean).join(' · ');
+    $('#characterProfession').setAttribute('title', focusSummary ? `Founder Path: ${pathLabel || '—'} · Historian Focus: ${focusSummary}` : `Founder Path: ${pathLabel || '—'}`);
     $('#dashboardAvatar').innerHTML = avatarMarkup(state.character, 'Character avatar');
     $('#republicName').textContent = state.republicName || 'The New Republic';
     $('.republic-motto').textContent = state.republicMotto;
@@ -304,18 +345,28 @@
   }
 
   function renderCharacterTraits() {
-    const traits = state.character.traits || calculateTraits(state.character.profession);
-    $('#traitsDashboardGrid').innerHTML = data.character.traits.map((trait) => `
-      <button class="dashboard-trait" type="button" data-trait="${trait.id}" aria-label="${trait.name}: ${traits[trait.id]} out of ${data.character.traitCap}. Learn more.">
-        <span class="dashboard-trait-icon" aria-hidden="true">${trait.icon}</span>
-        <span class="dashboard-trait-name">${trait.name}</span>
-        <strong>${traits[trait.id]} <small>/ ${data.character.traitCap}</small></strong>
+    const skills = state.profile?.historianSkills ? HISTORIAN_SKILLS.map((skill) => ({
+      ...skill,
+      score: Number(state.profile.historianSkills[skill.id] ?? 5)
+    })) : [];
+
+    if (!skills.length) {
+      $('#traitsDashboardGrid').innerHTML = '<p class="trait-placeholder">Choose your founder path and historian focus to unlock the new APUSH skill bar.</p>';
+      return;
+    }
+
+    $('#traitsDashboardGrid').innerHTML = skills.map((skill) => `
+      <button class="dashboard-trait dashboard-skill" type="button" data-skill="${skill.id}" aria-label="${skill.label}: ${skill.score} out of 20. ${skill.description}">
+        <span class="dashboard-trait-icon" aria-hidden="true">${skill.icon}</span>
+        <span class="dashboard-trait-name">${skill.label}</span>
+        <strong>${skill.score} <small>/ 20</small></strong>
       </button>
     `).join('');
 
-    $$('.dashboard-trait').forEach((button) => button.addEventListener('click', () => {
-      const trait = data.character.traits.find((item) => item.id === button.dataset.trait);
-      openInfoModal(trait.name, `${trait.description} Each founder can develop this attribute from 0 to ${data.character.traitCap} through quests, collaboration, writing, and era-specific rewards.`, 'Founder Trait');
+    $$('.dashboard-skill').forEach((button) => button.addEventListener('click', () => {
+      const skill = skills.find((item) => item.id === button.dataset.skill);
+      if (!skill) return;
+      openInfoModal(skill.label, `${skill.description} ${skill.practiceUnlock}`, 'Historian Skill');
     }));
   }
 
@@ -535,7 +586,7 @@
   }
 
   function renderCreationSteps() {
-    const labels = ['Identity', 'Calling', 'Wardrobe', 'Founding Oath'];
+    const labels = ['Identity', 'Profession', 'Founder Path', 'Historian Focus'];
     $('#creationStepList').innerHTML = labels.map((label, index) => `
       <li class="${index === creationStep ? 'active' : index < creationStep ? 'complete' : ''}" role="button" tabindex="0" data-step-index="${index}" aria-current="${index === creationStep ? 'step' : 'false'}">
         <b>${index < creationStep ? '✓' : index + 1}</b><span>${label}</span>
@@ -562,12 +613,28 @@
   }
 
   function renderCreationTraits() {
-    const traits = calculateTraits(creationDraft.profession);
-    $('#creationTraitsGrid').innerHTML = data.character.traits.map((trait) => `
-      <div class="trait-preview-item" title="${trait.description}">
-        <span class="trait-preview-icon" aria-hidden="true">${trait.icon}</span>
-        <span>${trait.name}</span>
-        <strong>${traits[trait.id]}</strong>
+    let skills = state.profile?.historianSkills ? HISTORIAN_SKILLS.map((skill) => ({
+      ...skill,
+      score: Number(state.profile.historianSkills[skill.id] ?? 5)
+    })) : HISTORIAN_SKILLS.map((skill) => ({ ...skill, score: 5 }));
+
+    // If there's no saved profile, preview any primary/secondary focus from the current draft
+    if (!state.profile && creationDraft) {
+      const primary = creationDraft.primarySkillId;
+      const secondary = creationDraft.secondarySkillId;
+      if (primary && secondary && primary !== secondary) {
+        skills = HISTORIAN_SKILLS.map((skill) => ({
+          ...skill,
+          score: Number((skill.id === primary || skill.id === secondary) ? 7 : 5)
+        }));
+      }
+    }
+
+    $('#creationTraitsGrid').innerHTML = skills.map((skill) => `
+      <div class="trait-preview-item" title="${skill.description}">
+        <span class="trait-preview-icon" aria-hidden="true">${skill.icon}</span>
+        <span>${skill.label}</span>
+        <strong>${skill.score}</strong>
       </div>
     `).join('');
   }
@@ -585,6 +652,61 @@
       <span class="choice-label">Home town</span>
       <div class="town-grid">
         ${data.character.towns.map((town) => `<button class="town-choice ${creationDraft.town === town.id ? 'selected' : ''}" type="button" data-town="${town.id}"><span aria-hidden="true">${town.icon}</span><span><strong>${town.name}</strong><small>${town.region}</small></span></button>`).join('')}
+      </div>
+      <div class="mini-wardrobe">
+        <p class="choice-label">Starter clothing</p>
+        <div class="mini-wardrobe-grid">
+          ${['hat','shirt','pants','socks','shoes'].map((slot) => `
+            <label class="creation-field">${slot[0].toUpperCase() + slot.slice(1)}
+              <select id="creation-outfit-${slot}">
+                ${(data.character.wardrobe[slot] || []).map((item) => `
+                  <option value="${item.id}" ${creationDraft.outfit[slot] === item.id ? 'selected' : ''}>${item.name}</option>
+                `).join('')}
+              </select>
+            </label>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function renderFounderPathStep() {
+    return `
+      <div class="creation-copy"><h2>Who are you in the Republic?</h2><p>Role-playing identity, dialogue flavor, and story routes tied to your Founder Path.</p></div>
+      <div class="profession-grid">
+        ${FOUNDER_PATHS.map((path) => `
+          <button class="founder-choice ${creationDraft.founderPathId === path.id ? 'selected' : ''}" type="button" data-founder="${path.id}">
+            <span class="profession-icon" aria-hidden="true">${path.icon}</span>
+            <span><strong>${path.label}</strong><p>${path.tagline}</p></span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderSkillStep() {
+    return `
+      <div class="creation-copy"><h2>Historian Focus</h2><p>Choose one Primary Focus and one different Secondary Focus. Each focused skill begins at +2 (7/20).</p></div>
+      <div class="rb-focus-grid">
+        <fieldset class="rb-focus-set">
+          <legend>Primary Focus <span>+2</span></legend>
+          ${HISTORIAN_SKILLS.map((skill) => `
+            <label class="rb-focus-option">
+              <input type="radio" name="primarySkill" value="${skill.id}" ${creationDraft.primarySkillId === skill.id ? 'checked' : ''} />
+              <span><strong>${skill.icon} ${skill.label}</strong><small>${skill.description}</small></span>
+            </label>
+          `).join('')}
+        </fieldset>
+
+        <fieldset class="rb-focus-set">
+          <legend>Secondary Focus <span>+2</span></legend>
+          ${HISTORIAN_SKILLS.map((skill) => `
+            <label class="rb-focus-option">
+              <input type="radio" name="secondarySkill" value="${skill.id}" ${creationDraft.secondarySkillId === skill.id ? 'checked' : ''} />
+              <span><strong>${skill.icon} ${skill.label}</strong><small>${skill.officialName}</small></span>
+            </label>
+          `).join('')}
+        </fieldset>
       </div>
     `;
   }
@@ -667,6 +789,10 @@
       creationDraft.profession = button.dataset.profession;
       renderCharacterForge();
     }));
+    $$('.founder-choice').forEach((button) => button.addEventListener('click', () => {
+      creationDraft.founderPathId = button.dataset.founder;
+      renderCharacterForge();
+    }));
     $$('.wardrobe-tab').forEach((button) => button.addEventListener('click', () => {
       activeWardrobeSlot = button.dataset.wardrobeSlot;
       renderCharacterForge();
@@ -676,46 +802,116 @@
       renderCharacterForge();
     }));
 
+    // Mini wardrobe selects in the identity step
+    ['hat','shirt','pants','socks','shoes'].forEach((slot) => {
+      const sel = document.getElementById(`creation-outfit-${slot}`);
+      if (sel) {
+        sel.addEventListener('change', () => {
+          creationDraft.outfit[slot] = sel.value;
+          renderCharacterForge();
+        });
+      }
+    });
+
+    // Historian focus radio inputs
+    $$("input[name='primarySkill']").forEach((input) => input.addEventListener('change', (ev) => {
+      creationDraft.primarySkillId = ev.target.value;
+      renderCreationTraits();
+    }));
+    $$("input[name='secondarySkill']").forEach((input) => input.addEventListener('change', (ev) => {
+      creationDraft.secondarySkillId = ev.target.value;
+      renderCreationTraits();
+    }));
+
     const republicInput = $('#creationRepublicInput');
     if (republicInput) republicInput.addEventListener('input', () => { creationDraft.republicName = republicInput.value; });
     const mottoInput = $('#creationMottoInput');
     if (mottoInput) mottoInput.addEventListener('input', () => { creationDraft.motto = mottoInput.value; });
   }
 
-  function renderCharacterForge() {
-    const steps = [
-      { title: 'Identity', render: renderIdentityStep },
-      { title: 'Calling', render: renderProfessionStep },
-      { title: 'Wardrobe', render: renderWardrobeStep },
-      { title: 'Founding Oath', render: renderOathStep }
-    ];
-    const current = steps[creationStep];
-    const profession = getProfession(creationDraft.profession) || data.character.professions[0];
+  function buildCharacterCreationDraft() {
+    const currentProfile = state.profile;
+    const currentCharacter = state.character || initialCharacter();
+    const outfit = currentProfile?.identity?.outfit || currentCharacter.outfit || createDefaultOutfit();
+    return {
+      name: currentProfile?.identity?.name || currentCharacter.name || '',
+      gender: currentProfile?.identity?.gender || currentCharacter.gender || 'prefer-not-to-say',
+      pronouns: currentProfile?.identity?.pronouns || '',
+      town: currentProfile?.identity?.town || currentCharacter.town || 'philadelphia',
+      founderPathId: currentProfile?.identity?.founderPathId || '',
+      professionId: currentProfile?.identity?.professionId || currentCharacter.profession || '',
+      primarySkillId: currentProfile?.historianFocus?.primarySkillId || '',
+      secondarySkillId: currentProfile?.historianFocus?.secondarySkillId || '',
+      outfit: { ...createDefaultOutfit(), ...(outfit || {}) }
+    };
+  }
 
-    renderCreationSteps();
-    $('#creationStepEyebrow').textContent = `Step ${creationStep + 1} of ${steps.length}`;
-    $('#creationStepTitle').textContent = current.title;
-    $('#creationControls').innerHTML = current.render();
+  function syncCharacterCreationPreview(creatorController) {
+    const draft = creatorController?.getDraft ? creatorController.getDraft() : buildCharacterCreationDraft();
+    creationDraft = {
+      ...creationDraft,
+      ...draft,
+      outfit: { ...clone(creationDraft.outfit), ...(draft.outfit || {}) }
+    };
+
     $('#creationAvatar').innerHTML = avatarMarkup(creationDraft, 'Founder appearance preview');
     $('#dashboardAvatar').innerHTML = avatarMarkup(creationDraft, 'Character avatar');
-    $('#creationNamePlate').textContent = creationDraft.name.trim() || 'Your Founder';
-    $('#creationRolePlate').textContent = profession.name;
-    $('#creationTraitsGrid').innerHTML = '';
+    $('#creationNamePlate').textContent = (draft.name || '').trim() || 'Your Founder';
+
+    const profileFocusSummary = getProfileFocusSummary({
+      identity: {
+        founderPathId: draft.founderPathId,
+        professionId: draft.professionId
+      },
+      historianFocus: {
+        primarySkillId: draft.primarySkillId,
+        secondarySkillId: draft.secondarySkillId
+      }
+    });
+    $('#creationRolePlate').textContent = [profileFocusSummary.profession, profileFocusSummary.founderPath].filter(Boolean).join(' · ') || 'Choose a profession';
+    $('#creationRolePlate').setAttribute('title', profileFocusSummary.focusSummary ? `Founder Path: ${profileFocusSummary.founderPath || '—'} · Historian Focus: ${profileFocusSummary.focusSummary}` : `Founder Path: ${profileFocusSummary.founderPath || '—'}`);
     renderCreationTraits();
-    $('#creationBackButton').disabled = creationStep === 0;
-    $('#creationNextButton').textContent = creationStep === steps.length - 1 ? (editingCharacter ? 'Save character' : 'Found the Republic') : 'Continue';
-    $('#exitForgeButton').hidden = !editingCharacter;
+  }
+
+  function renderCharacterForge() {
+    const mount = $('#creationControls');
+    const initialDraft = buildCharacterCreationDraft();
+
+    // Render the compact, paginated creation steps instead of a single long form.
+    renderCreationSteps();
+    $('#creationStepEyebrow').textContent = `Step ${creationStep + 1} of 4`;
+    const titles = ['Identity', 'Profession', 'Founder Path', 'Historian Focus'];
+    $('#creationStepTitle').textContent = titles[creationStep] || 'Identity & Historian Focus';
+
+    mount.innerHTML = (function () {
+      switch (creationStep) {
+        case 0:
+          return renderIdentityStep();
+        case 1:
+          return renderProfessionStep();
+        case 2:
+          return renderFounderPathStep();
+        case 3:
+          return renderSkillStep();
+        default:
+          return renderIdentityStep();
+      }
+    })();
+
     bindCreationControls();
+    syncCharacterCreationPreview();
+
+    // Back/Next visibility and labels
+    $('#creationBackButton').hidden = false;
+    $('#creationBackButton').textContent = creationStep > 0 ? 'Back' : (editingCharacter ? 'Cancel' : 'Back');
+    $('#creationNextButton').hidden = false;
+    $('#creationNextButton').textContent = creationStep < 3 ? 'Continue' : 'Begin Your Republic';
+    $('#demoFounderButton').hidden = false;
+    $('#exitForgeButton').hidden = !editingCharacter;
   }
 
   function openCharacterForge(editing = false) {
-    editingCharacter = editing;
-    creationDraft = createCreationDraft();
-    creationStep = 0;
-    activeWardrobeSlot = 'hat';
-    setAppVisibility(false);
-    renderCharacterForge();
-    window.scrollTo({ top: 0, behavior: 'auto' });
+    window.location.href = `features/character-forge/character-forge.html${editing ? '?edit=1' : ''}`;
   }
 
   function exitCharacterForge() {
@@ -726,35 +922,30 @@
   }
 
   function validateCreationStep() {
-    if (creationStep !== 0) return true;
-    if (creationDraft.name.trim().length < 2) {
-      showToast('Give your founder a name with at least two characters.');
-      $('#creationNameInput')?.focus();
-      return false;
-    }
     return true;
   }
 
-  function finishCharacterCreation() {
-    const profession = getProfession(creationDraft.profession) || data.character.professions[0];
-    const town = getTown(creationDraft.town) || data.character.towns[0];
+  function finishCharacterCreation(profile) {
     const isNewCharacter = !state.characterCreated;
-
+    const profession = getProfession(profile.identity.professionId) || data.character.professions[0];
+    const town = getTown(profile.identity.town) || data.character.towns[0];
     const retainedGrowth = isNewCharacter
       ? Object.fromEntries(data.character.traits.map((trait) => [trait.id, 0]))
       : clone(state.character.traitGrowth || Object.fromEntries(data.character.traits.map((trait) => [trait.id, 0])));
+
+    state.profile = profile;
     state.character = {
-      name: creationDraft.name.trim(),
-      gender: creationDraft.gender,
-      town: creationDraft.town,
-      profession: creationDraft.profession,
-      outfit: clone(creationDraft.outfit),
+      name: profile.identity.name,
+      gender: profile.identity.gender,
+      town: profile.identity.town,
+      profession: profile.identity.professionId,
+      outfit: clone(profile.identity.outfit),
       traitGrowth: retainedGrowth,
-      traits: calculateTraits(creationDraft.profession, retainedGrowth)
+      traits: calculateTraits(profile.identity.professionId, retainedGrowth)
     };
     state.studentName = state.character.name;
-    state.republicName = creationDraft.republicName.trim() || `The ${town.name} Commonwealth`;
-    state.republicMotto = sanitizeMotto(creationDraft.motto);
+    state.republicName = `The ${town.name} Republic`;
+    state.republicMotto = '“E Pluribus Unum”';
     state.characterCreated = true;
 
     if (isNewCharacter) {
@@ -814,31 +1005,61 @@
     $('#exitForgeButton').addEventListener('click', exitCharacterForge);
     $('#creationBackButton').addEventListener('click', () => {
       if (creationStep > 0) {
-        creationStep -= 1;
+        creationStep = Math.max(0, creationStep - 1);
         renderCharacterForge();
+        return;
+      }
+      if (editingCharacter) {
+        exitCharacterForge();
       }
     });
+
     $('#creationNextButton').addEventListener('click', () => {
-      if (!validateCreationStep()) return;
+      // Advance steps, or finalize on the last step
       if (creationStep < 3) {
-        creationStep += 1;
+        creationStep = Math.min(3, creationStep + 1);
         renderCharacterForge();
-      } else {
-        finishCharacterCreation();
+        return;
+      }
+
+      // Finalize: attempt to create a profile from the current draft
+      try {
+        const profile = createCharacterProfile({
+          name: creationDraft.name,
+          gender: creationDraft.gender,
+          pronouns: creationDraft.pronouns,
+          town: creationDraft.town,
+          founderPathId: creationDraft.founderPathId,
+          professionId: creationDraft.professionId,
+          primarySkillId: creationDraft.primarySkillId,
+          secondarySkillId: creationDraft.secondarySkillId,
+          outfit: creationDraft.outfit
+        });
+        finishCharacterCreation(profile);
+      } catch (err) {
+        const message = err?.message || 'Please complete required fields.';
+        showToast(message);
       }
     });
     $('#demoFounderButton').addEventListener('click', () => {
-      creationDraft = {
-        ...initialCharacter(),
+      const demoProfile = createCharacterProfile({
         name: 'Alex Morgan',
-        gender: 'neutral',
+        gender: 'nonbinary',
+        pronouns: 'they/them',
         town: 'philadelphia',
-        profession: 'newspaper-editor',
-        outfit: { hat: 'tricorn', shirt: 'blue-vest', pants: 'navy-breeches', socks: 'blue-socks', shoes: 'buckled-shoes', special: 'locked-relic' },
-        republicName: 'The Hamilton Republic',
-        motto: 'E Pluribus Unum'
-      };
-      renderCharacterForge();
+        founderPathId: 'orator',
+        professionId: 'printer',
+        primarySkillId: 'argument',
+        secondarySkillId: 'evidence',
+        outfit: {
+          hat: 'tricorn',
+          shirt: 'blue-vest',
+          pants: 'navy-breeches',
+          socks: 'blue-socks',
+          shoes: 'buckled-shoes'
+        }
+      });
+      finishCharacterCreation(demoProfile);
       showToast('Demo founder loaded. You can still customize every choice.');
     });
 
@@ -861,6 +1082,7 @@
       }
       if (action === 'reset') {
         storage.clear(STORAGE_KEY);
+        clearProfile(DEFAULT_STORAGE_KEY);
         state = clone(initialState);
         closeModals();
         openCharacterForge(false);
