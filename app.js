@@ -1,33 +1,23 @@
 /*
-  REPUBLIC BUILDER — INTERACTION PROTOTYPE
-  ---------------------------------------------------------------
-  This is intentionally a front-end-only demo. Progress is stored in
-  localStorage on one browser. It is NOT a secure student record system.
+  REPUBLIC BUILDER — FRONT-END PROTOTYPE
+  ------------------------------------------------------------------
+  Content lives in data.js. Saving lives in storage.js. This file only
+  renders the interface and applies game rules. That separation makes a
+  future account/database upgrade much easier.
 */
 
 (() => {
   const data = window.REPUBLIC_BUILDER_DATA;
-  const STORAGE_KEY = 'republic-builder-layout-v1';
-  const xpTarget = 3200;
-
-  const initialState = {
-    studentName: 'Alex Morgan',
-    republicName: 'The Hamilton Republic',
-    republicMotto: '“E Pluribus Unum”',
-    level: 12,
-    xp: 2450,
-    rp: 1285,
-    streak: 7,
-    pillars: Object.fromEntries(data.pillars.map((pillar) => [pillar.id, pillar.value])),
-    completedQuests: [],
-    dailyQuestIds: [],
-    unlockedUnit: 3,
-    inventory: data.inventory.map((item) => ({ ...item }))
+  const storage = window.RepublicBuilderStorage;
+  const STORAGE_KEY = 'republic-builder-state-v2';
+  const DEFAULT_OUTFIT = {
+    hat: 'hat-none',
+    shirt: 'basic-tunic',
+    pants: 'plain-trousers',
+    socks: 'wool-socks',
+    shoes: 'simple-shoes',
+    special: 'locked-relic'
   };
-
-  let state = loadState();
-  let activeQuest = null;
-  let selectedAnswer = null;
 
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -36,25 +26,160 @@
     return JSON.parse(JSON.stringify(value));
   }
 
-  function loadState() {
-    try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-      return saved ? { ...clone(initialState), ...saved } : clone(initialState);
-    } catch {
-      return clone(initialState);
+  function clamp(number, min, max) {
+    return Math.min(Math.max(number, min), max);
+  }
+
+  function getBaseTraits() {
+    return clone(data.character.baseTraits);
+  }
+
+  function calculateTraits(professionId, changes = {}) {
+    const profession = getProfession(professionId) || data.character.professions[0];
+    const traits = getBaseTraits();
+    Object.entries(profession.bonuses || {}).forEach(([trait, amount]) => {
+      traits[trait] = clamp((traits[trait] || 0) + amount, 0, data.character.traitCap);
+    });
+    Object.entries(changes || {}).forEach(([trait, amount]) => {
+      traits[trait] = clamp((traits[trait] || 0) + amount, 0, data.character.traitCap);
+    });
+    return traits;
+  }
+
+  function initialCharacter() {
+    return {
+      name: '',
+      gender: 'woman',
+      town: 'boston',
+      profession: 'blacksmith',
+      outfit: clone(DEFAULT_OUTFIT),
+      traitGrowth: Object.fromEntries(data.character.traits.map((trait) => [trait.id, 0])),
+      traits: calculateTraits('blacksmith')
+    };
+  }
+
+  const initialState = {
+    schemaVersion: 2,
+    characterCreated: false,
+    studentName: '',
+    republicName: '',
+    republicMotto: '“E Pluribus Unum”',
+    character: initialCharacter(),
+    level: 1,
+    xp: 0,
+    rp: 0,
+    streak: 0,
+    pillars: Object.fromEntries(data.pillars.map((pillar) => [pillar.id, 50])),
+    completedQuests: [],
+    dailyQuestIds: [],
+    unlockedUnit: 1,
+    inventory: []
+  };
+
+  function normalizeState(saved) {
+    const base = clone(initialState);
+    if (!saved || typeof saved !== 'object') return base;
+
+    const savedCharacter = saved.character || {};
+    const character = {
+      ...base.character,
+      ...savedCharacter,
+      outfit: { ...base.character.outfit, ...(savedCharacter.outfit || {}) },
+      traitGrowth: { ...base.character.traitGrowth, ...(savedCharacter.traitGrowth || {}) },
+      traits: { ...base.character.traits, ...(savedCharacter.traits || {}) }
+    };
+
+    if (!savedCharacter.traitGrowth && savedCharacter.traits) {
+      const professionTraits = calculateTraits(character.profession);
+      character.traitGrowth = Object.fromEntries(data.character.traits.map((trait) => [
+        trait.id,
+        Math.max(0, (character.traits[trait.id] || 0) - (professionTraits[trait.id] || 0))
+      ]));
     }
+    character.traits = calculateTraits(character.profession, character.traitGrowth);
+
+    return {
+      ...base,
+      ...saved,
+      schemaVersion: 2,
+      character,
+      pillars: { ...base.pillars, ...(saved.pillars || {}) },
+      completedQuests: Array.isArray(saved.completedQuests) ? saved.completedQuests : [],
+      dailyQuestIds: Array.isArray(saved.dailyQuestIds) ? saved.dailyQuestIds : [],
+      inventory: Array.isArray(saved.inventory) ? saved.inventory : [],
+      unlockedUnit: clamp(Number(saved.unlockedUnit || 1), 1, data.units.length),
+      level: Math.max(1, Number(saved.level || 1)),
+      xp: Math.max(0, Number(saved.xp || 0)),
+      rp: Math.max(0, Number(saved.rp || 0)),
+      streak: Math.max(0, Number(saved.streak || 0))
+    };
+  }
+
+  function loadState() {
+    return normalizeState(storage.load(STORAGE_KEY));
   }
 
   function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch {
-      // Some preview environments block browser storage. The interface still works for that session.
-    }
+    storage.save(STORAGE_KEY, state);
+  }
+
+  function getGender(id) {
+    return data.character.genders.find((gender) => gender.id === id);
+  }
+
+  function getTown(id) {
+    return data.character.towns.find((town) => town.id === id);
+  }
+
+  function getProfession(id) {
+    return data.character.professions.find((profession) => profession.id === id);
+  }
+
+  function getWardrobeItem(slot, id) {
+    return (data.character.wardrobe[slot] || []).find((item) => item.id === id);
+  }
+
+  function xpTargetForLevel(level) {
+    return 400 + ((level - 1) * 150);
   }
 
   function formatNumber(number) {
     return new Intl.NumberFormat('en-US').format(number);
+  }
+
+  function sanitizeMotto(motto) {
+    const clean = String(motto || '').replaceAll('“', '').replaceAll('”', '').trim();
+    return `“${clean || 'E Pluribus Unum'}”`;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"]/g, (character) => ({
+      '&': '&amp;',
+      '<': '&lt;',
+      '>': '&gt;',
+      '"': '&quot;'
+    }[character]));
+  }
+
+  function avatarMarkup(character, label = 'Character avatar') {
+    const gender = getGender(character.gender) || data.character.genders[0];
+    const outfit = character.outfit || DEFAULT_OUTFIT;
+    const layers = [
+      { slot: 'base', asset: gender.asset, label: gender.label },
+      { slot: 'socks', asset: getWardrobeItem('socks', outfit.socks)?.asset, label: getWardrobeItem('socks', outfit.socks)?.name },
+      { slot: 'pants', asset: getWardrobeItem('pants', outfit.pants)?.asset, label: getWardrobeItem('pants', outfit.pants)?.name },
+      { slot: 'shoes', asset: getWardrobeItem('shoes', outfit.shoes)?.asset, label: getWardrobeItem('shoes', outfit.shoes)?.name },
+      { slot: 'shirt', asset: getWardrobeItem('shirt', outfit.shirt)?.asset, label: getWardrobeItem('shirt', outfit.shirt)?.name },
+      { slot: 'hat', asset: getWardrobeItem('hat', outfit.hat)?.asset, label: getWardrobeItem('hat', outfit.hat)?.name }
+    ];
+
+    const special = getWardrobeItem('special', outfit.special);
+    if (special && !special.locked) layers.push({ slot: 'special', asset: special.asset, label: special.name });
+
+    return layers
+      .filter((layer) => layer.asset)
+      .map((layer) => `<img class="avatar-layer avatar-layer-${layer.slot}" src="${layer.asset}" alt="" aria-hidden="true" />`)
+      .join('') || `<span aria-label="${label}"></span>`;
   }
 
   function showToast(message) {
@@ -62,11 +187,31 @@
     toast.textContent = message;
     toast.hidden = false;
     clearTimeout(showToast.timeout);
-    showToast.timeout = setTimeout(() => { toast.hidden = true; }, 2800);
+    showToast.timeout = setTimeout(() => { toast.hidden = true; }, 3000);
   }
 
-  function clamp(number, min, max) {
-    return Math.min(Math.max(number, min), max);
+  let state = loadState();
+  let activeQuest = null;
+  let selectedAnswer = null;
+  let questResolved = false;
+  let creationDraft = createCreationDraft();
+  let creationStep = 0;
+  let activeWardrobeSlot = 'hat';
+  let editingCharacter = false;
+
+  function createCreationDraft() {
+    const source = state.character || initialCharacter();
+    return {
+      ...clone(source),
+      outfit: { ...clone(DEFAULT_OUTFIT), ...(source.outfit || {}) },
+      republicName: state.republicName || '',
+      motto: (state.republicMotto || 'E Pluribus Unum').replaceAll('“', '').replaceAll('”', '')
+    };
+  }
+
+  function setAppVisibility(showDashboard) {
+    $('#appShell').hidden = !showDashboard;
+    $('#characterCreation').hidden = showDashboard;
   }
 
   function updatePillars(changes = {}) {
@@ -77,37 +222,70 @@
     });
   }
 
+  // Future quest data can include rewards.traits, such as { intellect: 1 }.
+  function updateCharacterTraits(changes = {}) {
+    state.character.traitGrowth = state.character.traitGrowth || Object.fromEntries(data.character.traits.map((trait) => [trait.id, 0]));
+    Object.entries(changes).forEach(([traitId, amount]) => {
+      if (Object.prototype.hasOwnProperty.call(state.character.traitGrowth, traitId)) {
+        state.character.traitGrowth[traitId] = Math.max(0, state.character.traitGrowth[traitId] + amount);
+      }
+    });
+    state.character.traits = calculateTraits(state.character.profession, state.character.traitGrowth);
+  }
+
   function addXp(amount) {
     state.xp += amount;
     let didLevelUp = false;
-    while (state.xp >= xpTarget) {
-      state.xp -= xpTarget;
+    while (state.xp >= xpTargetForLevel(state.level)) {
+      state.xp -= xpTargetForLevel(state.level);
       state.level += 1;
       didLevelUp = true;
     }
     return didLevelUp;
   }
 
+  function addArtifact(name, icon = '✦', tone = 'gold') {
+    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const existing = state.inventory.find((item) => item.id === id);
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      state.inventory.unshift({ id, name, icon, quantity: 1, tone });
+    }
+  }
+
   function renderHeader() {
-    $('#studentName').textContent = state.studentName;
-    $('#republicName').textContent = state.republicName;
+    const town = getTown(state.character.town) || data.character.towns[0];
+    const profession = getProfession(state.character.profession) || data.character.professions[0];
+    const currentUnit = data.units.find((unit) => unit.id === state.unlockedUnit) || data.units[0];
+    const target = xpTargetForLevel(state.level);
+
+    $('#studentName').textContent = state.character.name || state.studentName || 'Founder';
+    $('#characterOrigin').textContent = `${town.name}, ${town.region}`;
+    $('#characterProfession').textContent = profession.name;
+    $('#dashboardAvatar').innerHTML = avatarMarkup(state.character, 'Character avatar');
+    $('#republicName').textContent = state.republicName || 'The New Republic';
     $('.republic-motto').textContent = state.republicMotto;
     $('#levelValue').textContent = state.level;
-    $('#xpValue').textContent = `${formatNumber(state.xp)} / ${formatNumber(xpTarget)}`;
-    $('#xpMeter').style.width = `${(state.xp / xpTarget) * 100}%`;
+    $('#xpValue').textContent = `${formatNumber(state.xp)} / ${formatNumber(target)}`;
+    $('#xpMeter').style.width = `${(state.xp / target) * 100}%`;
     $('#rpValue').textContent = formatNumber(state.rp);
     $('#streakValue').textContent = state.streak;
+    $('#currentEraNumber').textContent = `Era ${currentUnit.id}`;
+    $('#current-era-heading').textContent = currentUnit.title;
+    $('#currentEraDates').textContent = currentUnit.dates;
+    $('#currentEraImage').src = state.unlockedUnit >= 3 ? 'assets/era-revolution.svg' : 'assets/hero-scholar.svg';
+    $('#currentEraImage').alt = `Illustrated scene for ${currentUnit.title}`;
 
     const completed = state.completedQuests.length;
-    $('#populationValue').textContent = `${(12.4 + completed * 0.1).toFixed(1)}M`;
-    $('#treasuryValue').textContent = formatNumber(8750 + state.rp);
-    const averagePillar = Object.values(state.pillars).reduce((sum, value) => sum + value, 0) / 6;
+    $('#populationValue').textContent = `${(1.2 + completed * 0.1).toFixed(1)}M`;
+    $('#treasuryValue').textContent = formatNumber(500 + state.rp);
+    const averagePillar = Object.values(state.pillars).reduce((sum, value) => sum + value, 0) / data.pillars.length;
     $('#stabilityValue').textContent = `${Math.round(averagePillar)}%`;
   }
 
   function renderPillars() {
-    const pillarsGrid = $('#pillarsGrid');
-    pillarsGrid.innerHTML = data.pillars.map((pillar) => {
+    $('#pillarsGrid').innerHTML = data.pillars.map((pillar) => {
       const value = state.pillars[pillar.id];
       return `
         <button class="pillar-card" type="button" data-pillar="${pillar.id}" aria-label="${pillar.name}: ${value} out of 100. Learn more.">
@@ -125,8 +303,24 @@
     }));
   }
 
+  function renderCharacterTraits() {
+    const traits = state.character.traits || calculateTraits(state.character.profession);
+    $('#traitsDashboardGrid').innerHTML = data.character.traits.map((trait) => `
+      <button class="dashboard-trait" type="button" data-trait="${trait.id}" aria-label="${trait.name}: ${traits[trait.id]} out of ${data.character.traitCap}. Learn more.">
+        <span class="dashboard-trait-icon" aria-hidden="true">${trait.icon}</span>
+        <span class="dashboard-trait-name">${trait.name}</span>
+        <strong>${traits[trait.id]} <small>/ ${data.character.traitCap}</small></strong>
+      </button>
+    `).join('');
+
+    $$('.dashboard-trait').forEach((button) => button.addEventListener('click', () => {
+      const trait = data.character.traits.find((item) => item.id === button.dataset.trait);
+      openInfoModal(trait.name, `${trait.description} Each founder can develop this attribute from 0 to ${data.character.traitCap} through quests, collaboration, writing, and era-specific rewards.`, 'Founder Trait');
+    }));
+  }
+
   function questTypeClass(category) {
-    const typeMap = {
+    return {
       'Unit Quest': 'unit',
       'Primary Source Battle': 'source',
       'HIPP Challenge': 'hipp',
@@ -134,20 +328,16 @@
       'Timeline Mission': 'timeline',
       'DBQ Boss Fight': 'boss',
       'Vocabulary Bounty': 'vocab'
-    };
-    return typeMap[category] || 'unit';
+    }[category] || 'unit';
   }
 
   function renderQuests(filter = 'all') {
-    const questGrid = $('#questGrid');
-    const sortedQuests = [...data.quests].filter((quest) => filter === 'all' || quest.group === filter);
-
-    questGrid.innerHTML = sortedQuests.map((quest) => {
+    const sortedQuests = data.quests.filter((quest) => filter === 'all' || quest.group === filter);
+    $('#questGrid').innerHTML = sortedQuests.map((quest) => {
       const completed = state.completedQuests.includes(quest.id);
-      const typeClass = questTypeClass(quest.category);
       return `
         <article class="quest-card ${quest.boss ? 'quest-boss' : ''} ${completed ? 'completed' : ''}">
-          <div class="quest-type ${typeClass}">${quest.category}</div>
+          <div class="quest-type ${questTypeClass(quest.category)}">${quest.category}</div>
           ${quest.boss ? '<div class="boss-corner">Boss</div>' : ''}
           <div class="quest-image"><img src="${quest.image}" alt="" /></div>
           <div class="quest-card-content">
@@ -169,18 +359,18 @@
 
   function renderInventory() {
     const items = state.inventory.slice(0, 8);
-    $('#inventoryGrid').innerHTML = items.map((item) => `
+    $('#inventoryGrid').innerHTML = items.length ? items.map((item) => `
       <button class="inventory-item ${item.tone}" data-item-id="${item.id}" type="button" aria-label="${item.name}, quantity ${item.quantity}">
         <span class="inventory-icon" aria-hidden="true">${item.icon}</span>
         <span class="inventory-name">${item.name}</span>
         <span class="inventory-quantity">${item.quantity}</span>
       </button>
-    `).join('');
+    `).join('') : `<p class="inventory-empty">Finish character creation and complete quests to collect historical tools.</p>`;
 
     $$('.inventory-item').forEach((itemButton) => {
       itemButton.addEventListener('click', () => {
-        const item = state.inventory.find((item) => item.id === itemButton.dataset.itemId);
-        openInfoModal(item.name, `An earned historical tool in your republic inventory. In the complete game, artifacts can unlock lore, cosmetic upgrades, companion abilities, or quest advantages.`, 'Inventory Item');
+        const item = state.inventory.find((entry) => entry.id === itemButton.dataset.itemId);
+        openInfoModal(item.name, 'An earned historical tool in your republic inventory. In the complete game, artifacts can unlock lore, cosmetic upgrades, companion abilities, or quest advantages.', 'Inventory Item');
       });
     });
   }
@@ -198,12 +388,10 @@
       `;
     }).join('');
 
-    $$('.unit-node:not([disabled])').forEach((unitButton) => {
-      unitButton.addEventListener('click', () => {
-        const unit = data.units.find((item) => item.id === Number(unitButton.dataset.unitId));
-        openInfoModal(`${unit.short}: ${unit.title}`, `This era covers ${unit.dates}. The finished game will use this map as the gate to unit quests, primary-source encounters, timeline missions, boss fights, and historical characters.`, 'APUSH Era');
-      });
-    });
+    $$('.unit-node:not([disabled])').forEach((button) => button.addEventListener('click', () => {
+      const unit = data.units.find((item) => item.id === Number(button.dataset.unitId));
+      openInfoModal(`${unit.short}: ${unit.title}`, `This era covers ${unit.dates}. The completed game will use this map as the gateway to unit quests, source encounters, timeline missions, boss fights, historical figures, and era-specific wardrobe unlocks.`, 'APUSH Era');
+    }));
   }
 
   function renderDailyBonus() {
@@ -211,14 +399,14 @@
     $('#dailyProgress').textContent = count;
     $('#bonusDots').innerHTML = [0, 1, 2].map((index) => `<span class="bonus-dot ${index < count ? 'done' : ''}"></span>`).join('');
     const remainingForBoss = Math.max(0, 2 - Math.min(count, 2));
-    $('#bossUnlockText').textContent = remainingForBoss === 0
-      ? 'Unlocked!'
-      : `${remainingForBoss} ${remainingForBoss === 1 ? 'quest' : 'quests'}`;
+    $('#bossUnlockText').textContent = remainingForBoss === 0 ? 'Unlocked!' : `${remainingForBoss} ${remainingForBoss === 1 ? 'quest' : 'quests'}`;
   }
 
   function render() {
+    if (!state.characterCreated) return;
     renderHeader();
     renderPillars();
+    renderCharacterTraits();
     renderQuests($('.filter-chip.selected')?.dataset.filter || 'all');
     renderInventory();
     renderProgressionRail();
@@ -230,8 +418,7 @@
     $('#modalBackdrop').hidden = false;
     modal.hidden = false;
     document.body.classList.add('modal-open');
-    const focusable = modal.querySelector('button, input, select, textarea');
-    focusable?.focus();
+    modal.querySelector('button, input, select, textarea')?.focus();
   }
 
   function closeModals() {
@@ -240,6 +427,7 @@
     document.body.classList.remove('modal-open');
     activeQuest = null;
     selectedAnswer = null;
+    questResolved = false;
   }
 
   function openQuest(questId) {
@@ -248,6 +436,7 @@
 
     activeQuest = quest;
     selectedAnswer = null;
+    questResolved = false;
     $('#modalImage').src = quest.image;
     $('#modalImage').alt = `Artwork for ${quest.title}`;
     $('#modalCategory').textContent = quest.category;
@@ -255,6 +444,7 @@
     $('#modalDescription').textContent = quest.description;
     $('#modalPrompt').textContent = quest.prompt;
     $('#questFeedback').textContent = '';
+    $('#questFeedback').className = 'feedback';
     $('#modalRewards').innerHTML = `<span>Reward</span><strong>+${quest.rewards.xp} XP</strong><strong>+${quest.rewards.rp} RP</strong>`;
     $('#submitAnswerButton').textContent = 'Submit answer';
     $('#submitAnswerButton').disabled = true;
@@ -262,55 +452,47 @@
       <button class="answer-option" data-answer-index="${index}" type="button"><span>${String.fromCharCode(65 + index)}</span>${answer}</button>
     `).join('');
 
-    $$('.answer-option').forEach((button) => {
-      button.addEventListener('click', () => {
-        selectedAnswer = Number(button.dataset.answerIndex);
-        $$('.answer-option').forEach((option) => option.classList.remove('selected'));
-        button.classList.add('selected');
-        $('#submitAnswerButton').disabled = false;
-      });
-    });
+    $$('.answer-option').forEach((button) => button.addEventListener('click', () => {
+      selectedAnswer = Number(button.dataset.answerIndex);
+      $$('.answer-option').forEach((option) => option.classList.remove('selected'));
+      button.classList.add('selected');
+      $('#submitAnswerButton').disabled = false;
+    }));
 
     openModal($('#questModal'));
   }
 
-  function addArtifact(name) {
-    const id = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const existing = state.inventory.find((item) => item.id === id);
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      state.inventory.unshift({ id, name, icon: '✦', quantity: 1, tone: 'gold' });
-    }
-  }
-
   function resolveQuest() {
-    if (!activeQuest || selectedAnswer === null) return;
+    if (!activeQuest) return;
+    if (questResolved) {
+      completeQuest(activeQuest);
+      return;
+    }
+    if (selectedAnswer === null) return;
 
+    const correct = selectedAnswer === activeQuest.correctAnswer;
     const feedback = $('#questFeedback');
     const options = $$('.answer-option');
-    const correct = selectedAnswer === activeQuest.correctAnswer;
-    options.forEach((option, index) => {
-      option.disabled = true;
-      if (index === activeQuest.correctAnswer) option.classList.add('correct');
-      if (index === selectedAnswer && !correct) option.classList.add('incorrect');
-    });
-
     if (!correct) {
-      feedback.textContent = `Not quite. ${activeQuest.explanation} Choose another answer to try again.`;
+      options.forEach((option) => option.classList.remove('selected'));
+      const chosen = options.find((option) => Number(option.dataset.answerIndex) === selectedAnswer);
+      chosen?.classList.add('incorrect');
+      feedback.textContent = `Not quite. ${activeQuest.explanation}`;
       feedback.className = 'feedback error';
-      $('#submitAnswerButton').textContent = 'Choose another answer';
-      $('#submitAnswerButton').disabled = true;
       selectedAnswer = null;
-      options.forEach((option) => { option.disabled = false; });
+      $('#submitAnswerButton').disabled = true;
       return;
     }
 
+    options.forEach((option, index) => {
+      option.disabled = true;
+      if (index === activeQuest.correctAnswer) option.classList.add('correct');
+    });
     feedback.textContent = `Quest complete! ${activeQuest.explanation}`;
     feedback.className = 'feedback success';
+    questResolved = true;
     $('#submitAnswerButton').textContent = 'Claim rewards';
     $('#submitAnswerButton').disabled = false;
-    $('#submitAnswerButton').onclick = () => completeQuest(activeQuest);
   }
 
   function completeQuest(quest) {
@@ -318,6 +500,7 @@
     const levelUp = addXp(quest.rewards.xp);
     state.rp += quest.rewards.rp;
     updatePillars(quest.rewards.pillars);
+    updateCharacterTraits(quest.rewards.traits);
     state.completedQuests.push(quest.id);
 
     if (state.dailyQuestIds.length < 3) {
@@ -342,36 +525,256 @@
     openModal($('#infoModal'));
   }
 
+  function renderCreationSteps() {
+    const labels = ['Identity', 'Calling', 'Wardrobe', 'Founding Oath'];
+    $('#creationStepList').innerHTML = labels.map((label, index) => `
+      <li class="${index === creationStep ? 'active' : index < creationStep ? 'complete' : ''}">
+        <b>${index < creationStep ? '✓' : index + 1}</b><span>${label}</span>
+      </li>
+    `).join('');
+  }
+
+  function formatBonuses(bonuses) {
+    return Object.entries(bonuses).map(([trait, amount]) => {
+      const label = data.character.traits.find((entry) => entry.id === trait)?.name || trait;
+      return `+${amount} ${label}`;
+    }).join(' · ');
+  }
+
+  function renderCreationTraits() {
+    const traits = calculateTraits(creationDraft.profession);
+    $('#creationTraitsGrid').innerHTML = data.character.traits.map((trait) => `
+      <div class="trait-preview-item" title="${trait.description}">
+        <span class="trait-preview-icon" aria-hidden="true">${trait.icon}</span>
+        <span>${trait.name}</span>
+        <strong>${traits[trait.id]}</strong>
+      </div>
+    `).join('');
+  }
+
+  function renderIdentityStep() {
+    return `
+      <div class="creation-copy"><h2>Who is your founder?</h2><p>Name a character, choose a presentation, and place them in a town that will shape their story—not their academic score.</p></div>
+      <label class="creation-field">Founder name
+        <input id="creationNameInput" maxlength="28" placeholder="e.g., Maya Carter" value="${escapeHtml(creationDraft.name)}" autocomplete="off" />
+      </label>
+      <span class="choice-label">Gender / presentation</span>
+      <div class="gender-choices">
+        ${data.character.genders.map((gender) => `<button class="gender-choice ${creationDraft.gender === gender.id ? 'selected' : ''}" type="button" data-gender="${gender.id}">${gender.label}</button>`).join('')}
+      </div>
+      <span class="choice-label">Home town</span>
+      <div class="town-grid">
+        ${data.character.towns.map((town) => `<button class="town-choice ${creationDraft.town === town.id ? 'selected' : ''}" type="button" data-town="${town.id}"><span aria-hidden="true">${town.icon}</span><span><strong>${town.name}</strong><small>${town.region}</small></span></button>`).join('')}
+      </div>
+    `;
+  }
+
+  function renderProfessionStep() {
+    return `
+      <div class="creation-copy"><h2>Choose a calling</h2><p>Your profession gives a small opening advantage. Every founder starts with the same trait base; no choice is objectively better.</p></div>
+      <div class="profession-grid">
+        ${data.character.professions.map((profession) => `
+          <button class="profession-choice ${creationDraft.profession === profession.id ? 'selected' : ''}" type="button" data-profession="${profession.id}">
+            <span class="profession-icon" aria-hidden="true">${profession.icon}</span>
+            <span><strong>${profession.name}</strong><p>${profession.description}</p><span class="bonus-line">${formatBonuses(profession.bonuses)}</span></span>
+          </button>
+        `).join('')}
+      </div>
+    `;
+  }
+
+  function renderWardrobeStep() {
+    const slotNames = { hat: 'Hat', shirt: 'Shirt', pants: 'Pants', socks: 'Socks', shoes: 'Shoes', special: 'Quest Items' };
+    const selected = getWardrobeItem(activeWardrobeSlot, creationDraft.outfit[activeWardrobeSlot]);
+    return `
+      <div class="creation-copy"><h2>Dress for the journey</h2><p>Every founder begins with a basic tunic and practical clothing. These starter choices are cosmetic; later eras and quests add earned gear.</p></div>
+      <div class="wardrobe-label"><span>Choose ${slotNames[activeWardrobeSlot]}</span><span>${activeWardrobeSlot === 'special' ? 'Earned through quests' : 'Starter wardrobe'}</span></div>
+      <div class="wardrobe-tabs">
+        ${Object.entries(slotNames).map(([slot, label]) => `<button class="wardrobe-tab ${activeWardrobeSlot === slot ? 'active' : ''}" data-wardrobe-slot="${slot}" type="button">${label}</button>`).join('')}
+      </div>
+      <div class="wardrobe-options">
+        ${(data.character.wardrobe[activeWardrobeSlot] || []).map((item) => `
+          <button class="wardrobe-choice ${creationDraft.outfit[activeWardrobeSlot] === item.id ? 'selected' : ''} ${item.locked ? 'locked' : ''}" data-wardrobe-item="${item.id}" type="button" ${item.locked ? 'disabled' : ''}>
+            <span class="wardrobe-thumb"><img src="${item.asset}" alt="" /></span><strong>${item.name}</strong>
+          </button>
+        `).join('')}
+      </div>
+      <p class="wardrobe-note">${selected?.note || 'Select a wardrobe item to preview it.'}</p>
+    `;
+  }
+
+  function renderOathStep() {
+    const town = getTown(creationDraft.town) || data.character.towns[0];
+    const profession = getProfession(creationDraft.profession) || data.character.professions[0];
+    const traits = calculateTraits(creationDraft.profession);
+    const outfitEntries = ['hat', 'shirt', 'pants', 'socks', 'shoes'].map((slot) => getWardrobeItem(slot, creationDraft.outfit[slot])?.name).filter(Boolean);
+    return `
+      <div class="creation-copy"><h2>Found your republic</h2><p>Review your founder’s opening story. This profile is saved on this device now; a future account system will sync it between devices.</p></div>
+      <label class="creation-field">Republic name
+        <input id="creationRepublicInput" maxlength="34" placeholder="e.g., The Boston Commonwealth" value="${escapeHtml(creationDraft.republicName)}" autocomplete="off" />
+      </label>
+      <label class="creation-field">Republic motto
+        <input id="creationMottoInput" maxlength="42" placeholder="e.g., Learn. Argue. Build." value="${escapeHtml(creationDraft.motto)}" autocomplete="off" />
+      </label>
+      <div class="forge-summary">
+        <div class="summary-scroll">
+          <div class="summary-row"><span>Founder</span><strong>${escapeHtml(creationDraft.name || 'Unnamed founder')}</strong></div>
+          <div class="summary-row"><span>Home</span><strong>${town.name} · ${town.region}</strong></div>
+          <div class="summary-row"><span>Calling</span><strong>${profession.name}</strong></div>
+          <div><span class="choice-label">Starting wardrobe</span><div class="summary-outfit">${outfitEntries.map((item) => `<span>${item}</span>`).join('')}</div></div>
+          <div><span class="choice-label">Starting attributes</span><div class="summary-traits">${data.character.traits.map((trait) => `<span>${trait.name}<b>${traits[trait.id]}</b></span>`).join('')}</div></div>
+        </div>
+      </div>
+    `;
+  }
+
+  function bindCreationControls() {
+    const nameInput = $('#creationNameInput');
+    if (nameInput) nameInput.addEventListener('input', () => {
+      creationDraft.name = nameInput.value;
+      $('#creationNamePlate').textContent = creationDraft.name.trim() || 'Your Founder';
+    });
+
+    $$('.gender-choice').forEach((button) => button.addEventListener('click', () => {
+      creationDraft.gender = button.dataset.gender;
+      renderCharacterForge();
+    }));
+    $$('.town-choice').forEach((button) => button.addEventListener('click', () => {
+      creationDraft.town = button.dataset.town;
+      renderCharacterForge();
+    }));
+    $$('.profession-choice').forEach((button) => button.addEventListener('click', () => {
+      creationDraft.profession = button.dataset.profession;
+      renderCharacterForge();
+    }));
+    $$('.wardrobe-tab').forEach((button) => button.addEventListener('click', () => {
+      activeWardrobeSlot = button.dataset.wardrobeSlot;
+      renderCharacterForge();
+    }));
+    $$('.wardrobe-choice:not([disabled])').forEach((button) => button.addEventListener('click', () => {
+      creationDraft.outfit[activeWardrobeSlot] = button.dataset.wardrobeItem;
+      renderCharacterForge();
+    }));
+
+    const republicInput = $('#creationRepublicInput');
+    if (republicInput) republicInput.addEventListener('input', () => { creationDraft.republicName = republicInput.value; });
+    const mottoInput = $('#creationMottoInput');
+    if (mottoInput) mottoInput.addEventListener('input', () => { creationDraft.motto = mottoInput.value; });
+  }
+
+  function renderCharacterForge() {
+    const steps = [
+      { title: 'Identity', render: renderIdentityStep },
+      { title: 'Calling', render: renderProfessionStep },
+      { title: 'Wardrobe', render: renderWardrobeStep },
+      { title: 'Founding Oath', render: renderOathStep }
+    ];
+    const current = steps[creationStep];
+    const profession = getProfession(creationDraft.profession) || data.character.professions[0];
+
+    renderCreationSteps();
+    $('#creationStepEyebrow').textContent = `Step ${creationStep + 1} of ${steps.length}`;
+    $('#creationStepTitle').textContent = current.title;
+    $('#creationControls').innerHTML = current.render();
+    $('#creationAvatar').innerHTML = avatarMarkup(creationDraft, 'Founder appearance preview');
+    $('#creationNamePlate').textContent = creationDraft.name.trim() || 'Your Founder';
+    $('#creationRolePlate').textContent = profession.name;
+    $('#creationTraitsGrid').innerHTML = '';
+    renderCreationTraits();
+    $('#creationBackButton').disabled = creationStep === 0;
+    $('#creationNextButton').textContent = creationStep === steps.length - 1 ? (editingCharacter ? 'Save character' : 'Found the Republic') : 'Continue';
+    $('#exitForgeButton').hidden = !editingCharacter;
+    bindCreationControls();
+  }
+
+  function openCharacterForge(editing = false) {
+    editingCharacter = editing;
+    creationDraft = createCreationDraft();
+    creationStep = 0;
+    activeWardrobeSlot = 'hat';
+    setAppVisibility(false);
+    renderCharacterForge();
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }
+
+  function exitCharacterForge() {
+    if (!editingCharacter || !state.characterCreated) return;
+    editingCharacter = false;
+    setAppVisibility(true);
+    render();
+  }
+
+  function validateCreationStep() {
+    if (creationStep !== 0) return true;
+    if (creationDraft.name.trim().length < 2) {
+      showToast('Give your founder a name with at least two characters.');
+      $('#creationNameInput')?.focus();
+      return false;
+    }
+    return true;
+  }
+
+  function finishCharacterCreation() {
+    const profession = getProfession(creationDraft.profession) || data.character.professions[0];
+    const town = getTown(creationDraft.town) || data.character.towns[0];
+    const isNewCharacter = !state.characterCreated;
+
+    const retainedGrowth = isNewCharacter
+      ? Object.fromEntries(data.character.traits.map((trait) => [trait.id, 0]))
+      : clone(state.character.traitGrowth || Object.fromEntries(data.character.traits.map((trait) => [trait.id, 0])));
+    state.character = {
+      name: creationDraft.name.trim(),
+      gender: creationDraft.gender,
+      town: creationDraft.town,
+      profession: creationDraft.profession,
+      outfit: clone(creationDraft.outfit),
+      traitGrowth: retainedGrowth,
+      traits: calculateTraits(creationDraft.profession, retainedGrowth)
+    };
+    state.studentName = state.character.name;
+    state.republicName = creationDraft.republicName.trim() || `The ${town.name} Commonwealth`;
+    state.republicMotto = sanitizeMotto(creationDraft.motto);
+    state.characterCreated = true;
+
+    if (isNewCharacter) {
+      state.level = 1;
+      state.xp = 0;
+      state.rp = 50;
+      state.streak = 1;
+      state.pillars = Object.fromEntries(data.pillars.map((pillar) => [pillar.id, 50]));
+      state.completedQuests = [];
+      state.dailyQuestIds = [];
+      state.unlockedUnit = 1;
+      state.inventory = [];
+      addArtifact(profession.starterItem, profession.icon, 'gold');
+    }
+
+    editingCharacter = false;
+    saveState();
+    setAppVisibility(true);
+    render();
+    showToast(isNewCharacter ? `${state.character.name} founded ${state.republicName}.` : 'Founder profile updated.');
+  }
+
   function openTeacherMode() {
     openModal($('#teacherModal'));
   }
 
-  function openProfileEditor() {
-    $('#profileNameInput').value = state.studentName;
-    $('#profileRepublicInput').value = state.republicName;
-    $('#profileMottoInput').value = state.republicMotto.replaceAll('“', '').replaceAll('”', '');
-    openModal($('#profileModal'));
-  }
-
   function bindEvents() {
-    $$('.nav-item').forEach((item) => {
-      item.addEventListener('click', () => {
-        $$('.nav-item').forEach((nav) => { nav.classList.remove('active'); nav.removeAttribute('aria-current'); });
-        item.classList.add('active');
-        item.setAttribute('aria-current', 'page');
-        const target = document.getElementById(item.dataset.section);
-        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        else showToast(`${item.textContent.trim()} is planned for the next build.`);
-      });
-    });
+    $$('.nav-item').forEach((item) => item.addEventListener('click', () => {
+      $$('.nav-item').forEach((nav) => { nav.classList.remove('active'); nav.removeAttribute('aria-current'); });
+      item.classList.add('active');
+      item.setAttribute('aria-current', 'page');
+      const target = document.getElementById(item.dataset.section);
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else showToast(`${item.textContent.trim()} is planned for the next build.`);
+    }));
 
-    $$('.filter-chip').forEach((chip) => {
-      chip.addEventListener('click', () => {
-        $$('.filter-chip').forEach((filter) => filter.classList.remove('selected'));
-        chip.classList.add('selected');
-        renderQuests(chip.dataset.filter);
-      });
-    });
+    $$('.filter-chip').forEach((chip) => chip.addEventListener('click', () => {
+      $$('.filter-chip').forEach((filter) => filter.classList.remove('selected'));
+      chip.classList.add('selected');
+      renderQuests(chip.dataset.filter);
+    }));
 
     $('#refreshQuestsButton').addEventListener('click', () => {
       const grid = $('#questGrid');
@@ -386,61 +789,88 @@
 
     $('#submitAnswerButton').addEventListener('click', resolveQuest);
     $('#teacherModeButton').addEventListener('click', openTeacherMode);
-    $('#editProfileButton').addEventListener('click', openProfileEditor);
-
-    $('#profileForm').addEventListener('submit', (event) => {
-      event.preventDefault();
-      state.studentName = $('#profileNameInput').value.trim() || initialState.studentName;
-      state.republicName = $('#profileRepublicInput').value.trim() || initialState.republicName;
-      const motto = $('#profileMottoInput').value.trim() || 'E Pluribus Unum';
-      state.republicMotto = `“${motto.replaceAll('“', '').replaceAll('”', '')}”`;
-      closeModals();
-      render();
-      showToast('Republic profile updated.');
+    $('#editProfileButton').addEventListener('click', () => openCharacterForge(true));
+    $('#exitForgeButton').addEventListener('click', exitCharacterForge);
+    $('#creationBackButton').addEventListener('click', () => {
+      if (creationStep > 0) {
+        creationStep -= 1;
+        renderCharacterForge();
+      }
+    });
+    $('#creationNextButton').addEventListener('click', () => {
+      if (!validateCreationStep()) return;
+      if (creationStep < 3) {
+        creationStep += 1;
+        renderCharacterForge();
+      } else {
+        finishCharacterCreation();
+      }
+    });
+    $('#demoFounderButton').addEventListener('click', () => {
+      creationDraft = {
+        ...initialCharacter(),
+        name: 'Alex Morgan',
+        gender: 'neutral',
+        town: 'philadelphia',
+        profession: 'newspaper-editor',
+        outfit: { hat: 'tricorn', shirt: 'blue-vest', pants: 'navy-breeches', socks: 'blue-socks', shoes: 'buckled-shoes', special: 'locked-relic' },
+        republicName: 'The Hamilton Republic',
+        motto: 'E Pluribus Unum'
+      };
+      renderCharacterForge();
+      showToast('Demo founder loaded. You can still customize every choice.');
     });
 
-    $$('.teacher-controls [data-teacher-action]').forEach((button) => {
-      button.addEventListener('click', () => {
-        const action = button.dataset.teacherAction;
-        if (action === 'xp') {
-          const levelUp = addXp(100);
-          render();
-          showToast(levelUp ? `Teacher award: Level ${state.level} reached.` : 'Teacher award: +100 XP.');
-        }
-        if (action === 'rp') {
-          state.rp += 100;
-          render();
-          showToast('Teacher award: +100 Republic Points.');
-        }
-        if (action === 'unlock') {
-          state.unlockedUnit = Math.min(9, state.unlockedUnit + 1);
-          render();
-          showToast(`Unit ${state.unlockedUnit} is now unlocked.`);
-        }
-        if (action === 'reset') {
-          localStorage.removeItem(STORAGE_KEY);
-          state = clone(initialState);
-          closeModals();
-          render();
-          showToast('Demo progress reset.');
-        }
-      });
+    $$('.teacher-controls [data-teacher-action]').forEach((button) => button.addEventListener('click', () => {
+      const action = button.dataset.teacherAction;
+      if (action === 'xp') {
+        const levelUp = addXp(100);
+        render();
+        showToast(levelUp ? `Teacher award: Level ${state.level} reached.` : 'Teacher award: +100 XP.');
+      }
+      if (action === 'rp') {
+        state.rp += 100;
+        render();
+        showToast('Teacher award: +100 Republic Points.');
+      }
+      if (action === 'unlock') {
+        state.unlockedUnit = Math.min(data.units.length, state.unlockedUnit + 1);
+        render();
+        showToast(`Unit ${state.unlockedUnit} is now unlocked.`);
+      }
+      if (action === 'reset') {
+        storage.clear(STORAGE_KEY);
+        state = clone(initialState);
+        closeModals();
+        openCharacterForge(false);
+        showToast('Demo progress reset. Create a new founder.');
+      }
+    }));
+
+    $('#settingsButton').addEventListener('click', () => openInfoModal('Settings', 'This starter saves a founder profile and demo progress only to the current browser. The storage adapter is intentionally isolated in storage.js so that a future school-approved account system can sync progress between devices without rebuilding quests or character data.', 'Prototype Setting'));
+    $('#helpButton').addEventListener('click', () => openInfoModal('How the Demo Works', 'Create a founder, choose a profession and starting wardrobe, then complete APUSH-style quests. Character traits are separate from Republic Pillars: traits represent individual skills; pillars represent the health of the student’s evolving republic.', 'Quick Start'));
+    $('#eraDetailsButton').addEventListener('click', () => {
+      const unit = data.units.find((entry) => entry.id === state.unlockedUnit) || data.units[0];
+      openInfoModal(`Era ${unit.id}: ${unit.title}`, `This chapter covers ${unit.dates}. The full game can add unit goals, maps, source libraries, historical figures, writing practice, clothing unlocks, and a culminating boss battle to this campaign space.`, 'Current Era');
     });
+    $('#viewRepublicButton').addEventListener('click', () => openInfoModal(state.republicName, 'A future Republic page can visualize civic choices: laws, alliances, population, stability, treasury, achievements, and a story journal. Historical outcomes should never become “win conditions”; the system should reward reasoning, evidence, collaboration, and reflection.', 'Republic Overview'));
+    $('#viewAllInventoryButton').addEventListener('click', () => openInfoModal('Full Inventory', 'The starter displays earned historical artifacts. In later versions, artifacts can be grouped by era, source type, historical figure, profession, or skill—and can unlock lore entries, earned wardrobe, and optional class rewards.', 'Inventory'));
 
-    $('#settingsButton').addEventListener('click', () => openInfoModal('Settings', 'This starter includes local saved progress, responsive layout behavior, and a reduced-motion-friendly interface. Account settings, sound controls, accessibility preferences, and parental privacy tools belong in the production build.', 'Prototype Setting'));
-    $('#helpButton').addEventListener('click', () => openInfoModal('How the Demo Works', 'Choose a quest card, answer a short APUSH-style prompt, claim rewards, and watch your XP, Republic Points, pillars, inventory, daily bonus, and republic statistics update. The complete game can replace these demo questions with teacher-authored assignments and gradebook-linked tasks.', 'Quick Start'));
-    $('#eraDetailsButton').addEventListener('click', () => openInfoModal('Era 3: Road to Revolution', 'This screen models a current campaign chapter. In the real game, this panel can hold unit goals, a visual map, lesson links, unit vocabulary, historical figures, and a culminating boss battle.', 'Current Era'));
-    $('#viewRepublicButton').addEventListener('click', () => openInfoModal(state.republicName, 'A future Republic page can visualize the student’s civic choices: laws, alliances, population, stability, treasury, achievements, and a story journal. Avoid making historical outcomes “win conditions”; use the system to reward historical reasoning, evidence, and reflection.', 'Republic Overview'));
-    $('#viewAllInventoryButton').addEventListener('click', () => openInfoModal('Full Inventory', 'The starter shows the first eight historical artifacts. In later versions, artifacts can be grouped by era, source type, historical figure, or skill—and each can unlock a short lore entry or class reward.', 'Inventory'));
-
-    $('[data-close-modal]')?.addEventListener('click', closeModals);
     $$('.modal-close').forEach((button) => button.addEventListener('click', closeModals));
     $('#modalBackdrop').addEventListener('click', closeModals);
     document.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') closeModals();
+      if (event.key === 'Escape') {
+        if (!$('#characterCreation').hidden && editingCharacter) exitCharacterForge();
+        else closeModals();
+      }
     });
   }
 
   bindEvents();
-  render();
+  if (state.characterCreated) {
+    setAppVisibility(true);
+    render();
+  } else {
+    openCharacterForge(false);
+  }
 })();

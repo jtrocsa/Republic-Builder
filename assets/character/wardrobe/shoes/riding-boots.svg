@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" role="img" aria-label="Republic Builder character layer">
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#e4b84e"/><stop offset="1" stop-color="#9f6b1a"/></linearGradient>
+    <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f0dfb5"/><stop offset="1" stop-color="#c5a466"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#071523" flood-opacity=".45"/></filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <path d="M146 400h45v58h-67c-7 0-12-5-12-12 0-8 8-13 34-13zm63 0h45c26 0 34 5 34 13 0 7-5 12-12 12h-67z" fill="#283d4e" stroke="#102634" stroke-width="4"/>
+    <path d="M154 409h30m62 0h-30" stroke="#c2d4dd" stroke-width="3"/>
+  </g>
+</svg>

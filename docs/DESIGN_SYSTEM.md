@@ -27,11 +27,12 @@ Do not use decorative display fonts for paragraph-length instructions, DBQ promp
 
 ## UI hierarchy
 
-1. Current student progress appears first: profile, XP, points, streak.
-2. The six Republic Pillars establish the current historical/civic state.
-3. The Quest Board is the center of the screen and should stay the primary action area.
-4. The right column holds persistent context: republic status, inventory, upcoming boss.
-5. The APUSH unit rail makes the year-long journey visible.
+1. The Founder’s Character Forge is the first-run entry point: a high-contrast RPG onboarding screen with a live avatar preview.
+2. Current student progress appears first on the dashboard: profile, XP, points, and streak.
+3. Founder Traits show personal skill growth; Republic Pillars show civic/historical tensions. Keep those systems visually and conceptually distinct.
+4. The Quest Board is the center of the dashboard and should stay the primary action area.
+5. The right column holds persistent context: republic status, inventory, upcoming boss.
+6. The APUSH unit rail makes the year-long journey visible.
 
 ## Accessibility non-negotiables
 
@@ -44,7 +45,7 @@ Do not use decorative display fonts for paragraph-length instructions, DBQ promp
 
 ## Visual asset direction
 
-The starter includes original lightweight SVG assets so the prototype works without image licensing questions or third-party hosting. As the game expands, add art intentionally:
+The starter includes original lightweight SVG assets so the prototype works without image licensing questions or third-party hosting. Character bases and clothing layers share a `400 × 500` SVG coordinate system so they can stack in the Forge. As the game expands, add art intentionally:
 
 - Use original, public-domain, or properly licensed archival images.
 - Credit source images where needed.

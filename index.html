@@ -18,7 +18,56 @@
   </head>
   <body>
     <div class="screen-noise" aria-hidden="true"></div>
-    <div class="app-shell">
+
+    <section class="character-creation" id="characterCreation" aria-labelledby="creationTitle" hidden>
+      <div class="forge-backdrop" aria-hidden="true"></div>
+      <header class="forge-header">
+        <div class="forge-brand">
+          <img src="assets/brand-seal.svg" alt="" />
+          <div><p>Republic Builder</p><span>Founder’s Character Forge</span></div>
+        </div>
+        <button class="text-button forge-exit" id="exitForgeButton" type="button" hidden>Return to dashboard</button>
+      </header>
+
+      <div class="forge-layout">
+        <aside class="forge-steps" aria-label="Character creation steps">
+          <p class="micro-label">Founding record</p>
+          <h1 id="creationTitle">Create Your Founder</h1>
+          <p class="forge-intro">A republic grows through the choices and skills of the person building it. Start with a story; earn the rest.</p>
+          <ol class="creation-step-list" id="creationStepList"></ol>
+          <div class="forge-tip"><span aria-hidden="true">✦</span><p><strong>Cosmetics are free at the beginning.</strong> Quest artifacts and era-specific clothing arrive later.</p></div>
+        </aside>
+
+        <section class="forge-stage-panel" aria-label="Character preview">
+          <div class="forge-stage-topline"><span>Founder preview</span><span id="creationEraLabel">Founding Era · Unit 1</span></div>
+          <div class="forge-portrait-stage">
+            <div class="forge-sun" aria-hidden="true"></div>
+            <div class="forge-architecture" aria-hidden="true"></div>
+            <div class="avatar-stack avatar-stack-large" id="creationAvatar" aria-label="Character appearance preview"></div>
+          </div>
+          <div class="forge-character-plate">
+            <p id="creationNamePlate">Your Founder</p>
+            <span id="creationRolePlate">Choose a calling</span>
+          </div>
+          <section class="trait-panel" aria-labelledby="creationTraitsHeading">
+            <div class="trait-panel-heading"><div><p class="micro-label">Personal traits</p><h2 id="creationTraitsHeading">Founding Attributes</h2></div><span class="trait-cap">Maximum <b>20</b></span></div>
+            <div class="trait-preview-grid" id="creationTraitsGrid"></div>
+          </section>
+        </section>
+
+        <section class="forge-controls-panel" aria-live="polite">
+          <div class="forge-step-meta"><span id="creationStepEyebrow">Step 1 of 4</span><span id="creationStepTitle">Identity</span></div>
+          <div id="creationControls"></div>
+          <div class="forge-navigation">
+            <button class="button button-navy" id="creationBackButton" type="button">Back</button>
+            <button class="button button-red" id="creationNextButton" type="button">Continue</button>
+          </div>
+          <button class="forge-demo-button" id="demoFounderButton" type="button">Use a ready-made demo founder</button>
+        </section>
+      </div>
+    </section>
+
+    <div class="app-shell" id="appShell">
       <aside class="sidebar" aria-label="Primary navigation">
         <div class="brand-lockup">
           <img src="assets/brand-seal.svg" alt="Republic Builder seal" class="brand-seal" />
@@ -44,10 +93,10 @@
 
         <section class="era-card side-card" aria-labelledby="current-era-heading">
           <p class="micro-label">Current Era</p>
-          <p class="era-number">Era 3</p>
+          <p class="era-number" id="currentEraNumber">Era 3</p>
           <h2 id="current-era-heading">The Road to Revolution</h2>
-          <p class="era-dates">1763–1776</p>
-          <img src="assets/era-revolution.svg" alt="Illustrated colonial-era figures" />
+          <p class="era-dates" id="currentEraDates">1763–1776</p>
+          <img id="currentEraImage" src="assets/era-revolution.svg" alt="Illustrated historical-era figures" />
           <button class="button button-navy full-width" id="eraDetailsButton">View era details</button>
         </section>
       </aside>
@@ -55,13 +104,11 @@
       <main class="game-board" id="dashboard">
         <header class="topbar panel panel-navy">
           <section class="student-profile" aria-label="Student profile">
-            <div class="portrait-frame">
-              <img src="assets/hero-scholar.svg" alt="Illustrated student historian avatar" />
-            </div>
+            <div class="portrait-frame" id="dashboardAvatar" aria-label="Character avatar"></div>
             <div>
-              <p class="greeting">Welcome back,</p>
+              <p class="greeting" id="characterOrigin">Founder of the republic</p>
               <h1 id="studentName">Alex Morgan</h1>
-              <button class="archetype" id="editProfileButton">The History Scholar <span aria-hidden="true">✎</span></button>
+              <button class="archetype" id="editProfileButton"><span id="characterProfession">The History Scholar</span> <span aria-hidden="true">✎</span></button>
             </div>
           </section>
 
@@ -99,6 +146,15 @@
                 <span></span>
               </div>
               <div class="pillars-grid" id="pillarsGrid"></div>
+            </section>
+
+            <section class="traits-dashboard-panel parchment-panel" aria-labelledby="traits-heading">
+              <div class="ornament-header">
+                <span></span>
+                <h2 id="traits-heading">Founder Traits</h2>
+                <span></span>
+              </div>
+              <div class="traits-dashboard-grid" id="traitsDashboardGrid"></div>
             </section>
 
             <section class="quest-board panel panel-navy" id="quests" aria-labelledby="quest-heading">
@@ -207,18 +263,6 @@
       <div class="teacher-note"><strong>Next build:</strong> class roster, teacher-created quests, due dates, rubric scoring, and cloud saves.</div>
     </section>
 
-    <section class="modal profile-modal" id="profileModal" role="dialog" aria-modal="true" aria-labelledby="profileModalTitle" hidden>
-      <button class="modal-close" data-close-modal aria-label="Close profile editor">×</button>
-      <p class="micro-label">Character profile</p>
-      <h2 id="profileModalTitle">Customize Your Republic</h2>
-      <form id="profileForm" class="profile-form">
-        <label>Historian name<input id="profileNameInput" maxlength="28" required /></label>
-        <label>Republic name<input id="profileRepublicInput" maxlength="34" required /></label>
-        <label>Republic motto<input id="profileMottoInput" maxlength="42" required /></label>
-        <button class="button button-red" type="submit">Save profile</button>
-      </form>
-    </section>
-
     <section class="modal info-modal" id="infoModal" role="dialog" aria-modal="true" aria-labelledby="infoModalTitle" hidden>
       <button class="modal-close" data-close-modal aria-label="Close information">×</button>
       <p class="micro-label" id="infoModalEyebrow">Republic Builder</p>
@@ -229,6 +273,7 @@
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
     <script src="data.js"></script>
+    <script src="storage.js"></script>
     <script src="app.js"></script>
   </body>
 </html>

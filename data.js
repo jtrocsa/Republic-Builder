@@ -162,5 +162,90 @@ window.REPUBLIC_BUILDER_DATA = {
       explanation: 'A boycott is the organized refusal to purchase goods or participate in an activity as a form of protest or pressure.',
       rewards: { xp: 80, rp: 40, pillars: { economy: 2, liberty: 1 }, artifact: 'Vocabulary Codex' }
     }
-  ]
+  ],
+
+  /*
+    CHARACTER CREATION CONTENT
+    ------------------------------------------------------------------
+    This object is intentionally separated from save logic. Add new
+    professions, clothing, towns, or later-era unlocks here; app.js only
+    reads the data and applies the selected effects.
+  */
+  character: {
+    traitCap: 20,
+    baseTraits: {
+      intellect: 5,
+      industry: 5,
+      influence: 5,
+      courage: 5,
+      diplomacy: 5,
+      integrity: 5
+    },
+    traits: [
+      { id: 'intellect', name: 'Intellect', icon: '✦', description: 'Historical analysis, writing, sourcing, and document interpretation.' },
+      { id: 'industry', name: 'Industry', icon: '⚒', description: 'Building, production, persistence, and economic development.' },
+      { id: 'influence', name: 'Influence', icon: '◆', description: 'Argument, leadership, public speaking, and persuasion.' },
+      { id: 'courage', name: 'Courage', icon: '✹', description: 'Facing risk, responding to crises, and taking principled action.' },
+      { id: 'diplomacy', name: 'Diplomacy', icon: '⌁', description: 'Collaboration, compromise, alliances, and negotiation.' },
+      { id: 'integrity', name: 'Integrity', icon: '⚖', description: 'Justice, civic responsibility, reform, and ethical choices.' }
+    ],
+    genders: [
+      { id: 'woman', label: 'Woman', asset: 'assets/character/base/woman.svg' },
+      { id: 'man', label: 'Man', asset: 'assets/character/base/man.svg' },
+      { id: 'neutral', label: 'Nonbinary / another identity', asset: 'assets/character/base/neutral.svg' }
+    ],
+    towns: [
+      { id: 'boston', name: 'Boston', region: 'New England', icon: '⚓', note: 'Ports, pamphlets, town meetings, and protest.' },
+      { id: 'new-york', name: 'New York', region: 'Middle Colonies', icon: '⌂', note: 'A bustling crossroads of trade and cultures.' },
+      { id: 'philadelphia', name: 'Philadelphia', region: 'Middle Colonies', icon: '✒', note: 'Printers, debate, civic life, and constitutional ideas.' },
+      { id: 'williamsburg', name: 'Williamsburg', region: 'Chesapeake', icon: '♜', note: 'Plantations, assemblies, and imperial politics.' },
+      { id: 'charleston', name: 'Charleston', region: 'Lower South', icon: '⛵', note: 'Atlantic commerce and a diverse port city.' },
+      { id: 'backcountry', name: 'Backcountry', region: 'Frontier', icon: '⛰', note: 'Self-reliance, migration, and contested borderlands.' }
+    ],
+    professions: [
+      { id: 'blacksmith', name: 'Blacksmith', icon: '⚒', description: 'Forge tools and turn raw materials into something useful.', bonuses: { industry: 3, courage: 1 }, starterItem: 'Ironworker’s Apron' },
+      { id: 'newspaper-editor', name: 'Newspaper Editor', icon: '✒', description: 'Shape public debate through ideas, arguments, and persuasive writing.', bonuses: { intellect: 3, influence: 1 }, starterItem: 'Printer’s Proof' },
+      { id: 'farmer', name: 'Farmer', icon: '♧', description: 'Sustain a community through stewardship, patience, and labor.', bonuses: { industry: 2, integrity: 2 }, starterItem: 'Seed Ledger' },
+      { id: 'merchant', name: 'Merchant', icon: '◈', description: 'Navigate trade networks, relationships, and calculated risks.', bonuses: { diplomacy: 2, influence: 2 }, starterItem: 'Trade Ledger' },
+      { id: 'teacher', name: 'Teacher', icon: '▤', description: 'Build knowledge, strengthen communities, and guide others.', bonuses: { intellect: 3, integrity: 1 }, starterItem: 'Lesson Primer' },
+      { id: 'apprentice-lawyer', name: 'Apprentice Lawyer', icon: '⚖', description: 'Study arguments, civic institutions, and the rule of law.', bonuses: { intellect: 2, influence: 2 }, starterItem: 'Casebook' },
+      { id: 'sailor', name: 'Sailor', icon: '⚓', description: 'Cross uncertain waters and rely on teamwork under pressure.', bonuses: { courage: 2, diplomacy: 2 }, starterItem: 'Navigator’s Knot' },
+      { id: 'artisan', name: 'Artisan', icon: '✣', description: 'Apply craft, creativity, and technical knowledge to everyday life.', bonuses: { industry: 2, intellect: 2 }, starterItem: 'Maker’s Token' }
+    ],
+    wardrobe: {
+      hat: [
+        { id: 'hat-none', name: 'Bareheaded', asset: 'assets/character/wardrobe/hats/hat-none.svg', note: 'A practical start.' },
+        { id: 'round-cap', name: 'Round Cap', asset: 'assets/character/wardrobe/hats/round-cap.svg', note: 'A simple cloth cap.' },
+        { id: 'wide-brim', name: 'Wide-Brim Hat', asset: 'assets/character/wardrobe/hats/wide-brim.svg', note: 'Good shade on long roads.' },
+        { id: 'tricorn', name: 'Tricorn', asset: 'assets/character/wardrobe/hats/tricorn.svg', note: 'A formal colonial-era look.' }
+      ],
+      shirt: [
+        { id: 'basic-tunic', name: 'Basic Tunic', asset: 'assets/character/wardrobe/shirts/basic-tunic.svg', note: 'Every founder begins with this tunic.' },
+        { id: 'linen-shirt', name: 'Linen Shirt', asset: 'assets/character/wardrobe/shirts/linen-shirt.svg', note: 'Clean lines for civic life.' },
+        { id: 'work-shirt', name: 'Work Shirt', asset: 'assets/character/wardrobe/shirts/work-shirt.svg', note: 'Built for long days.' },
+        { id: 'blue-vest', name: 'Blue Vest', asset: 'assets/character/wardrobe/shirts/blue-vest.svg', note: 'A bold layer for public debate.' }
+      ],
+      pants: [
+        { id: 'plain-trousers', name: 'Plain Trousers', asset: 'assets/character/wardrobe/pants/plain-trousers.svg', note: 'Reliable and unadorned.' },
+        { id: 'work-breeches', name: 'Work Breeches', asset: 'assets/character/wardrobe/pants/work-breeches.svg', note: 'Ready for labor and travel.' },
+        { id: 'navy-breeches', name: 'Navy Breeches', asset: 'assets/character/wardrobe/pants/navy-breeches.svg', note: 'A polished civic look.' },
+        { id: 'striped-trousers', name: 'Striped Trousers', asset: 'assets/character/wardrobe/pants/striped-trousers.svg', note: 'A little more character.' }
+      ],
+      socks: [
+        { id: 'wool-socks', name: 'Wool Socks', asset: 'assets/character/wardrobe/socks/wool-socks.svg', note: 'Warm, sturdy, standard issue.' },
+        { id: 'striped-socks', name: 'Striped Socks', asset: 'assets/character/wardrobe/socks/striped-socks.svg', note: 'A small flash of color.' },
+        { id: 'blue-socks', name: 'Blue Wool', asset: 'assets/character/wardrobe/socks/blue-socks.svg', note: 'Dye is a statement.' },
+        { id: 'charcoal-socks', name: 'Charcoal Wool', asset: 'assets/character/wardrobe/socks/charcoal-socks.svg', note: 'Quiet and practical.' }
+      ],
+      shoes: [
+        { id: 'simple-shoes', name: 'Simple Shoes', asset: 'assets/character/wardrobe/shoes/simple-shoes.svg', note: 'The founder’s dependable footwear.' },
+        { id: 'work-boots', name: 'Work Boots', asset: 'assets/character/wardrobe/shoes/work-boots.svg', note: 'A sturdy choice for an industrious character.' },
+        { id: 'buckled-shoes', name: 'Buckled Shoes', asset: 'assets/character/wardrobe/shoes/buckled-shoes.svg', note: 'Ready for the assembly hall.' },
+        { id: 'riding-boots', name: 'Riding Boots', asset: 'assets/character/wardrobe/shoes/riding-boots.svg', note: 'Made for travel and dispatches.' }
+      ],
+      special: [
+        { id: 'locked-relic', name: 'Quest Artifact Slot', asset: 'assets/character/special/locked-relic.svg', note: 'Special items are earned through quests and boss battles.', locked: true }
+      ]
+    }
+  }
 };

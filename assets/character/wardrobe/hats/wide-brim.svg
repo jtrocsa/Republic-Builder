@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" role="img" aria-label="Republic Builder character layer">
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#e4b84e"/><stop offset="1" stop-color="#9f6b1a"/></linearGradient>
+    <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f0dfb5"/><stop offset="1" stop-color="#c5a466"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#071523" flood-opacity=".45"/></filter>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <ellipse cx="200" cy="66" rx="81" ry="20" fill="#563f2e" stroke="#d8b36e" stroke-width="4"/>
+    <path d="M165 59c4-35 21-49 35-49s32 15 36 49c-21 9-50 9-71 0z" fill="#684932" stroke="#d8b36e" stroke-width="3"/>
+    <path d="M151 68c25 11 73 11 98 0" fill="none" stroke="#25201b" stroke-width="7"/>
+  </g>
+</svg>

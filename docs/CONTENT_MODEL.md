@@ -98,3 +98,39 @@ A fuller quest object will likely need:
 - `prerequisiteQuestIds`
 - `branchingOutcomes`
 - `accessibleAlternative`
+
+## Character creation content
+
+Character configuration also lives in `data.js`, under `REPUBLIC_BUILDER_DATA.character`.
+
+The character object keeps the reusable game engine separate from classroom content:
+
+```js
+character: {
+  traitCap: 20,
+  baseTraits: { intellect: 5, industry: 5, influence: 5, courage: 5, diplomacy: 5, integrity: 5 },
+  traits: [...],
+  genders: [...],
+  towns: [...],
+  professions: [...],
+  wardrobe: { hat: [...], shirt: [...], pants: [...], socks: [...], shoes: [...], special: [...] }
+}
+```
+
+See [Character Creation System](CHARACTER_CREATION.md) for the trait rules, profession balance, and era-evolution plan.
+
+### Adding rewards to a quest
+
+A future quest may award founder-trait growth independently from Republic Pillars:
+
+```js
+rewards: {
+  xp: 150,
+  rp: 75,
+  pillars: { liberty: 2 },
+  traits: { intellect: 1, diplomacy: 1 },
+  artifact: 'Historian’s Lens'
+}
+```
+
+Trait rewards should be tied to observable learning behaviors—such as evidence use, revision, constructive peer feedback, or source analysis—not subjective personality judgments.

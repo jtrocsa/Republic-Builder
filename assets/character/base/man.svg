@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" role="img" aria-label="Republic Builder character layer">
+  <defs>
+    <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#e4b84e"/><stop offset="1" stop-color="#9f6b1a"/></linearGradient>
+    <linearGradient id="cloth" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#f0dfb5"/><stop offset="1" stop-color="#c5a466"/></linearGradient>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="7" stdDeviation="6" flood-color="#071523" flood-opacity=".45"/></filter>
+  </defs>
+
+  <path d="M162 69c3-34 23-50 41-50 24 0 39 19 41 51l-12 17c-9-19-23-29-40-29-15 0-27 10-31 29z" fill="#392821"/>
+  <path d="M168 98c3 36 13 56 32 58 18-2 29-22 32-58-18 10-46 10-64 0z" fill="#e3b07c"/>
+  <path d="M178 126c12 13 32 15 44 0l-4 19c-10 6-26 6-36 0z" fill="#3a2721"/>
+
+  <ellipse cx="200" cy="476" rx="92" ry="12" fill="#071722" opacity=".3"/>
+  <g filter="url(#shadow)">
+    <path d="M154 432h35v34h-47c-9 0-15-7-15-15 0-11 8-19 27-19zm92 0h-35v34h47c9 0 15-7 15-15 0-11-8-19-27-19z" fill="#b87943"/>
+    <path d="M154 267h48v168h-56c-4-51 5-114 8-168zm44 0h48c3 54 12 117 8 168h-56z" fill="#b87943"/>
+    <path d="M144 116c12-26 34-41 56-41s44 15 56 41l26 149c-37 23-127 23-164 0z" fill="#e3b07c"/>
+    <circle cx="200" cy="73" r="39" fill="#e3b07c"/>
+    <path d="M166 113c6 7 17 12 34 12s28-5 34-12l-2 25c-17 12-47 12-64 0z" fill="#d08f5b"/>
+  </g>
+</svg>

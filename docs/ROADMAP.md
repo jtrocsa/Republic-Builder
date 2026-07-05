@@ -4,16 +4,18 @@
 
 - Static GitHub Pages-ready dashboard
 - Responsive game UI
+- RPG-style Founder’s Character Forge
+- Eight starter professions, six capped traits, and layered SVG wardrobe assets
 - Sample Unit 3 quests
-- Local browser progress
+- Local browser progress through a swappable save adapter
 - Teacher-demo controls
-- Content and visual documentation
+- Content, asset, persistence, and visual documentation
 
 ## Phase 1 — A real playable single-student prototype
 
-- Character creator with a handful of non-stereotyped avatar choices
-- A landing/onboarding sequence
+- Character Forge refinement with classroom-tested naming, town, profession, and wardrobe choices
 - Unit 1 quest set
+- A student-facing progress journal and first-era story hook
 - Better quest interactions: matching, sorting, source annotation, short answer, and teacher-reviewed completion
 - Progress journal and unlocked artifact lore
 - Sound toggle with optional, non-intrusive audio feedback
@@ -39,7 +41,7 @@
 
 ## Phase 4 — Advanced features
 
-- Cloud saves and cross-device progress
+- Cloud saves and cross-device progress through school-approved authentication
 - School-safe class leaderboard controls
 - Optional classroom teams
 - Audio, ambient sound, and screen-reader-safe captions/transcripts
