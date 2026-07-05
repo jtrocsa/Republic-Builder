@@ -525,13 +525,33 @@
     openModal($('#infoModal'));
   }
 
+  function jumpToCreationStep(targetStep) {
+    if (targetStep === creationStep) return;
+    if (targetStep > creationStep) {
+      if (!validateCreationStep()) return;
+    }
+    creationStep = targetStep;
+    renderCharacterForge();
+  }
+
   function renderCreationSteps() {
     const labels = ['Identity', 'Calling', 'Wardrobe', 'Founding Oath'];
     $('#creationStepList').innerHTML = labels.map((label, index) => `
-      <li class="${index === creationStep ? 'active' : index < creationStep ? 'complete' : ''}">
+      <li class="${index === creationStep ? 'active' : index < creationStep ? 'complete' : ''}" role="button" tabindex="0" data-step-index="${index}" aria-current="${index === creationStep ? 'step' : 'false'}">
         <b>${index < creationStep ? '✓' : index + 1}</b><span>${label}</span>
       </li>
     `).join('');
+    
+    $$('#creationStepList li').forEach((item) => {
+      const stepIndex = Number(item.dataset.stepIndex);
+      item.addEventListener('click', () => jumpToCreationStep(stepIndex));
+      item.addEventListener('keydown', (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          jumpToCreationStep(stepIndex);
+        }
+      });
+    });
   }
 
   function formatBonuses(bonuses) {
@@ -677,6 +697,7 @@
     $('#creationStepTitle').textContent = current.title;
     $('#creationControls').innerHTML = current.render();
     $('#creationAvatar').innerHTML = avatarMarkup(creationDraft, 'Founder appearance preview');
+    $('#dashboardAvatar').innerHTML = avatarMarkup(creationDraft, 'Character avatar');
     $('#creationNamePlate').textContent = creationDraft.name.trim() || 'Your Founder';
     $('#creationRolePlate').textContent = profession.name;
     $('#creationTraitsGrid').innerHTML = '';
