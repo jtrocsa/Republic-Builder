@@ -11,6 +11,7 @@ export class DataServiceContract {
 
   async getTeacherQuestStudio({ classId }) { throw new Error('Not implemented'); }
   async getTeacherQuest({ questId }) { throw new Error('Not implemented'); }
+  async createQuestFromTemplate(payload) { throw new Error('Not implemented'); }
   async saveQuestDraft(payload) { throw new Error('Not implemented'); }
   async publishQuestVersion(payload) { throw new Error('Not implemented'); }
   async duplicateQuest(payload) { throw new Error('Not implemented'); }

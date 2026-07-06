@@ -15,9 +15,10 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="css/quest-world.css" />
+    <link rel="stylesheet" href="css/quest-progression.css" />
   </head>
-  <body>
-    <div class="app-shell">
+  <body class="quest-game">
+    <div class="app-shell quest-game">
       <aside class="hud-rail" aria-label="Unit 1 player HUD">
         <a class="brand" href="features/character-forge/character-forge.html?edit=1" aria-label="Open the founder forge to edit your character">
           <span class="brand-mark">RB</span>
@@ -46,6 +47,8 @@
           <button class="rail-link active" data-scroll-target="map-panel" type="button"><span>⌖</span> Atlas Map</button>
           <button class="rail-link" data-action="open-library" type="button"><span>▤</span> Field Archive <b id="source-count-badge">0</b></button>
           <button class="rail-link" data-action="open-rubrics" type="button"><span>✦</span> APUSH Rubrics</button>
+          <button class="rail-link" data-action="open-badge-case" type="button"><span>◉</span> Badge Case</button>
+          <button class="rail-link" data-action="open-store" type="button"><span>◌</span> Archive Store</button>
           <button class="rail-link" data-action="open-inventory" type="button"><span>▣</span> Inventory</button>
           <button class="rail-link" data-action="open-skills" type="button"><span>◆</span> Historian Skills</button>
           <button class="rail-link" data-action="open-leaderboard" type="button"><span>▥</span> Ledger</button>
@@ -61,6 +64,7 @@
 
         <footer class="rail-footer">
           <button class="teacher-mode" id="teacher-mode-toggle" type="button">Teacher mode: <span>off</span></button>
+          <button class="teacher-dashboard-button" id="teacher-dashboard-button" type="button">Open Teacher Dashboard</button>
           <p id="teacher-mode-status">Teacher Mode is off (Local Demo)</p>
           <p>Quest scoring and drafts are local to this browser. Official AP scoring remains teacher-controlled.</p>
         </footer>
@@ -71,14 +75,31 @@
           <div>
             <p class="eyebrow">Unit 1 · 1491-1607</p>
             <h1>Atlantic Crossroads</h1>
-            <p class="world-subtitle">Chart encounters across the Atlantic World. Each region marker opens a Unit 1 quest mode: HIPP Challenge, Evidence Royale, Vocabulary Bounty, and Boss Battle.</p>
+            <p class="world-subtitle">Chart encounters across the Atlantic World. Activities now use plain-language APUSH labels: MCQ Challenge, HIPP Source Analysis, Vocabulary Challenge, and Boss Battle mode tasks.</p>
           </div>
           <div class="header-actions">
             <a class="header-button" href="features/character-forge/character-forge.html?edit=1"><span>✎</span>Edit Founder</a>
             <button class="header-button" data-action="open-library" type="button"><span>▤</span>Open Unit 1 Archive</button>
+            <button class="header-button" data-action="open-badge-case" type="button"><span>◉</span>Badge Case</button>
+            <button class="header-button" data-action="open-store" type="button"><span>◌</span>Store</button>
             <button class="header-button icon-button" data-action="open-help" type="button" aria-label="Open Unit 1 quest guide">?</button>
           </div>
         </header>
+
+        <section class="qp-card qp-journey" id="historian-journey" aria-label="Historian Journey progression">
+          <div>
+            <p class="qp-eyebrow">Historian Journey</p>
+            <h2 class="qp-level-title" id="journey-level-title">Level 1 · Apprentice Historian</h2>
+            <p class="qp-level-meta" id="journey-level-meta">0 XP total</p>
+            <div class="qp-progress-track" aria-label="Historian level progress"><span class="qp-progress-fill" id="journey-progress-fill" style="--qp-progress: 0%"></span></div>
+            <p class="qp-level-meta" id="journey-next-level">Next level: 75 XP</p>
+            <p class="qp-level-meta" id="journey-mastery-note" hidden></p>
+          </div>
+          <div class="qp-token-chip" aria-label="Archive Token balance">
+            <img src="assets/badges/ui/archive-token.svg" alt="Archive Token icon" />
+            <span><strong id="archive-token-balance">0</strong> Archive Tokens</span>
+          </div>
+        </section>
 
         <section class="unit-progress-card" id="unit-progress-section" aria-label="Unit 1 topics">
           <div>
@@ -107,9 +128,9 @@
             <div class="map-quests" id="map-quests" aria-live="polite"></div>
             <div class="map-legend" aria-label="Quest map legend">
               <span><i class="legend-dot hipp"></i>HIPP Challenge</span>
-              <span><i class="legend-dot royale"></i>Evidence Royale</span>
-              <span><i class="legend-dot vocab"></i>Vocabulary Bounty</span>
-              <span><i class="legend-dot boss"></i>Boss Battle</span>
+              <span><i class="legend-dot royale"></i>MCQ Challenge</span>
+              <span><i class="legend-dot vocab"></i>Vocabulary Challenge</span>
+              <span><i class="legend-dot boss"></i>Boss Battle Mode</span>
             </div>
           </div>
         </section>
@@ -159,7 +180,7 @@
               </div>
               <div class="rubric-card-body">
                 <div><b>SAQ Rubric</b><span>3 PT</span></div>
-                <p>Short-answer scoring structure for Boss Battle practice.</p>
+                <p>Short-answer scoring structure for SAQ practice and boss-mode tasks.</p>
               </div>
             </button>
             <button class="rubric-card" data-action="open-rubrics" type="button">

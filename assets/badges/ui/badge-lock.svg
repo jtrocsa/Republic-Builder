@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<title>Locked Badge Placeholder</title><desc>A grayscale seal and lock for badges not yet accessed.</desc>
+<defs>
+  <linearGradient id="gNavy" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#203B70"/><stop offset="1" stop-color="#0E1E3C"/></linearGradient>
+  <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#F2CF6B"/><stop offset="1" stop-color="#C88A26"/></linearGradient>
+  <linearGradient id="gParchment" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF9E8"/><stop offset="1" stop-color="#EBD5A3"/></linearGradient>
+  <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#0E1E3C" flood-opacity=".25"/></filter>
+  <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#0E1E3C" flood-opacity=".16"/></filter>
+</defs>
+
+<g filter="url(#shadow)">
+  <path d="M128 13 160 29 195 24 214 54 243 79 231 113 240 147 213 170 196 203 161 201 128 243 95 201 60 203 43 170 16 147 25 113 13 79 42 54 61 24 96 29Z" fill="#667080" stroke="#374150" stroke-width="7" stroke-linejoin="round"/>
+  <circle cx="128" cy="126" r="70" fill="#D3D8DE" stroke="#5D6674" stroke-width="5"/>
+  <rect x="87" y="119" width="82" height="61" rx="10" fill="#5D6674" stroke="#374150" stroke-width="5"/>
+  <path d="M103 119v-18c0-14 11-25 25-25s25 11 25 25v18" fill="none" stroke="#5D6674" stroke-width="14" stroke-linecap="round"/>
+  <circle cx="128" cy="148" r="8" fill="#D3D8DE"/><path d="M128 155v12" stroke="#D3D8DE" stroke-width="5" stroke-linecap="round"/>
+</g>
+</svg>

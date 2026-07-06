@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "studentId": "demo-student",
+  "totalXp": 355,
+  "archiveTokens": 18,
+  "completedQuestIds": [
+    "u1-atlantic-world-map",
+    "u1-three-worlds-comparison"
+  ],
+  "questCompletions": [],
+  "assessmentResults": [],
+  "badgeProgress": {
+    "timeline-mastery": {
+      "tier": "bronze",
+      "metrics": {
+        "timelineTasksCompleted": 2
+      },
+      "awardedTiers": [
+        "bronze"
+      ]
+    }
+  },
+  "earnedBadgeIds": [
+    "u1-atlantic-cartographer",
+    "u1-three-worlds-interpreter"
+  ],
+  "inventoryItemIds": [
+    "profile-frame-parchment"
+  ],
+  "equipped": {
+    "profileFrame": "profile-frame-parchment"
+  },
+  "transactions": [],
+  "updatedAt": "2026-09-12T21:15:00.000Z"
+}

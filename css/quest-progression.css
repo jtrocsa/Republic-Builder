@@ -1,0 +1,125 @@
+/* APUSH Quest Progression UI — framework-free, safe to scope under .quest-game */
+.quest-game {
+  --qp-ink: #1d2b4f;
+  --qp-ink-soft: #3e4f72;
+  --qp-parchment: #f7f0df;
+  --qp-paper: #fffaf0;
+  --qp-gold: #d69a2d;
+  --qp-bronze: #a9603b;
+  --qp-silver: #93a1ae;
+  --qp-teal: #2e7d7d;
+  --qp-rust: #a24d35;
+  --qp-shadow: 0 12px 28px rgb(27 38 65 / 18%);
+  color: var(--qp-ink);
+}
+
+.quest-game .qp-card {
+  background: var(--qp-paper);
+  border: 1px solid rgb(29 43 79 / 16%);
+  border-radius: 18px;
+  box-shadow: var(--qp-shadow);
+}
+
+.quest-game .qp-journey {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.15rem;
+}
+
+.quest-game .qp-eyebrow,
+.quest-game .qp-activity-type,
+.quest-game .qp-badge-label {
+  color: var(--qp-ink-soft);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+
+.quest-game .qp-level-title { margin: .12rem 0 .45rem; font-size: 1.25rem; }
+.quest-game .qp-level-meta { color: var(--qp-ink-soft); font-size: .88rem; }
+
+.quest-game .qp-progress-track {
+  width: 100%;
+  height: .7rem;
+  overflow: hidden;
+  background: rgb(29 43 79 / 10%);
+  border-radius: 999px;
+}
+
+.quest-game .qp-progress-fill {
+  width: var(--qp-progress, 0%);
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--qp-teal), var(--qp-gold));
+  transition: width 240ms ease;
+}
+
+.quest-game .qp-token-chip {
+  display: inline-flex;
+  gap: .5rem;
+  align-items: center;
+  padding: .55rem .75rem;
+  background: #fff2cb;
+  border: 1px solid rgb(214 154 45 / 45%);
+  border-radius: 999px;
+  color: #5c3b07;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.quest-game .qp-token-chip img { width: 1.45rem; height: 1.45rem; }
+
+.quest-game .qp-badge-case-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+}
+
+.quest-game .qp-badge-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  gap: .9rem;
+  align-items: center;
+  min-height: 126px;
+  padding: .85rem;
+}
+
+.quest-game .qp-badge-card img { width: 76px; height: 76px; object-fit: contain; }
+.quest-game .qp-badge-card h3 { margin: .12rem 0 .35rem; font-size: 1rem; }
+.quest-game .qp-badge-card p { margin: 0; color: var(--qp-ink-soft); font-size: .84rem; line-height: 1.35; }
+.quest-game .qp-badge-card--locked img { filter: grayscale(1) contrast(.72); opacity: .42; }
+.quest-game .qp-badge-card--locked { background: #f5f4f1; box-shadow: none; }
+.quest-game .qp-badge-card--active { border-color: rgb(46 125 125 / 50%); }
+.quest-game .qp-badge-card--earned { border-color: rgb(214 154 45 / 62%); }
+
+.quest-game .qp-tier-track { display: flex; gap: .32rem; margin-top: .55rem; }
+.quest-game .qp-tier-dot { width: .7rem; height: .7rem; border: 2px solid rgb(29 43 79 / 28%); border-radius: 50%; }
+.quest-game .qp-tier-dot--bronze.is-earned { background: var(--qp-bronze); border-color: var(--qp-bronze); }
+.quest-game .qp-tier-dot--silver.is-earned { background: var(--qp-silver); border-color: var(--qp-silver); }
+.quest-game .qp-tier-dot--gold.is-earned { background: var(--qp-gold); border-color: var(--qp-gold); }
+
+.quest-game .qp-quest-card { padding: 1.1rem; }
+.quest-game .qp-quest-card h3 { margin: .2rem 0 .45rem; font-size: 1.12rem; }
+.quest-game .qp-quest-meta { display: flex; flex-wrap: wrap; gap: .45rem; color: var(--qp-ink-soft); font-size: .85rem; }
+.quest-game .qp-tag { padding: .22rem .52rem; background: #e9efe9; border-radius: 999px; font-weight: 700; }
+.quest-game .qp-reward-row { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .8rem; font-size: .86rem; font-weight: 800; }
+.quest-game .qp-reward-xp { color: var(--qp-teal); }
+.quest-game .qp-reward-token { color: #8a5808; }
+
+.quest-game button:focus-visible,
+.quest-game a:focus-visible,
+.quest-game [tabindex]:focus-visible {
+  outline: 3px solid #2e7d7d;
+  outline-offset: 3px;
+}
+
+@media (max-width: 600px) {
+  .quest-game .qp-journey { grid-template-columns: 1fr; }
+  .quest-game .qp-token-chip { justify-self: start; }
+  .quest-game .qp-badge-card { grid-template-columns: 64px minmax(0, 1fr); }
+  .quest-game .qp-badge-card img { width: 64px; height: 64px; }
+}

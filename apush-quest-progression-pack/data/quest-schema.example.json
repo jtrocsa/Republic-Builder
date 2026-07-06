@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "APUSH Quest Definition",
+  "type": "object",
+  "required": [
+    "id",
+    "unitId",
+    "activityType",
+    "mode",
+    "title",
+    "estimatedMinutes",
+    "xpReward",
+    "tokenReward"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]+$"
+    },
+    "unitId": {
+      "type": "string"
+    },
+    "activityType": {
+      "type": "string",
+      "enum": [
+        "MCQ Challenge",
+        "Vocabulary Challenge",
+        "HIPP Source Analysis",
+        "Primary Source Analysis",
+        "Timeline Challenge",
+        "SAQ Practice",
+        "DBQ Writing Challenge",
+        "LEQ Writing Challenge",
+        "Debate Challenge",
+        "Review Challenge",
+        "Reflection / Revision Challenge"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "practice",
+        "core",
+        "side",
+        "collaborative",
+        "boss",
+        "bonus"
+      ]
+    },
+    "title": {
+      "type": "string"
+    },
+    "estimatedMinutes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "xpReward": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "tokenReward": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 10
+    },
+    "replayRewardPolicy": {
+      "type": "string",
+      "enum": [
+        "first_completion_only",
+        "repeat_xp_only",
+        "repeat_full_reward"
+      ]
+    },
+    "badgeLinks": {
+      "type": "array"
+    }
+  }
+}

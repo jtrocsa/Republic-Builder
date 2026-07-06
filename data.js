@@ -132,7 +132,7 @@ window.REPUBLIC_BUILDER_DATA = {
     },
     {
       id: 'revolution-dbq',
-      category: 'DBQ Boss Fight',
+      category: 'DBQ Boss Battle',
       group: 'writing',
       image: 'assets/quest-revolution.svg',
       title: 'The American Revolution',
@@ -151,7 +151,7 @@ window.REPUBLIC_BUILDER_DATA = {
     },
     {
       id: 'vocabulary',
-      category: 'Vocabulary Bounty',
+      category: 'Vocabulary Challenge',
       group: 'skill',
       image: 'assets/quest-vocab.svg',
       title: 'Find the Term',

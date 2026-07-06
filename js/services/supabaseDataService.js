@@ -28,6 +28,7 @@ export class SupabaseDataService extends DataServiceContract {
 
   async getTeacherQuestStudio() { return this._todo('getTeacherQuestStudio'); }
   async getTeacherQuest() { return this._todo('getTeacherQuest'); }
+  async createQuestFromTemplate() { return this._todo('createQuestFromTemplate'); }
   async saveQuestDraft() { return this._todo('saveQuestDraft'); }
   async publishQuestVersion() { return this._todo('publishQuestVersion'); }
   async duplicateQuest() { return this._todo('duplicateQuest'); }

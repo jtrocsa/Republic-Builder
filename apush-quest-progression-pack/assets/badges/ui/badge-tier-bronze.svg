@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+<title>Bronze Badge Tier</title><desc>A bronze badge tier emblem for assessment badge tiers.</desc>
+<defs>
+  <linearGradient id="gNavy" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#203B70"/><stop offset="1" stop-color="#0E1E3C"/></linearGradient>
+  <linearGradient id="gGold" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#F2CF6B"/><stop offset="1" stop-color="#C88A26"/></linearGradient>
+  <linearGradient id="gParchment" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFF9E8"/><stop offset="1" stop-color="#EBD5A3"/></linearGradient>
+  <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#0E1E3C" flood-opacity=".25"/></filter>
+  <filter id="soft" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="2" stdDeviation="1.6" flood-color="#0E1E3C" flood-opacity=".16"/></filter>
+</defs>
+
+<g filter="url(#shadow)"><circle cx="128" cy="128" r="92" fill="#A85E3D" stroke="#15274C" stroke-width="8"/><circle cx="128" cy="128" r="70" fill="#FFF9ED" stroke="#15274C" stroke-width="4"/><path d="m128 73 11 30 31 1-24 20 8 31-26-17-26 17 8-31-24-20 31-1Z" fill="#A85E3D" stroke="#15274C" stroke-width="5" stroke-linejoin="round"/></g>
+</svg>

@@ -1,0 +1,110 @@
+[
+  {
+    "id": "u1-atlantic-world-map",
+    "unitId": "unit-1",
+    "activityType": "Timeline Challenge",
+    "mode": "core",
+    "title": "Mapping the Atlantic World",
+    "estimatedMinutes": 15,
+    "xpReward": 30,
+    "tokenReward": 3,
+    "replayRewardPolicy": "first_completion_only",
+    "badgeLinks": [
+      {
+        "badgeId": "timeline-mastery",
+        "metric": "timelineTasksCompleted",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": "u1-three-worlds-comparison",
+    "unitId": "unit-1",
+    "activityType": "Primary Source Analysis",
+    "mode": "core",
+    "title": "Three Worlds Before Contact",
+    "estimatedMinutes": 20,
+    "xpReward": 30,
+    "tokenReward": 3,
+    "replayRewardPolicy": "first_completion_only",
+    "badgeLinks": []
+  },
+  {
+    "id": "u1-columbian-exchange-mcq",
+    "unitId": "unit-1",
+    "activityType": "MCQ Challenge",
+    "mode": "core",
+    "title": "Columbian Exchange",
+    "estimatedMinutes": 10,
+    "xpReward": 30,
+    "tokenReward": 3,
+    "replayRewardPolicy": "first_completion_only",
+    "badgeLinks": [
+      {
+        "badgeId": "mcq-mastery",
+        "metric": "mcqSetsAt60",
+        "amount": 0
+      }
+    ]
+  },
+  {
+    "id": "u1-settlement-chronicle-timeline",
+    "unitId": "unit-1",
+    "activityType": "Timeline Challenge",
+    "mode": "practice",
+    "title": "Settlements and Encounters",
+    "estimatedMinutes": 12,
+    "xpReward": 20,
+    "tokenReward": 2,
+    "replayRewardPolicy": "first_completion_only",
+    "badgeLinks": [
+      {
+        "badgeId": "timeline-mastery",
+        "metric": "timelineTasksCompleted",
+        "amount": 1
+      }
+    ]
+  },
+  {
+    "id": "u1-winthrop-hipp",
+    "unitId": "unit-1",
+    "activityType": "HIPP Source Analysis",
+    "mode": "practice",
+    "title": "John Winthrop and a Model of Christian Charity",
+    "estimatedMinutes": 15,
+    "xpReward": 20,
+    "tokenReward": 2,
+    "replayRewardPolicy": "first_completion_only",
+    "badgeLinks": [
+      {
+        "badgeId": "hipp-mastery",
+        "metric": "hippAtThreeOfFour",
+        "amount": 0
+      }
+    ]
+  },
+  {
+    "id": "u1-saq-contact",
+    "unitId": "unit-1",
+    "activityType": "SAQ Practice",
+    "mode": "major",
+    "title": "Contact and Exchange",
+    "estimatedMinutes": 18,
+    "xpReward": 45,
+    "tokenReward": 4,
+    "replayRewardPolicy": "first_completion_only",
+    "badgeLinks": []
+  },
+  {
+    "id": "u1-foundations-dbq",
+    "unitId": "unit-1",
+    "activityType": "DBQ Writing Challenge",
+    "mode": "boss",
+    "title": "Foundations of the Atlantic World",
+    "estimatedMinutes": 55,
+    "xpReward": 60,
+    "tokenReward": 6,
+    "replayRewardPolicy": "first_completion_only",
+    "badgeLinks": []
+  }
+]

@@ -115,7 +115,7 @@ export const SOURCES = [
     region: 'Mesoamerica',
     description: 'Cortés’s report to the Spanish monarch describing Tenochtitlan and defending his actions during the conquest.',
     classroomExcerpt: '“This great city of Temixtitan is built in the midst of a salt lake … The principal streets are very wide and straight.”',
-    questUse: ['Tenochtitlan: Evidence Royale', 'Conquest & Conscience', 'Empire’s Reckoning DBQ'],
+    questUse: ['MCQ Challenge: Tenochtitlan', 'Conquest & Conscience', 'Empire’s Reckoning DBQ'],
     sourceUrl: 'https://www.loc.gov/item/2021666768/',
     citation: 'Hernán Cortés, Second Letter to Charles V, 1520. Library of Congress.',
     rights: 'Library of Congress digital collection; verify current Rights & Access statement before redistributing scans.'
@@ -129,7 +129,7 @@ export const SOURCES = [
     region: 'Mesoamerica',
     description: 'An early European printed plan of Tenochtitlan that represented the city after Spanish contact and conquest.',
     classroomExcerpt: 'Visual source: the city appears as an island settlement with monumental buildings, causeways, and surrounding water.',
-    questUse: ['Tenochtitlan: Evidence Royale', 'Empire’s Reckoning DBQ'],
+    questUse: ['MCQ Challenge: Tenochtitlan', 'Empire’s Reckoning DBQ'],
     sourceUrl: 'https://www.loc.gov/item/2021668313/',
     citation: 'Map of Tenochtitlan, published with Hernán Cortés’s letters, 1524. Library of Congress.',
     rights: 'Library of Congress digital collection; verify current Rights & Access statement before redistributing scans.'
@@ -143,7 +143,7 @@ export const SOURCES = [
     region: 'Mesoamerica',
     description: 'A pictorial Indigenous account that depicts Aztec rulers, the arrival of Spanish forces, and religious change.',
     classroomExcerpt: 'Visual source: a pictorial account of the arrival of Spanish troops and the transformation of central Mexico.',
-    questUse: ['Tenochtitlan: Evidence Royale', 'Empire’s Reckoning DBQ'],
+    questUse: ['MCQ Challenge: Tenochtitlan', 'Empire’s Reckoning DBQ'],
     sourceUrl: 'https://www.loc.gov/resource/gdcwdl.wdl_15280/',
     citation: 'Codex Azcatitlan, sixteenth century. Library of Congress / World Digital Library.',
     rights: 'Use the repository’s Rights & Access statement for the individual image selected.'
@@ -185,7 +185,7 @@ export const SOURCES = [
     region: 'Spanish America',
     description: 'Spanish royal laws intended to limit Indigenous enslavement and restrain abuses in the encomienda system.',
     classroomExcerpt: 'Classroom excerpt: the laws limited the inheritance of encomiendas and prohibited the enslavement of Indigenous people.',
-    questUse: ['Conquest & Conscience', 'Vocabulary Bounty', 'Empire’s Reckoning DBQ'],
+    questUse: ['Conquest & Conscience', 'Vocabulary Challenge', 'Empire’s Reckoning DBQ'],
     sourceUrl: 'https://sourcebooks.fordham.edu/mod/1542newlawsindies.asp',
     citation: 'New Laws of the Indies, 1542, English translation in Fordham Internet Modern History Sourcebook.',
     rights: 'Historical legal text; verify translation permissions before republishing.'
@@ -199,7 +199,7 @@ export const SOURCES = [
     region: 'England / Atlantic',
     description: 'An English argument for colonization emphasizing trade, security, religion, and imperial competition.',
     classroomExcerpt: '“This enterprise will be for the increase of the forces of our country … and for the enlargement of the Queen’s dominions.”',
-    questUse: ['Virginia: Evidence Royale', 'Empire’s Reckoning DBQ'],
+    questUse: ['MCQ Challenge: Virginia', 'Empire’s Reckoning DBQ'],
     sourceUrl: 'https://www.gutenberg.org/ebooks/5262',
     citation: 'Richard Hakluyt, A Discourse Concerning Western Planting, 1584. Project Gutenberg transcription.',
     rights: 'Public-domain historical work; confirm any transcription site terms before direct reuse.'
@@ -213,7 +213,7 @@ export const SOURCES = [
     region: 'English Atlantic',
     description: 'An English account presenting the resources and peoples of the Roanoke region to a European readership.',
     classroomExcerpt: '“The soile is very plentifull, sweete, fruitfull and wholesome.”',
-    questUse: ['Virginia: Evidence Royale', 'Empire’s Reckoning DBQ'],
+    questUse: ['MCQ Challenge: Virginia', 'Empire’s Reckoning DBQ'],
     sourceUrl: 'https://www.loc.gov/item/48032384/',
     citation: 'Thomas Harriot, A briefe and true report of the new found land of Virginia, 1590. Library of Congress.',
     rights: 'Library of Congress digital collection; verify current Rights & Access statement before redistributing scans.'
@@ -241,7 +241,7 @@ export const SOURCES = [
     region: 'Caribbean',
     description: 'A Spanish chronicler’s descriptions and illustrations of unfamiliar American plants, foods, and goods.',
     classroomExcerpt: 'Classroom source note: Oviedo described and illustrated goods unfamiliar to Europeans, including tobacco, hammocks, and pineapple.',
-    questUse: ['Vocabulary Bounty', 'Caribbean Crossroads Royale'],
+    questUse: ['Vocabulary Challenge', 'MCQ Challenge: Caribbean Crossroads'],
     sourceUrl: 'https://www.loc.gov/exhibits/exploring-the-early-americas/columbus-and-the-taino.html',
     citation: 'Gonzalo Fernández de Oviedo, Historia general y natural de las Indias, 1535. Library of Congress exhibition.',
     rights: 'Historical work; verify the selected image and translation rights before republishing.'
@@ -283,7 +283,7 @@ export const SOURCES = [
     region: 'Caribbean and Spanish America',
     description: 'Early Spanish regulations addressing Indigenous labor, conversion, residence, and treatment in the Caribbean.',
     classroomExcerpt: 'Classroom source note: the laws regulated Indigenous labor and required instruction in Christianity while preserving Spanish colonial control.',
-    questUse: ['Vocabulary Bounty', 'Conquest & Conscience', 'Empire’s Reckoning DBQ'],
+    questUse: ['Vocabulary Challenge', 'Conquest & Conscience', 'Empire’s Reckoning DBQ'],
     sourceUrl: 'https://sourcebooks.fordham.edu/mod/1512burgos.asp',
     citation: 'Laws of Burgos, 1512–1513, English translation in Fordham Internet Modern History Sourcebook.',
     rights: 'Historical legal text; verify translation permissions before republishing.'

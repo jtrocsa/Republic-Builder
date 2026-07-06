@@ -32,8 +32,8 @@ function seedQuestVersions() {
   return {
     'q-southwest-survey': {
       schemaVersion: 1,
-      identity: { title: 'Southwest Survey', subtitle: 'Evidence Royale', questType: 'royale', xpReward: 45, location: 'American Southwest', mapMarker: { x: 20, y: 45, icon: 'royale', label: 'Southwest Survey' } },
-      presentation: { heroKicker: 'Evidence Royale', heroDescription: 'Compare evidence from regional Native societies.', theme: 'royale' },
+      identity: { title: 'Southwest Survey', subtitle: 'MCQ Challenge', questType: 'royale', xpReward: 45, location: 'American Southwest', mapMarker: { x: 20, y: 45, icon: 'royale', label: 'Southwest Survey' } },
+      presentation: { heroKicker: 'MCQ Challenge', heroDescription: 'Compare evidence from regional Native societies.', theme: 'royale' },
       sources: [{ id: 'cabeza', title: 'Cabeza de Vaca', citation: '1542', body: 'Accounts of travel and encounters across Indigenous communities.' }],
       assessments: [{ id: 'mcq', label: 'Evidence Rounds', maxPoints: 3, instructions: 'Choose the best evidence-based answer.', responseSettings: { autosave: true, allowResubmit: true }, questions: [{ id: 'q1', label: 'Q1', prompt: 'Which adaptation supported settled life in parts of the Southwest before 1491?', placeholder: 'Select one option', responseType: 'multiple_choice', maxPoints: 1 }] }],
       rubrics: {},
@@ -41,8 +41,8 @@ function seedQuestVersions() {
     },
     'q-maize-bounty': {
       schemaVersion: 1,
-      identity: { title: 'The Maize Ledger', subtitle: 'Vocabulary Bounty', questType: 'vocab', xpReward: 40, location: 'River Valleys', mapMarker: { x: 25, y: 25, icon: 'vocab', label: 'Maize Ledger' } },
-      presentation: { heroKicker: 'Vocabulary Bounty', heroDescription: 'Track key Unit 1 concepts and misconceptions.', theme: 'vocab' },
+      identity: { title: 'The Maize Ledger', subtitle: 'Vocabulary Challenge', questType: 'vocab', xpReward: 40, location: 'River Valleys', mapMarker: { x: 25, y: 25, icon: 'vocab', label: 'Maize Ledger' } },
+      presentation: { heroKicker: 'Vocabulary Challenge', heroDescription: 'Track key Unit 1 concepts and misconceptions.', theme: 'vocab' },
       sources: [{ id: 'oviedo', title: 'Natural History of the Indies', citation: '1535', body: 'Descriptions of New World crops and goods.' }],
       assessments: [{ id: 'vocab', label: 'Term Recovery', maxPoints: 4, instructions: 'Define and apply terms.', responseSettings: { autosave: true, allowResubmit: true }, questions: [{ id: 'v1', label: 'Maize cultivation', prompt: 'Explain how maize cultivation shaped settlement patterns.', placeholder: 'Write a concise explanation.', responseType: 'textarea', maxPoints: 1 }] }],
       rubrics: {},
@@ -68,8 +68,8 @@ function seedQuestVersions() {
     },
     'q-tenochtitlan-royale': {
       schemaVersion: 1,
-      identity: { title: 'Tenochtitlan Under Watch', subtitle: 'Evidence Royale', questType: 'royale', xpReward: 55, location: 'Tenochtitlan', mapMarker: { x: 31, y: 62, icon: 'royale', label: 'Tenochtitlan' } },
-      presentation: { heroKicker: 'Evidence Royale', heroDescription: 'Compare European and Indigenous evidence.', theme: 'royale' },
+      identity: { title: 'Tenochtitlan Under Watch', subtitle: 'MCQ Challenge', questType: 'royale', xpReward: 55, location: 'Tenochtitlan', mapMarker: { x: 31, y: 62, icon: 'royale', label: 'Tenochtitlan' } },
+      presentation: { heroKicker: 'MCQ Challenge', heroDescription: 'Compare European and Indigenous evidence.', theme: 'royale' },
       sources: [{ id: 'cortes', title: 'Second Letter to Charles V', citation: '1520', body: 'Description of city layout and governance.' }],
       assessments: [{ id: 'mcq', label: 'Rounds', maxPoints: 3, instructions: 'Select the best supported claim.', responseSettings: { autosave: true, allowResubmit: true }, questions: [{ id: 'q1', label: 'Q1', prompt: 'Which claim is best supported by map and letter evidence?', placeholder: 'Select one', responseType: 'multiple_choice', maxPoints: 1 }] }],
       rubrics: {},
@@ -86,8 +86,8 @@ function seedQuestVersions() {
     },
     'q-virginia-royale': {
       schemaVersion: 1,
-      identity: { title: 'Virginia: Promise or Projection?', subtitle: 'Evidence Royale', questType: 'royale', xpReward: 55, location: 'Roanoke / English Coast', mapMarker: { x: 29, y: 34, icon: 'royale', label: 'Virginia' } },
-      presentation: { heroKicker: 'Evidence Royale', heroDescription: 'Evaluate promotional versus observational sources.', theme: 'royale' },
+      identity: { title: 'Virginia: Promise or Projection?', subtitle: 'MCQ Challenge', questType: 'royale', xpReward: 55, location: 'Roanoke / English Coast', mapMarker: { x: 29, y: 34, icon: 'royale', label: 'Virginia' } },
+      presentation: { heroKicker: 'MCQ Challenge', heroDescription: 'Evaluate promotional versus observational sources.', theme: 'royale' },
       sources: [{ id: 'harriot', title: 'A Briefe and True Report', citation: '1590', body: 'Promotional framing of Virginia resources.' }],
       assessments: [{ id: 'mcq', label: 'Rounds', maxPoints: 3, instructions: 'Choose evidence-backed answers.', responseSettings: { autosave: true, allowResubmit: true }, questions: [{ id: 'q1', label: 'Q1', prompt: 'Which motive is most reflected in Hakluyt and Harriot?', placeholder: 'Select one', responseType: 'multiple_choice', maxPoints: 1 }] }],
       rubrics: {},
@@ -335,14 +335,14 @@ function seedDemoData() {
       classId: 'demo-period-3',
       accessMode: QUEST_ACCESS_MODES.LOCKED,
       visibleBeforeUnlock: true,
-      noteToStudent: 'Complete Virginia Evidence Royale first',
+      noteToStudent: 'Complete Virginia MCQ Challenge first',
       prerequisiteQuestIds: ['q-virginia-royale']
     }
   ];
 
   const announcements = [
     { id: uid('ann'), classId: 'demo-period-3', title: "Empire's Reckoning opens Friday", body: 'Prepare SAQ drafts before release.', publishAt: nowIso(), createdBy: 'demo-teacher' },
-    { id: uid('ann'), classId: 'demo-period-5', title: 'Vocabulary bounties due Thursday', body: 'All Unit 1 terms must be mastered by Thursday night.', publishAt: nowIso(), createdBy: 'demo-teacher' }
+    { id: uid('ann'), classId: 'demo-period-5', title: 'Vocabulary challenges due Thursday', body: 'All Unit 1 terms must be mastered by Thursday night.', publishAt: nowIso(), createdBy: 'demo-teacher' }
   ];
 
   const skills = [];
@@ -578,6 +578,101 @@ export class MockDataService extends DataServiceContract {
     const draft = versions.find((row) => row.id === quest.currentDraftVersionId) || versions[0];
     const published = versions.find((row) => row.id === quest.publishedVersionId) || versions[0];
     return clone({ quest, versions, draft, published });
+  }
+
+  async createQuestFromTemplate({ unitId = 'unit-1', templateKey = 'royale', identity = {}, source = null, questions = [] }) {
+    const store = readStore();
+    const questId = uid('q-custom');
+    const questTypeMap = {
+      hipp: 'hipp',
+      royale: 'evidence',
+      vocab: 'vocabulary',
+      boss: 'boss_battle'
+    };
+    const title = String(identity.title || 'Untitled Quest').trim() || 'Untitled Quest';
+    const slugBase = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'untitled-quest';
+    const slug = `${slugBase}-${Math.random().toString(36).slice(2, 5)}`;
+
+    const builtQuestions = questions.length ? questions : [{
+      id: 'q1',
+      label: 'Q1',
+      prompt: 'Write your first prompt.',
+      choices: ['Choice A', 'Choice B', 'Choice C', 'Choice D'],
+      answer: 0,
+      responseType: 'multiple_choice',
+      maxPoints: 1
+    }];
+
+    const content = {
+      schemaVersion: 1,
+      identity: {
+        title,
+        subtitle: String(identity.subtitle || ''),
+        questType: templateKey,
+        xpReward: Number(identity.xpReward || 50),
+        location: String(identity.location || 'Atlantic World'),
+        mapMarker: {
+          x: Number(identity.mapX || 50),
+          y: Number(identity.mapY || 50),
+          icon: String(identity.markerIcon || templateKey),
+          label: title
+        }
+      },
+      presentation: {
+        heroKicker: String(identity.heroKicker || 'Teacher Built Quest'),
+        heroDescription: String(identity.heroDescription || 'Custom quest created in Quest Studio builder.'),
+        theme: templateKey
+      },
+      sources: source ? [clone(source)] : [],
+      assessments: [{
+        id: templateKey,
+        label: String(identity.assessmentLabel || 'Assessment'),
+        maxPoints: builtQuestions.reduce((sum, item) => sum + Number(item.maxPoints || 1), 0),
+        instructions: String(identity.instructions || 'Respond to all prompts with evidence and explanation.'),
+        responseSettings: { autosave: true, allowResubmit: true },
+        questions: builtQuestions.map((question, index) => ({
+          id: question.id || `q${index + 1}`,
+          label: question.label || `Q${index + 1}`,
+          prompt: question.prompt || 'Prompt text',
+          choices: Array.isArray(question.choices) ? question.choices : ['Choice A', 'Choice B', 'Choice C', 'Choice D'],
+          answer: Number(question.answer || 0),
+          responseType: question.responseType || 'multiple_choice',
+          maxPoints: Number(question.maxPoints || 1)
+        }))
+      }],
+      rubrics: {},
+      rewards: { xp: Number(identity.xpReward || 50), items: [], historianSkillAwards: [] }
+    };
+
+    const version = createVersionSnapshot({
+      questId,
+      versionNumber: 1,
+      content,
+      changeNote: 'Created from teacher builder template',
+      state: 'draft'
+    });
+
+    const quest = {
+      id: questId,
+      unitId,
+      slug,
+      questType: questTypeMap[templateKey] || 'other',
+      title,
+      locationKey: content.identity.location,
+      xpReward: content.identity.xpReward,
+      markerLabel: title,
+      defaultAccessMode: QUEST_ACCESS_MODES.DRAFT,
+      status: QUEST_ACCESS_MODES.DRAFT,
+      publishedVersionId: version.id,
+      currentDraftVersionId: version.id,
+      tabLocks: { saq: false, leq: false, dbq: false },
+      orderIndex: store.quests.length + 1
+    };
+
+    store.quests.push(quest);
+    store.questVersions.push(version);
+    writeStore(store);
+    return clone({ quest, version });
   }
 
   async saveQuestDraft({ questId, patch, metadata = {}, changeNote = '' }) {

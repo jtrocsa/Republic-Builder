@@ -377,12 +377,13 @@ import {
   function questTypeClass(category) {
     return {
       'Unit Quest': 'unit',
-      'Primary Source Battle': 'source',
+      'Primary Source Analysis': 'source',
       'HIPP Challenge': 'hipp',
-      'Debate Duel': 'debate',
-      'Timeline Mission': 'timeline',
-      'DBQ Boss Fight': 'boss',
-      'Vocabulary Bounty': 'vocab'
+      'Debate Challenge': 'debate',
+      'Timeline Challenge': 'timeline',
+      'DBQ Boss Battle': 'boss',
+      'Vocabulary Challenge': 'vocab',
+      'MCQ Challenge': 'source'
     }[category] || 'unit';
   }
 
