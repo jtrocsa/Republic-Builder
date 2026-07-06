@@ -2,6 +2,8 @@ import { UNIT, QUESTS, SOURCES, SKILLS, RUBRICS } from './quest%20data.js';
 import { loadState, saveState } from './quest%20store.js';
 import { DEFAULT_STORAGE_KEY, loadProfile } from '../src/services/characterProfile.js';
 import { PROFESSION_BY_ID } from '../src/data/professions.js';
+import { getDataService, getDataModeLabel } from './services/dataService.js';
+import { QUEST_BACKEND_CONFIG } from './config/quest-backend.config.js';
 
 let state = loadState();
 let activeQuest = null;
@@ -11,6 +13,17 @@ let royaleScore = 0;
 let vocabIndex = 0;
 let vocabScore = 0;
 const CORE_STATE_KEY = 'republic-builder-state-v2';
+const dataService = getDataService();
+let studentClassId = QUEST_BACKEND_CONFIG.demoClassId;
+let studentQuestFeed = [];
+let teacherSession = null;
+let teacherClasses = [];
+let teacherActiveClassId = QUEST_BACKEND_CONFIG.demoClassId;
+let teacherActiveTab = 'command-center';
+let teacherDashboardSnapshot = null;
+let teacherStudioSnapshot = [];
+let activeTeacherSubmissionId = null;
+let activeTeacherRubricMode = 'saq';
 const RUBRIC_ASSETS = [
   { id: 'saq', title: 'SAQ Rubric', file: 'APUSH%20Rubrics/SAQ_Rubric.pdf', type: 'pdf', note: '3-point short-answer scoring structure.' },
   { id: 'leq', title: 'LEQ Rubric', file: 'APUSH%20Rubrics/LEQ%20Rubric.webp', type: 'image', note: '6-point long-essay scoring structure.' },
@@ -26,6 +39,78 @@ function text(value = '') {
 
 function getQuest(id) {
   return QUESTS.find((quest) => quest.id === id);
+}
+
+function getQuestFeedEntry(id) {
+  return studentQuestFeed.find((entry) => entry.quest?.id === id || entry.questId === id);
+}
+
+function getRuntimeQuest(id) {
+  const quest = getQuest(id);
+  const feedEntry = getQuestFeedEntry(id);
+  if (!quest) return null;
+  if (!feedEntry) return { ...quest, unlocked: quest.unlocked !== false, accessMode: 'available', lockMessage: '' };
+  return {
+    ...quest,
+    unlocked: Boolean(feedEntry.canOpen),
+    accessMode: feedEntry.accessMode || 'available',
+    lockMessage: feedEntry.noteToStudent || ''
+  };
+}
+
+function getQuestCatalog() {
+  return QUESTS.map((quest) => getRuntimeQuest(quest.id)).filter(Boolean);
+}
+
+function getAssignmentIdForQuest(questId) {
+  const entry = getQuestFeedEntry(questId);
+  return entry?.assignmentId || null;
+}
+
+function setTeacherMode(enabled) {
+  state.teacherMode = enabled;
+  document.body.setAttribute('data-app-mode', enabled ? 'teacher' : 'student');
+  saveState(state);
+}
+
+function formatWhen(value) {
+  if (!value) return 'Not scheduled';
+  const dt = new Date(value);
+  return Number.isNaN(dt.getTime()) ? String(value) : dt.toLocaleString();
+}
+
+function teacherBadge(status) {
+  const textValue = String(status || 'unknown').replace(/_/g, ' ');
+  return `<span class="quest-teacher-status-badge">${text(textValue)}</span>`;
+}
+
+function getTeacherTabs() {
+  return [
+    { id: 'command-center', label: 'Command Center' },
+    { id: 'quest-studio', label: 'Quest Studio' },
+    { id: 'submission-archive', label: 'Submission Archive' },
+    { id: 'unit-control', label: 'Unit Control' },
+    { id: 'roster', label: 'Roster & Classes' },
+    { id: 'analytics', label: 'Historian Analytics' },
+    { id: 'settings', label: 'Teacher Settings' }
+  ];
+}
+
+function renderTeacherTabBar() {
+  return `
+    <nav class="teacher-tabs" aria-label="Teacher dashboard sections">
+      ${getTeacherTabs().map((tab) => `<button type="button" data-teacher-tab="${tab.id}" class="${teacherActiveTab === tab.id ? 'active' : ''}">${text(tab.label)}</button>`).join('')}
+    </nav>`;
+}
+
+function applyTeacherTabVisibility() {
+  $$('[data-teacher-section]').forEach((section) => {
+    const isActive = section.dataset.teacherSection === teacherActiveTab;
+    section.hidden = !isActive;
+  });
+  $$('[data-teacher-tab]').forEach((tab) => {
+    tab.classList.toggle('active', tab.dataset.teacherTab === teacherActiveTab);
+  });
 }
 
 function readCoreState() {
@@ -125,6 +210,15 @@ function updateHud() {
   const toggle = $('#teacher-mode-toggle');
   toggle.classList.toggle('on', state.teacherMode);
   $('span', toggle).textContent = state.teacherMode ? 'on' : 'off';
+  document.body.setAttribute('data-app-mode', state.teacherMode ? 'teacher' : 'student');
+  const teacherStatus = $('#teacher-mode-status');
+  if (teacherStatus) {
+    if (state.teacherMode && teacherSession?.user) {
+      teacherStatus.textContent = `Signed in as ${teacherSession.user.displayName} (${getDataModeLabel()})`;
+    } else {
+      teacherStatus.textContent = `Teacher Mode is off (${getDataModeLabel()})`;
+    }
+  }
 
   if (state.dispatch) {
     $('#dispatch-title').textContent = state.dispatch.title;
@@ -137,9 +231,19 @@ function renderTopicChips() {
 }
 
 function renderMap() {
-  $('#map-quests').innerHTML = QUESTS.map((quest) => {
+  const questCatalog = getQuestCatalog();
+  $('#map-quests').innerHTML = questCatalog.map((quest) => {
     const unlocked = quest.unlocked !== false;
     const done = Boolean(state.completed[quest.id]);
+    const statusLabel = quest.accessMode === 'review_only'
+      ? 'Review only'
+      : quest.accessMode === 'scheduled'
+        ? 'Scheduled'
+        : quest.accessMode === 'locked'
+          ? 'Locked'
+          : unlocked
+            ? 'Unlocked'
+            : 'Locked';
     const questType = quest.mode === 'hipp'
       ? 'HIPP Challenge'
       : quest.mode === 'royale'
@@ -150,7 +254,7 @@ function renderMap() {
     return `
       <button class="map-quest ${quest.mode} ${done ? 'completed' : ''} ${unlocked ? 'unlocked' : 'locked'}" data-quest-id="${quest.id}" style="left:${quest.coordinates.left}; top:${quest.coordinates.top};" aria-label="Open ${text(quest.title)}" ${unlocked ? '' : 'disabled'}>
         <span class="quest-beacon">${quest.icon}</span>
-        <span class="quest-label"><b>${text(quest.shortTitle)}</b><em>${questType}</em><em>${text(quest.location)} · ${quest.xp} XP · ${done ? 'Completed' : unlocked ? 'Unlocked' : 'Locked'}</em></span>
+        <span class="quest-label"><b>${text(quest.shortTitle)}</b><em>${questType}</em><em>${text(quest.location)} · ${quest.xp} XP · ${done ? 'Completed' : statusLabel}</em>${quest.lockMessage && !unlocked ? `<em>${text(quest.lockMessage)}</em>` : ''}</span>
         ${done ? '<span class="quest-check">✓</span>' : ''}
       </button>`;
   }).join('');
@@ -223,8 +327,34 @@ function renderArchiveEntries(items) {
 }
 
 function openQuest(questId) {
-  activeQuest = getQuest(questId);
+  activeQuest = getRuntimeQuest(questId);
   if (!activeQuest) return;
+  const feedEntry = getQuestFeedEntry(questId);
+  if (feedEntry && !feedEntry.canOpen) {
+    openOverlay();
+    const modal = $('#modal-layer');
+    modal.innerHTML = `
+      <article class="small-modal">
+        <header class="quest-modal-header">
+          <div>
+            <p class="eyebrow">Quest currently locked</p>
+            <h2>${text(activeQuest.title)}</h2>
+            <p>${text(feedEntry.noteToStudent || 'Your teacher has not released this quest yet.')}</p>
+          </div>
+          <button class="close-button" data-close-modal aria-label="Close quest">×</button>
+        </header>
+        <div class="teacher-lock-panel">
+          <p>${text(activeQuest.description)}</p>
+          <div class="teacher-lock-meta">
+            <span>Access mode: <b>${text(feedEntry.accessMode || 'locked')}</b></span>
+            <span>Status: <b>${text(feedEntry.assignmentStatus || 'not_started')}</b></span>
+          </div>
+        </div>
+      </article>`;
+    modal.classList.add('open');
+    modal.setAttribute('aria-hidden', 'false');
+    return;
+  }
   royaleIndex = 0;
   royaleScore = 0;
   vocabIndex = 0;
@@ -412,10 +542,18 @@ function openRubric(rubricId) {
 function bindQuestEvents() {
   const hippForm = $('#hipp-form');
   if (hippForm) {
-    hippForm.addEventListener('submit', (event) => {
+    hippForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const response = Object.fromEntries(new FormData(hippForm).entries());
       state.attempts[activeQuest.id] = { response, savedAt: new Date().toISOString() };
+      const assignmentId = getAssignmentIdForQuest(activeQuest.id);
+      if (assignmentId) {
+        try {
+          await dataService.saveStudentDraft({ assignmentId, answers: response });
+        } catch (error) {
+          console.warn('Unable to save HIPP draft via data service', error);
+        }
+      }
       const complete = Object.values(response).every((value) => value.trim().length >= 25);
       if (complete) completeQuest(activeQuest, 'HIPP analysis saved. You earned practice XP for a complete, evidence-ready attempt.', { sourcing: 1, evidence: 1 });
       else {
@@ -435,13 +573,21 @@ function bindQuestEvents() {
 
   const bossForm = $('#boss-form');
   if (bossForm) {
-    bossForm.addEventListener('submit', (event) => {
+    bossForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       const response = Object.fromEntries(new FormData(bossForm).entries());
       if (activeBossMode === 'leq') {
         $$('.planning-grid textarea').forEach((field) => { response[field.name] = field.value; });
       }
       state.attempts[`${activeQuest.id}-${activeBossMode}`] = { ...(state.attempts[`${activeQuest.id}-${activeBossMode}`] || {}), response, savedAt: new Date().toISOString() };
+      const assignmentId = getAssignmentIdForQuest(activeQuest.id);
+      if (assignmentId) {
+        try {
+          await dataService.saveStudentDraft({ assignmentId, answers: response });
+        } catch (error) {
+          console.warn('Unable to save boss draft via data service', error);
+        }
+      }
       saveState(state);
       const responseLength = Object.values(response).join('').trim().length;
       if (responseLength > 70) completeQuest(activeQuest, `${activeQuest.variants[activeBossMode].label} draft saved. Use the official ${RUBRICS[activeQuest.variants[activeBossMode].rubric].total}-point rubric to revise before scoring.`, { argument: 1, reasoning: 1 });
@@ -583,6 +729,319 @@ function openHelp() {
   $('#modal-layer').setAttribute('aria-hidden', 'false');
 }
 
+async function refreshStudentFeed() {
+  try {
+    studentQuestFeed = await dataService.getStudentQuestFeed({
+      classId: studentClassId,
+      studentId: QUEST_BACKEND_CONFIG.demoStudentId || 'student-aria'
+    });
+  } catch (error) {
+    console.warn('Unable to load student quest feed from data service', error);
+    studentQuestFeed = [];
+  }
+}
+
+async function renderStudentBulletin() {
+  const list = $('#student-bulletin-list');
+  if (!list) return;
+  try {
+    const announcements = await dataService.listAnnouncements({ classId: studentClassId });
+    list.innerHTML = announcements.slice(0, 3).map((item) => `
+      <article class="bulletin-item">
+        <h3>${text(item.title)}</h3>
+        <p>${text(item.body)}</p>
+        <small>${text(formatWhen(item.publishAt))}</small>
+      </article>
+    `).join('');
+    if (!announcements.length) list.innerHTML = '<p class="empty-note">No current announcements.</p>';
+  } catch {
+    list.innerHTML = '<p class="empty-note">Announcements unavailable in this mode.</p>';
+  }
+}
+
+async function hydrateTeacherSnapshots() {
+  teacherClasses = await dataService.getTeacherClasses();
+  if (!teacherClasses.length) return;
+  if (!teacherActiveClassId || !teacherClasses.some((row) => row.id === teacherActiveClassId)) {
+    teacherActiveClassId = teacherClasses[0].id;
+  }
+  [teacherDashboardSnapshot, teacherStudioSnapshot] = await Promise.all([
+    dataService.getTeacherDashboard({ classId: teacherActiveClassId }),
+    dataService.getTeacherQuestStudio({ classId: teacherActiveClassId })
+  ]);
+}
+
+function teacherClassSelect() {
+  if (!teacherClasses.length) return '<span>No classes</span>';
+  return `<label class="teacher-inline-label">Class
+    <select id="teacher-class-select">${teacherClasses.map((klass) => `<option value="${klass.id}" ${klass.id === teacherActiveClassId ? 'selected' : ''}>${text(klass.periodLabel)} · ${text(klass.name)}</option>`).join('')}</select>
+  </label>`;
+}
+
+function renderTeacherCommandCenterSection() {
+  const snapshot = teacherDashboardSnapshot || {};
+  return `
+    <section class="teacher-panel" data-teacher-section="command-center">
+      <header><h3>Command Center</h3><p>Live snapshot for class operations and grading queue.</p></header>
+      <div class="teacher-kpi-grid">
+        <article><span>Students</span><strong>${snapshot.studentCount || 0}</strong></article>
+        <article><span>Ungraded</span><strong>${snapshot.ungradedCount || 0}</strong></article>
+        <article><span>Completion</span><strong>${snapshot.completionPct || 0}%</strong></article>
+        <article><span>Needs attention</span><strong>${snapshot.needsAttention || 0}</strong></article>
+      </div>
+      <div class="teacher-activity-list">${(snapshot.recentActivity || []).map((event) => `<div>${teacherBadge(event.type)}<p>${text(event.message)}</p><small>${text(formatWhen(event.at))}</small></div>`).join('') || '<p class="empty-note">No activity yet.</p>'}</div>
+    </section>`;
+}
+
+function renderTeacherQuestStudioSection() {
+  return `
+    <section class="teacher-panel" data-teacher-section="quest-studio">
+      <header><h3>Quest Studio</h3><p>Edit release states, publish drafts, and manage versions.</p></header>
+      <div class="teacher-table-wrap">
+        <table class="teacher-table">
+          <thead><tr><th>Quest</th><th>Type</th><th>Access</th><th>Versions</th><th>Actions</th></tr></thead>
+          <tbody>${teacherStudioSnapshot.map((quest) => `<tr>
+            <td><b>${text(quest.title)}</b><small>${text(quest.slug)}</small></td>
+            <td>${text(quest.questType)}</td>
+            <td>${teacherBadge(quest.accessMode)}</td>
+            <td>v${quest.latestVersion} (${quest.versionCount})</td>
+            <td class="teacher-actions-inline">
+              <button data-teacher-action="set-access" data-quest-id="${quest.id}" data-access="available">Unlock</button>
+              <button data-teacher-action="set-access" data-quest-id="${quest.id}" data-access="locked">Lock</button>
+              <button data-teacher-action="duplicate-quest" data-quest-id="${quest.id}">Duplicate</button>
+              <button data-teacher-action="archive-quest" data-quest-id="${quest.id}">Archive</button>
+            </td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+function renderTeacherSubmissionArchiveSection(submissions) {
+  return `
+    <section class="teacher-panel" data-teacher-section="submission-archive">
+      <header><h3>Submission Archive</h3><p>Open any entry in the grading interface that mirrors boss battle rubric workflows.</p></header>
+      <div class="teacher-table-wrap">
+        <table class="teacher-table">
+          <thead><tr><th>Student</th><th>Quest</th><th>Status</th><th>Score</th><th>Action</th></tr></thead>
+          <tbody>${submissions.map((submission) => `<tr>
+            <td>${text(submission.student?.displayName || 'Student')}<small>${text(submission.classPeriod || '')}</small></td>
+            <td>${text(submission.quest?.title || submission.questId)}</td>
+            <td>${teacherBadge(submission.status)}</td>
+            <td>${submission.score ?? '-'} / ${submission.maxScore ?? '-'}</td>
+            <td><button data-teacher-action="grade-submission" data-submission-id="${submission.id}">Open Grader</button></td>
+          </tr>`).join('')}</tbody>
+        </table>
+      </div>
+    </section>`;
+}
+
+function renderTeacherUnitControlSection(units) {
+  return `
+    <section class="teacher-panel" data-teacher-section="unit-control">
+      <header><h3>Unit Control</h3><p>Set active unit and move prior content into review state.</p></header>
+      <div class="teacher-unit-grid">${units.map((unit) => `<article>
+        <h4>${text(unit.title)}</h4>
+        <p>${text(unit.subtitle || '')}</p>
+        ${teacherBadge(unit.state)}
+        <div class="teacher-actions-inline">
+          <button data-teacher-action="set-unit-state" data-unit-id="${unit.id}" data-unit-state="active">Set Active</button>
+          <button data-teacher-action="set-unit-state" data-unit-id="${unit.id}" data-unit-state="review_only">Review</button>
+          <button data-teacher-action="set-unit-state" data-unit-id="${unit.id}" data-unit-state="archived">Archive</button>
+        </div>
+      </article>`).join('')}</div>
+    </section>`;
+}
+
+function renderTeacherRosterSection(roster) {
+  return `
+    <section class="teacher-panel" data-teacher-section="roster">
+      <header><h3>Roster & Classes</h3><p>Track student progress and class memberships.</p></header>
+      <div class="teacher-roster-grid">${roster.map((student) => `<article>
+        <h4>${text(student.displayName)}</h4>
+        <p>${text(student.studentIdentifier || 'ID pending')}</p>
+        <span>${text(student.profession || 'Founder')}</span>
+      </article>`).join('')}</div>
+    </section>`;
+}
+
+function renderTeacherAnalyticsSection(analytics) {
+  return `
+    <section class="teacher-panel" data-teacher-section="analytics">
+      <header><h3>Historian Analytics</h3><p>Identify unfinished work and commonly missed criteria.</p></header>
+      <div class="teacher-split-grid">
+        <article>
+          <h4>Completion Heatmap</h4>
+          ${(analytics.completionByStudent || []).map((row) => `<div class="teacher-heat-row"><span>${text(row.studentName)}</span><b>${row.completionPct}%</b></div>`).join('') || '<p class="empty-note">No completion data.</p>'}
+        </article>
+        <article>
+          <h4>Common Misses</h4>
+          ${(analytics.commonMissedCriteria || []).map((row) => `<div class="teacher-heat-row"><span>${text(row.criterionKey)}</span><b>${row.count}</b></div>`).join('') || '<p class="empty-note">No rubric misses recorded.</p>'}
+        </article>
+      </div>
+    </section>`;
+}
+
+function renderTeacherSettingsSection(announcements) {
+  return `
+    <section class="teacher-panel" data-teacher-section="settings">
+      <header><h3>Teacher Settings</h3><p>Demo mode controls, announcement composer, and export tools.</p></header>
+      <form class="teacher-announcement-form" id="teacher-announcement-form">
+        <label>Announcement title<input name="title" required placeholder="Friday DBQ launch" /></label>
+        <label>Announcement body<textarea name="body" rows="3" required placeholder="Reminder and expectations..."></textarea></label>
+        <div class="teacher-actions-inline">
+          <button type="submit">Publish Announcement</button>
+          <button type="button" data-teacher-action="export-csv">Export Grades CSV</button>
+          <button type="button" data-teacher-action="reset-demo">Reset Demo Data</button>
+          <button type="button" data-teacher-action="exit-teacher">Exit Teacher Mode</button>
+        </div>
+      </form>
+      <div class="teacher-announcement-list">${announcements.map((item) => `<article><h4>${text(item.title)}</h4><p>${text(item.body)}</p><small>${text(formatWhen(item.publishAt))}</small></article>`).join('') || '<p class="empty-note">No announcements yet.</p>'}</div>
+    </section>`;
+}
+
+async function openTeacherSubmissionGrader(submissionId) {
+  activeTeacherSubmissionId = submissionId;
+  const details = await dataService.getSubmissionForGrading({ submissionId });
+
+  const supportsWritingRubrics = details.submission.questId === 'q-empires-reckoning';
+  const existing = Object.fromEntries((details.rubricScores || []).map((row) => [row.criterionKey, row]));
+
+  if (supportsWritingRubrics) {
+    const savedModes = ['saq', 'leq', 'dbq'].filter((mode) => Object.keys(existing).some((key) => key.startsWith(`${mode}-`) || (mode === 'saq' && key.startsWith('saq-part-'))));
+    activeTeacherRubricMode = savedModes[0] || activeTeacherRubricMode || 'saq';
+  } else {
+    activeTeacherRubricMode = 'saq';
+  }
+
+  const rubric = RUBRICS[activeTeacherRubricMode] || RUBRICS.saq;
+  const scoreHtml = rubric.criteria.map((criterion) => {
+    const key = `${activeTeacherRubricMode}-${criterion.id}`;
+    const legacyKey = activeTeacherRubricMode === 'saq' ? `saq-part-${criterion.id}` : key;
+    const row = existing[key] || existing[legacyKey] || {};
+    const points = Number(row.pointsEarned ?? 0);
+    return `
+      <label class="teacher-grade-row">
+        <span>${text(criterion.label)} (${criterion.points} pt)</span>
+        <input type="number" min="0" max="${criterion.points}" step="1" name="${key}" value="${points}" />
+        <textarea name="fb-${key}" rows="2" placeholder="Feedback for ${text(criterion.label)}">${text(row.feedback || '')}</textarea>
+      </label>`;
+  }).join('');
+
+  $('#modal-layer').innerHTML = `
+    <article class="small-modal teacher-grade-modal">
+      <header class="quest-modal-header">
+        <div>
+          <p class="eyebrow">Submission Grader</p>
+          <h2>${text(details.student?.displayName || 'Student')} · ${text(details.content?.identity?.title || 'Quest')}</h2>
+          <p>Use AP-style rubric scoring. Changes stay in local demo mode.</p>
+        </div>
+        <button class="close-button" data-close-modal>×</button>
+      </header>
+      <div class="teacher-grade-layout">
+        <article class="teacher-grade-response">
+          <h3>Student Response</h3>
+          <pre>${text(JSON.stringify(details.submission.answers || {}, null, 2))}</pre>
+        </article>
+        <form id="teacher-grade-form" class="quest-teacher-grading-panel">
+          <p class="quest-teacher-panel-kicker">Rubric Scoring</p>
+          <input type="hidden" name="rubric-mode" value="${activeTeacherRubricMode}" />
+          ${supportsWritingRubrics ? `<label class="teacher-inline-label">Rubric Mode
+            <select id="teacher-rubric-mode-select">
+              <option value="saq" ${activeTeacherRubricMode === 'saq' ? 'selected' : ''}>SAQ (3-Point)</option>
+              <option value="leq" ${activeTeacherRubricMode === 'leq' ? 'selected' : ''}>LEQ (6-Point)</option>
+              <option value="dbq" ${activeTeacherRubricMode === 'dbq' ? 'selected' : ''}>DBQ (7-Point)</option>
+            </select>
+          </label>` : ''}
+          <p class="quest-teacher-score-summary">Scoring with ${text(rubric.title)} (${rubric.total} points)</p>
+          ${scoreHtml}
+          <label class="quest-teacher-feedback-label">Overall Feedback
+            <textarea class="quest-teacher-overall-feedback" name="overall" rows="4">${text(details.submission.overallFeedback || '')}</textarea>
+          </label>
+          <div class="quest-teacher-panel-actions">
+            <button type="submit">Save Scores</button>
+            <button type="button" data-teacher-action="request-revision" data-submission-id="${submissionId}">Request Revision</button>
+            <button type="button" data-teacher-action="return-graded" data-submission-id="${submissionId}">Return Graded</button>
+          </div>
+        </form>
+      </div>
+    </article>`;
+  openOverlay();
+  $('#modal-layer').classList.add('open');
+  $('#modal-layer').setAttribute('aria-hidden', 'false');
+}
+
+async function renderTeacherDashboard() {
+  await hydrateTeacherSnapshots();
+  const [submissions, units, roster, analytics, announcements] = await Promise.all([
+    dataService.getSubmissions({ classId: teacherActiveClassId }),
+    dataService.getTeacherUnits(),
+    dataService.getRoster({ classId: teacherActiveClassId }),
+    dataService.getHistorianAnalytics({ classId: teacherActiveClassId, unitId: 'unit-1' }),
+    dataService.listAnnouncements({ classId: teacherActiveClassId })
+  ]);
+
+  $('#modal-layer').innerHTML = `
+    <article class="teacher-dashboard-modal">
+      <header class="quest-modal-header">
+        <div>
+          <p class="eyebrow">Teacher Mode · ${text(getDataModeLabel())}</p>
+          <h2>Atlantic Command Dashboard</h2>
+          <p>Mock-only infrastructure active. Supabase adapter is scaffolded but not connected.</p>
+        </div>
+        <div class="teacher-header-controls">${teacherClassSelect()}<button class="close-button" data-close-modal>×</button></div>
+      </header>
+      <div class="teacher-dashboard-body">
+        ${renderTeacherTabBar()}
+        ${renderTeacherCommandCenterSection()}
+        ${renderTeacherQuestStudioSection()}
+        ${renderTeacherSubmissionArchiveSection(submissions)}
+        ${renderTeacherUnitControlSection(units)}
+        ${renderTeacherRosterSection(roster)}
+        ${renderTeacherAnalyticsSection(analytics)}
+        ${renderTeacherSettingsSection(announcements)}
+      </div>
+    </article>`;
+  openOverlay();
+  $('#modal-layer').classList.add('open');
+  $('#modal-layer').setAttribute('aria-hidden', 'false');
+  applyTeacherTabVisibility();
+}
+
+async function openTeacherAccessModal() {
+  const session = await dataService.getCurrentSession();
+  teacherSession = session;
+  if (session?.user?.role === 'teacher') {
+    setTeacherMode(true);
+    updateHud();
+    await renderTeacherDashboard();
+    return;
+  }
+
+  $('#modal-layer').innerHTML = `
+    <article class="small-modal teacher-auth-modal">
+      <header class="quest-modal-header">
+        <div>
+          <p class="eyebrow">Teacher Mode Access</p>
+          <h2>Authenticate Teacher Dashboard</h2>
+          <p>Current mode: ${text(getDataModeLabel())}. Supabase is intentionally disabled for this phase.</p>
+        </div>
+        <button class="close-button" data-close-modal>×</button>
+      </header>
+      <div class="teacher-auth-body">
+        <p>This local demo sign-in unlocks teacher infrastructure: class controls, quest studio, grading queue, analytics, and announcements.</p>
+        <div class="quest-actions">
+          <button class="primary-button" id="teacher-demo-signin" type="button">Demo Teacher Sign In</button>
+          <button class="text-button" data-close-modal type="button">Cancel</button>
+        </div>
+        <small>Note: no remote auth, no Supabase writes, no student data sync.</small>
+      </div>
+    </article>`;
+  openOverlay();
+  $('#modal-layer').classList.add('open');
+  $('#modal-layer').setAttribute('aria-hidden', 'false');
+}
+
 function initializeEvents() {
   document.addEventListener('click', (event) => {
     const questButton = event.target.closest('[data-quest-id]');
@@ -597,19 +1056,163 @@ function initializeEvents() {
     if (action === 'open-skills') openSkills();
     if (action === 'open-help') openHelp();
     if (action === 'open-rubrics') openRubricIndex();
+
+    if (event.target.id === 'teacher-demo-signin') {
+      dataService.signInDemoTeacher()
+        .then((session) => {
+          teacherSession = session;
+          setTeacherMode(true);
+          updateHud();
+          return renderTeacherDashboard();
+        })
+        .catch((error) => console.error('Teacher sign-in failed', error));
+    }
+
+    const teacherActionButton = event.target.closest('[data-teacher-action]');
+    if (teacherActionButton) {
+      const actionName = teacherActionButton.dataset.teacherAction;
+      const questId = teacherActionButton.dataset.questId;
+      const access = teacherActionButton.dataset.access;
+      const submissionId = teacherActionButton.dataset.submissionId;
+      const unitId = teacherActionButton.dataset.unitId;
+      const unitState = teacherActionButton.dataset.unitState;
+
+      if (actionName === 'grade-submission' && submissionId) {
+        openTeacherSubmissionGrader(submissionId).catch((error) => console.error(error));
+      }
+      if (actionName === 'set-access' && questId && access) {
+        dataService.saveQuestAccessRule({
+          questId,
+          classId: teacherActiveClassId,
+          rule: { accessMode: access, noteToStudent: access === 'locked' ? 'Locked by teacher command center.' : '' }
+        }).then(() => renderTeacherDashboard()).then(() => refreshStudentFeed()).then(() => renderMap());
+      }
+      if (actionName === 'duplicate-quest' && questId) {
+        dataService.duplicateQuest({ questId, unitId: 'unit-1' }).then(() => renderTeacherDashboard());
+      }
+      if (actionName === 'archive-quest' && questId) {
+        dataService.archiveQuest({ questId }).then(() => renderTeacherDashboard());
+      }
+      if (actionName === 'set-unit-state' && unitId && unitState) {
+        dataService.setUnitState({ unitId, state: unitState }).then(() => renderTeacherDashboard());
+      }
+      if (actionName === 'request-revision' && submissionId) {
+        dataService.requestRevision({ submissionId, feedback: 'Revise and resubmit. See rubric comments.', reopenQuestionIds: ['part-b'] })
+          .then(() => renderTeacherDashboard());
+      }
+      if (actionName === 'return-graded' && submissionId) {
+        dataService.returnSubmissionToStudent({ submissionId, overallFeedback: 'Graded and returned.' })
+          .then(() => renderTeacherDashboard());
+      }
+      if (actionName === 'reset-demo') {
+        dataService.resetDemoData().then(async () => {
+          await refreshStudentFeed();
+          await renderStudentBulletin();
+          renderMap();
+          await renderTeacherDashboard();
+        });
+      }
+      if (actionName === 'export-csv') {
+        dataService.exportGradesCsv({ classId: teacherActiveClassId, unitId: 'unit-1' })
+          .then((csv) => showFeedback('#boss-feedback', `CSV generated in memory (${csv.split('\n').length - 1} rows).`, 'notice'));
+      }
+      if (actionName === 'exit-teacher') {
+        dataService.signOut().then(async () => {
+          teacherSession = null;
+          setTeacherMode(false);
+          updateHud();
+          closeModal();
+          await refreshStudentFeed();
+          renderMap();
+        });
+      }
+    }
+
+    const teacherTabButton = event.target.closest('[data-teacher-tab]');
+    if (teacherTabButton) {
+      teacherActiveTab = teacherTabButton.dataset.teacherTab;
+      applyTeacherTabVisibility();
+    }
+
     const rubricButton = event.target.closest('[data-open-rubric]');
     if (rubricButton) openRubric(rubricButton.dataset.openRubric);
   });
   $('#teacher-mode-toggle').addEventListener('click', () => {
-    state.teacherMode = !state.teacherMode;
-    saveState(state);
-    updateHud();
-    if (activeQuest?.mode === 'boss') renderActiveQuest();
+    if (state.teacherMode) {
+      dataService.signOut().then(async () => {
+        teacherSession = null;
+        setTeacherMode(false);
+        updateHud();
+        if (activeQuest?.mode === 'boss') renderActiveQuest();
+        await refreshStudentFeed();
+        renderMap();
+      });
+      return;
+    }
+    openTeacherAccessModal().catch((error) => console.error(error));
   });
+
+  document.addEventListener('change', (event) => {
+    if (event.target.id === 'teacher-class-select') {
+      teacherActiveClassId = event.target.value;
+      renderTeacherDashboard().catch((error) => console.error(error));
+    }
+
+    if (event.target.id === 'teacher-rubric-mode-select' && activeTeacherSubmissionId) {
+      activeTeacherRubricMode = event.target.value;
+      openTeacherSubmissionGrader(activeTeacherSubmissionId).catch((error) => console.error(error));
+    }
+  });
+
+  document.addEventListener('submit', (event) => {
+    if (event.target.id === 'teacher-announcement-form') {
+      event.preventDefault();
+      const formData = new FormData(event.target);
+      dataService.createAnnouncement({
+        classId: teacherActiveClassId,
+        title: String(formData.get('title') || ''),
+        body: String(formData.get('body') || '')
+      }).then(async () => {
+        await renderStudentBulletin();
+        await renderTeacherDashboard();
+      });
+    }
+
+    if (event.target.id === 'teacher-grade-form') {
+      event.preventDefault();
+      if (!activeTeacherSubmissionId) return;
+      const formData = new FormData(event.target);
+      const rubricMode = String(formData.get('rubric-mode') || 'saq');
+      const rubric = RUBRICS[rubricMode] || RUBRICS.saq;
+      const scores = rubric.criteria.map((criterion) => {
+        const key = `${rubricMode}-${criterion.id}`;
+        return {
+          criterionKey: key,
+          pointsEarned: Number(formData.get(key) || 0),
+          maxPoints: criterion.points,
+          feedback: String(formData.get(`fb-${key}`) || '')
+        };
+      });
+
+      dataService.saveRubricScores({
+        submissionId: activeTeacherSubmissionId,
+        scores,
+        overallFeedback: String(formData.get('overall') || ''),
+        status: 'grading'
+      }).then(() => renderTeacherDashboard());
+    }
+  });
+
   $$('.rail-link[data-scroll-target]').forEach((button) => button.addEventListener('click', () => $(`#${button.dataset.scrollTarget}`).scrollIntoView({ behavior: 'smooth', block: 'start' })));
 }
 
-function init() {
+async function init() {
+  await refreshStudentFeed();
+  await renderStudentBulletin();
+  teacherSession = await dataService.getCurrentSession();
+  if (teacherSession?.user?.role === 'teacher') {
+    setTeacherMode(true);
+  }
   renderTopicChips();
   renderMap();
   updateHud();

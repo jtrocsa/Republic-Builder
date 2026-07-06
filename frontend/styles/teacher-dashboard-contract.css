@@ -1,0 +1,89 @@
+/*
+  Teacher backend visual contract.
+  Integrate after existing theme CSS. Map these variables to current site values before adding new colors.
+  Do not turn Teacher Mode into a generic admin UI.
+*/
+
+:root {
+  --quest-teacher-surface: var(--surface-parchment, #f8f1e6);
+  --quest-teacher-surface-muted: var(--surface-cream, #eee4d4);
+  --quest-teacher-ink: var(--ink-deep, #17343a);
+  --quest-teacher-border: var(--border-gold-muted, #c9ab6c);
+  --quest-teacher-accent: var(--accent-gold, #d2b164);
+  --quest-teacher-danger: var(--danger-rust, #a74e3d);
+}
+
+/* Apply only inside Teacher Mode; preserve legacy student styling. */
+[data-app-mode='teacher'] .quest-teacher-status-badge {
+  align-items: center;
+  border: 1px solid var(--quest-teacher-border);
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: .78rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  min-height: 1.9rem;
+  padding: .2rem .65rem;
+  text-transform: uppercase;
+}
+
+[data-app-mode='teacher'] [data-teacher-editable][data-teacher-mode] {
+  position: relative;
+}
+
+[data-app-mode='teacher'] .quest-teacher-edit-trigger {
+  background: var(--quest-teacher-surface);
+  border: 1px solid var(--quest-teacher-border);
+  border-radius: 50%;
+  color: var(--quest-teacher-ink);
+  cursor: pointer;
+  display: inline-grid;
+  height: 2rem;
+  place-items: center;
+  position: absolute;
+  right: .25rem;
+  top: .25rem;
+  width: 2rem;
+}
+
+[data-app-mode='teacher'] .quest-teacher-grading-panel {
+  background: var(--quest-teacher-surface);
+  border: 1px solid var(--quest-teacher-border);
+  border-radius: 1rem;
+  color: var(--quest-teacher-ink);
+  padding: 1.25rem;
+}
+
+[data-app-mode='teacher'] .quest-teacher-panel-kicker {
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+[data-app-mode='teacher'] .quest-teacher-score-summary {
+  font-weight: 800;
+  margin: .75rem 0;
+}
+
+[data-app-mode='teacher'] .quest-teacher-feedback-label {
+  display: grid;
+  font-weight: 700;
+  gap: .4rem;
+}
+
+[data-app-mode='teacher'] .quest-teacher-overall-feedback {
+  background: rgba(255,255,255,.6);
+  border: 1px solid var(--quest-teacher-border);
+  border-radius: .65rem;
+  color: inherit;
+  font: inherit;
+  padding: .65rem;
+  resize: vertical;
+}
+
+[data-app-mode='teacher'] .quest-teacher-panel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .65rem;
+  margin-top: 1rem;
+}

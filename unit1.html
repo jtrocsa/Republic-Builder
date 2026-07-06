@@ -61,6 +61,7 @@
 
         <footer class="rail-footer">
           <button class="teacher-mode" id="teacher-mode-toggle" type="button">Teacher mode: <span>off</span></button>
+          <p id="teacher-mode-status">Teacher Mode is off (Local Demo)</p>
           <p>Quest scoring and drafts are local to this browser. Official AP scoring remains teacher-controlled.</p>
         </footer>
       </aside>
@@ -85,6 +86,15 @@
             <p id="quest-progress-label-secondary">Navigate each Atlantic landmark to unlock evidence and complete writing drafts.</p>
           </div>
           <div class="topic-chips" id="topic-chips"></div>
+        </section>
+
+        <section class="student-bulletin" id="student-bulletin" aria-labelledby="student-bulletin-heading">
+          <div class="section-heading section-heading-light">
+            <span id="student-bulletin-heading">Teacher Bulletin</span>
+          </div>
+          <div id="student-bulletin-list" class="bulletin-list">
+            <p class="empty-note">Loading announcements...</p>
+          </div>
         </section>
 
         <section class="map-panel" id="map-panel" aria-labelledby="map-heading">
