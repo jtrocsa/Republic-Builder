@@ -960,6 +960,130 @@ export const CHARACTER_ITEM_CATALOG = [
   }
 ];
 
+const DESCRIPTION_LEADS = [
+  'is cut for long days of travel and study.',
+  'was built to handle weather, work, and worn roads.',
+  'fits right into a busy Atlantic port or classroom.',
+  'carries a practical style that still looks sharp.',
+  'feels like gear borrowed from a working archive.'
+];
+
+const SLOT_DESCRIPTION_LINES = {
+  shoes: [
+    'The sole and stitching are made for miles of cobblestone, docks, and dirt paths.',
+    'It keeps your footing steady whether you are on a market lane or a muddy trail.',
+    'The shape favors comfort first, with enough structure for formal stops on the route.'
+  ],
+  pants: [
+    'The fabric is durable enough for workshop tasks but neat enough for public debate.',
+    'The cut gives you room to move while still reading as historically grounded attire.',
+    'These are practical field trousers with details inspired by period tailoring.'
+  ],
+  shirts: [
+    'Layered construction gives it a period silhouette without sacrificing movement.',
+    'The stitching and collar details echo the social style of its era inspiration.',
+    'It balances utility and formality the way a historian moving between spaces would need.'
+  ],
+  belts: [
+    'It secures the outfit and adds a clear visual cue for role and profession.',
+    'The buckle work is small, but it gives the whole look a strong historical anchor.',
+    'It functions as a practical fastener while signaling regional style.'
+  ],
+  hats: [
+    'Its profile reads from a distance and helps set the time-period tone instantly.',
+    'The brim and crown shape borrow from recognizable dress codes of the era.',
+    'It is the kind of headwear that turns an outfit into a clear historical statement.'
+  ],
+  hands: [
+    'This hand item suggests what kind of evidence, trade, or task you are focused on.',
+    'Carrying it gives your historian a clear purpose in the scene.',
+    'It works as a prop that tells a story before any dialogue appears.'
+  ],
+  transportation: [
+    'This ride changes the silhouette of the whole character and signals movement across regions.',
+    'It marks your travel style and the scale of your journey through the Atlantic world.',
+    'It frames your character as someone moving between distant places, not just local streets.'
+  ],
+  default: [
+    'It adds distinct visual identity while staying readable at card and map scale.'
+  ]
+};
+
+const PERIOD_RULES = [
+  {
+    keywords: ['colonial', 'tricorn', 'breeches', 'waistcoat'],
+    text: 'Its design reflects British Atlantic fashion from the 1700s, where status and durability often appeared in the same garment.'
+  },
+  {
+    keywords: ['frontier', 'trail', 'coonskin', 'covered-wagon'],
+    text: 'The look leans frontier practical: hard-wearing materials, simple lines, and repairs that value function over polish.'
+  },
+  {
+    keywords: ['printer', 'newspaper', 'quill'],
+    text: 'It carries print-shop energy, the kind of gear linked to pamphlets, presses, and the spread of public argument.'
+  },
+  {
+    keywords: ['suffrage', 'civic-sign', 'victory-bandana'],
+    text: 'Its style nods to reform movements and public organizing, where clothing and signs became part of political voice.'
+  },
+  {
+    keywords: ['factory', 'mechanic', 'tractor'],
+    text: 'The details echo industrial-era workwear, built for machines, long shifts, and material resilience.'
+  },
+  {
+    keywords: ['varsity', 'campus', 'loafers', 'chinos'],
+    text: 'This version is less period-bound and more academic-casual, giving a distinct school identity without repeating other looks.'
+  },
+  {
+    keywords: ['model-t', 'streetcar', 'locomotive', 'modern-train', 'motorcycle', 'roadster', 'bicycle'],
+    text: 'Its silhouette reflects later transportation eras, emphasizing speed, industry, and expanding mobility.'
+  },
+  {
+    keywords: ['laurel', 'master', 'archivist', 'sealkeeper', 'chronicle', 'archive'],
+    text: 'The ornamentation signals earned mastery, treating the item like ceremonial recognition rather than daily gear.'
+  },
+  {
+    keywords: ['horse', 'spyglass', 'compass', 'atlas', 'rolled-map', 'lantern'],
+    text: 'It fits exploration themes common to Atlantic navigation, surveying, and long-distance travel narratives.'
+  }
+];
+
+const NON_PERIOD_NOTES = [
+  'It is intentionally unique in this set, designed to stand apart from strictly period reconstructions.',
+  'Rather than tie to one era, it blends influences to create a distinct signature item.',
+  'It keeps the theme readable while using a broader, cross-era style language.'
+];
+
+function pickDescriptionLine(seed, options) {
+  const value = String(seed || '');
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+  return options[hash % options.length];
+}
+
+function resolvePeriodNote(item) {
+  const haystack = `${item.id} ${item.name}`.toLowerCase();
+  const matched = PERIOD_RULES.find((rule) => rule.keywords.some((keyword) => haystack.includes(keyword)));
+  if (matched) return matched.text;
+  return pickDescriptionLine(`${item.id}-non-period`, NON_PERIOD_NOTES);
+}
+
+function buildItemDescription(item) {
+  const lead = pickDescriptionLine(`${item.id}-lead`, DESCRIPTION_LEADS);
+  const slotLines = SLOT_DESCRIPTION_LINES[item.slot] || SLOT_DESCRIPTION_LINES.default;
+  const slotNote = pickDescriptionLine(`${item.id}-slot`, slotLines);
+  const periodNote = resolvePeriodNote(item);
+  const slotFragment = slotNote.replace(/[.]$/, '');
+  const eraFragment = periodNote.charAt(0).toLowerCase() + periodNote.slice(1);
+  return `${item.name} ${lead} ${slotFragment}; ${eraFragment}`;
+}
+
+CHARACTER_ITEM_CATALOG.forEach((item) => {
+  item.description = buildItemDescription(item);
+});
+
 export const CHARACTER_SLOT_ORDER = [
   'transportation', 'base', 'pants', 'shoes', 'shirts', 'belts', 'hands', 'hats'
 ];

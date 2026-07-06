@@ -2123,7 +2123,128 @@ function openCustomize() {
 }
 
 function openInventory() {
-  openCustomize();
+  if (!activeCharacter?.identity?.name) {
+    openCharacterWizard();
+    return;
+  }
+
+  const ownedItems = (activeCharacter.inventory || [])
+    .map((itemId) => getCharacterItem(itemId))
+    .filter(Boolean)
+    .sort((a, b) => {
+      const slotA = CHARACTER_SLOT_LABELS[a.slot] || a.slot;
+      const slotB = CHARACTER_SLOT_LABELS[b.slot] || b.slot;
+      if (slotA !== slotB) return slotA.localeCompare(slotB);
+      return a.name.localeCompare(b.name);
+    });
+  const equippedSet = new Set(Object.values(activeCharacter.equipped || {}).filter(Boolean));
+
+  openOverlay();
+  $('#modal-layer').innerHTML = `
+    <article class="small-modal">
+      <header class="quest-modal-header">
+        <div>
+          <p class="eyebrow">Inventory</p>
+          <h2>${text(activeCharacter.identity?.name || 'Historian')} · Owned Gear</h2>
+          <p>View all owned items and their previews. Equip and appearance changes are in Customize.</p>
+        </div>
+        <button class="close-button" data-close-modal aria-label="Close">×</button>
+      </header>
+      <div class="quest-modal-body">
+        <div class="inventory-grid">${ownedItems.map((item) => `
+          <article>
+            <div class="store-item-art" data-slot="${text(item.slot)}" data-item-preview-id="${text(item.id)}" aria-label="${text(item.name)} preview"></div>
+            <h3>${text(item.name)}</h3>
+            <p>${text(item.description)}</p>
+            <div class="qp-quest-meta">
+              <span class="qp-tag">Slot: ${text(CHARACTER_SLOT_LABELS[item.slot] || item.slot)}</span>
+              <span class="qp-tag">${text(String(item.rarity || '').toUpperCase())}</span>
+              ${equippedSet.has(item.id) ? '<span class="qp-tag">Equipped</span>' : '<span class="qp-tag">Owned</span>'}
+            </div>
+          </article>`).join('') || '<article><span>○</span><h3>No owned items</h3><p>Earn gear from quests, badges, and the Archive Store.</p></article>'}
+        </div>
+      </div>
+    </article>`;
+  $('#modal-layer').classList.add('open');
+  $('#modal-layer').setAttribute('aria-hidden', 'false');
+  renderItemPreviewStages($('#modal-layer'));
+}
+
+function renderItemPreviewStages(parent = document) {
+  if (!activeCharacter) return;
+  const slotCrop = {
+    hats: { x: 108, y: 34, w: 296, h: 228 },
+    shirts: { x: 96, y: 154, w: 320, h: 356 },
+    belts: { x: 132, y: 320, w: 248, h: 184 },
+    pants: { x: 96, y: 292, w: 320, h: 372 },
+    shoes: { x: 98, y: 486, w: 316, h: 248 },
+    hands: { x: 214, y: 264, w: 222, h: 280 },
+    transportation: { x: 18, y: 170, w: 476, h: 482 }
+  };
+  const defaultCrop = { x: 96, y: 144, w: 320, h: 420 };
+  const previewTargets = $$('[data-item-preview-id]', parent);
+  previewTargets.forEach((target) => {
+    const itemId = target.dataset.itemPreviewId;
+    const item = getCharacterItem(itemId);
+    if (!item) {
+      target.classList.add('is-missing');
+      return;
+    }
+    try {
+      const slotClass = item.slot ? `store-item-art--slot-${item.slot}` : '';
+      target.classList.remove('is-missing');
+      target.className = `store-item-art ${slotClass}`.trim();
+      target.innerHTML = '<canvas class="item-preview-canvas" role="img"></canvas>';
+      target.setAttribute('aria-label', `${item.name} preview`);
+      const canvas = $('canvas', target);
+      const source = new Image();
+      source.decoding = 'async';
+      source.onload = () => {
+        if (!canvas) return;
+        const crop = slotCrop[item.slot] || defaultCrop;
+        canvas.width = 420;
+        canvas.height = 315;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          target.classList.add('is-missing');
+          target.innerHTML = '';
+          return;
+        }
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(
+          source,
+          crop.x,
+          crop.y,
+          crop.w,
+          crop.h,
+          0,
+          0,
+          canvas.width,
+          canvas.height
+        );
+        requestAnimationFrame(() => {
+          target.classList.remove('is-missing');
+        });
+      };
+      source.onerror = () => {
+        target.classList.add('is-missing');
+        target.innerHTML = '';
+      };
+      source.src = item.assetPath;
+      if (source.complete && source.naturalWidth > 0) {
+        requestAnimationFrame(() => {
+          target.classList.remove('is-missing');
+        });
+      }
+      if (source.complete && source.naturalWidth === 0) {
+          target.classList.add('is-missing');
+          target.innerHTML = '';
+      }
+    } catch {
+      target.classList.add('is-missing');
+      target.innerHTML = '';
+    }
+  });
 }
 
 function getTierProgressText(badge, visual) {
@@ -2209,15 +2330,7 @@ function openStore() {
     const lockedReason = !hasBadge ? `Requires ${item.requiresBadgeId}` : !canAfford ? 'Not enough Archive Tokens' : '';
     return `
       <article class="qp-card qp-quest-card" aria-label="Store item ${text(item.name)}">
-        <div class="store-item-art" aria-hidden="true" data-slot="${text(item.slot || item.category)}">
-          <img
-            src="${text(item.assetPath)}"
-            alt="${text(item.name)} preview"
-            loading="eager"
-            decoding="async"
-            onerror="this.style.display='none'; this.parentElement.classList.add('is-missing');"
-          />
-        </div>
+        <div class="store-item-art" data-slot="${text(item.slot || item.category)}" data-item-preview-id="${text(item.id)}" aria-label="${text(item.name)} preview"></div>
         <p class="qp-activity-type">${text(item.categoryLabel || CHARACTER_SLOT_LABELS[item.slot] || item.category)} · ${text(item.rarity)}</p>
         <h3>${text(item.name)}</h3>
         <p>${text(item.description)}</p>
@@ -2250,6 +2363,7 @@ function openStore() {
     </article>`;
   $('#modal-layer').classList.add('open');
   $('#modal-layer').setAttribute('aria-hidden', 'false');
+  renderItemPreviewStages($('#modal-layer'));
 }
 
 function openLeaderboard() {
