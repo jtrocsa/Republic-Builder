@@ -30,6 +30,7 @@ const CORE_STATE_KEY = 'republic-builder-state-v2';
 const dataService = getDataService();
 let studentClassId = QUEST_BACKEND_CONFIG.demoClassId;
 let studentQuestFeed = [];
+let serviceCatalogQuests = [];
 let teacherSession = null;
 let teacherClasses = [];
 let teacherActiveClassId = QUEST_BACKEND_CONFIG.demoClassId;
@@ -391,6 +392,99 @@ function createTeacherQuestRuntime({ id, title, assessmentLabel, xpReward, token
   return quest;
 }
 
+function toPercent(value, fallback) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return fallback;
+  return `${Math.min(100, Math.max(0, n)).toFixed(2)}%`;
+}
+
+function buildServiceQuestRuntimeFromContent(questRow, content = {}) {
+  const identity = content.identity || {};
+  const assessment = content.assessments?.[0] || {};
+  const assessmentLabel = normalizeAssessmentLabel(assessment.label || questRow.questType || 'MCQ');
+  const style = getAssessmentStyle(assessmentLabel);
+  const xpReward = Number(identity.xpReward || questRow.xpReward || content.rewards?.xp || 20);
+  const tokenReward = Number(content.rewards?.tokens || Math.max(1, Math.min(6, Math.round(xpReward / 12))));
+  const questions = Array.isArray(assessment.questions) ? assessment.questions : [];
+  const mapMarker = identity.mapMarker || {};
+  const runtime = createTeacherQuestRuntime({
+    id: questRow.id,
+    title: identity.title || questRow.title || 'Teacher Quest',
+    assessmentLabel,
+    xpReward,
+    tokenReward,
+    questionCount: questions.length || 1,
+    coordinates: {
+      left: toPercent(mapMarker.x, '50%'),
+      top: toPercent(mapMarker.y, '50%')
+    },
+    unlocked: !['locked', 'scheduled', 'draft', 'hidden', 'archived'].includes(String(questRow.accessMode || questRow.defaultAccessMode || '').toLowerCase())
+  });
+
+  runtime.isServiceBacked = true;
+  runtime.accessMode = questRow.accessMode || questRow.defaultAccessMode || 'available';
+  runtime.lockMessage = questRow.noteToStudent || '';
+  runtime.location = identity.location || questRow.locationKey || 'Atlantic World';
+  runtime.description = content.presentation?.heroDescription || runtime.description;
+  runtime.assessmentLabel = style.label;
+  runtime.icon = style.icon;
+  runtime.mode = style.mode;
+
+  if (style.mode === 'vocab') {
+    runtime.cards = questions.map((item, index) => ({
+      term: item.label || `Term ${index + 1}`,
+      definition: content.sources?.[0]?.body || 'Teacher-authored vocabulary definition.',
+      application: item.prompt || `Teacher-authored vocabulary prompt ${index + 1}`,
+      choices: Array.isArray(item.choices) && item.choices.length ? item.choices : ['Choice A', 'Choice B', 'Choice C', 'Choice D'],
+      answer: Number(item.answer || 0),
+      misconception: 'Teacher-authored misconception.'
+    }));
+  } else if (style.mode === 'hipp') {
+    const source = content.sources?.[0] || {};
+    runtime.source = {
+      type: 'Primary Source',
+      date: source.citation || source.date || '',
+      title: source.title || 'Teacher Source',
+      author: source.author || 'Teacher Upload',
+      classroomExcerpt: source.body || source.classroomExcerpt || '',
+      sourceUrl: source.sourceUrl || '#',
+      citation: source.citation || ''
+    };
+    runtime.prompts = {
+      historicalSituation: questions[0]?.prompt || 'Describe historical context.',
+      audience: questions[1]?.prompt || 'Identify intended audience.',
+      purpose: questions[2]?.prompt || 'Explain purpose.',
+      pov: questions[3]?.prompt || 'Explain point of view.'
+    };
+    runtime.model = 'Teacher-authored model analysis.';
+  } else if (style.mode === 'boss') {
+    const parts = questions.map((item, index) => ({
+      label: item.label || String.fromCharCode(65 + index),
+      text: item.prompt || `Part ${index + 1}`
+    }));
+    runtime.variants = {
+      saq: {
+        label: 'SAQ Skirmish',
+        rubric: 'saq',
+        prompt: questions[0]?.prompt || 'Teacher-authored SAQ prompt.',
+        parts: parts.length ? parts : [{ label: 'A', text: 'Part A prompt' }, { label: 'B', text: 'Part B prompt' }, { label: 'C', text: 'Part C prompt' }]
+      },
+      leq: { label: 'LEQ Duel', rubric: 'leq', prompt: 'Teacher-authored LEQ prompt.', planningPrompts: ['Thesis', 'Context', 'Evidence', 'Reasoning'] },
+      dbq: { label: 'DBQ Siege', rubric: 'dbq', prompt: 'Teacher-authored DBQ prompt.', documents: [] }
+    };
+  } else {
+    runtime.questions = questions.map((item, index) => ({
+      prompt: item.prompt || `Teacher-authored question ${index + 1}`,
+      choices: Array.isArray(item.choices) && item.choices.length ? item.choices : ['Choice A', 'Choice B', 'Choice C', 'Choice D'],
+      answer: Number(item.answer || 0),
+      rationale: 'Teacher-authored rationale.',
+      skill: 'Evidence'
+    }));
+  }
+
+  return runtime;
+}
+
 function upsertTeacherCustomQuest(quest) {
   const list = getTeacherCustomQuests();
   const index = list.findIndex((item) => item.id === quest.id);
@@ -401,7 +495,10 @@ function upsertTeacherCustomQuest(quest) {
 }
 
 function getQuest(id) {
-  return QUESTS.find((quest) => quest.id === id) || getTeacherCustomQuests().find((quest) => quest.id === id) || null;
+  return QUESTS.find((quest) => quest.id === id)
+    || getTeacherCustomQuests().find((quest) => quest.id === id)
+    || serviceCatalogQuests.find((quest) => quest.id === id)
+    || null;
 }
 
 function getSourceById(sourceId) {
@@ -445,8 +542,9 @@ function getRuntimeQuest(id) {
 }
 
 function getQuestCatalog() {
-  const allQuests = [...QUESTS, ...getTeacherCustomQuests()];
-  return allQuests.map((quest) => getRuntimeQuest(quest.id)).filter(Boolean);
+  const allQuests = [...QUESTS, ...getTeacherCustomQuests(), ...serviceCatalogQuests];
+  const deduped = Array.from(new Map(allQuests.map((quest) => [quest.id, quest])).values());
+  return deduped.map((quest) => getRuntimeQuest(quest.id)).filter(Boolean);
 }
 
 function getAssignmentIdForQuest(questId) {
@@ -598,6 +696,25 @@ function deriveTemplateFromQuestType(value = '') {
   if (questType.includes('vocab')) return 'vocab';
   if (questType.includes('boss')) return 'boss';
   return 'royale';
+}
+
+function formatQuestStudioTypeLabel(quest = {}) {
+  const questType = String(quest.questType || '').toLowerCase();
+  if (questType.includes('saq')) return 'saq';
+  if (questType.includes('leq')) return 'leq';
+  if (questType.includes('dbq')) return 'dbq';
+  if (questType.includes('hipp') || questType.includes('primary')) return 'hipp';
+  if (questType.includes('vocab')) return 'vocab';
+  if (questType.includes('boss')) return 'saq/leq/dbq';
+  if (questType.includes('mcq') || questType.includes('evidence') || questType.includes('royale')) return 'mcq';
+
+  const assessmentLabel = normalizeAssessmentLabel(quest.assessmentLabel || quest.typeLabel || '');
+  if (assessmentLabel === 'SAQ') return 'saq';
+  if (assessmentLabel === 'LEQ') return 'leq';
+  if (assessmentLabel === 'DBQ') return 'dbq';
+  if (assessmentLabel === 'HIPP' || assessmentLabel === 'PRIMARY') return 'hipp';
+  if (assessmentLabel === 'VOCAB') return 'vocab';
+  return 'mcq';
 }
 
 function normalizeTeacherQuestDraft(data = {}, quest = null) {
@@ -839,7 +956,7 @@ function renderQuestionEditorRows(questions = [], templateKey = 'royale') {
         <label>Max Points<input type="number" min="1" max="10" name="question-max-${index}" value="${Number(question.maxPoints || 1)}" /></label>
         ${isMultipleChoice ? `
           <div class="quest-builder-choice-grid">
-            ${choices.slice(0, 4).map((choice, choiceIndex) => `<label>Choice ${String.fromCharCode(65 + choiceIndex)}<input name="question-choice-${index}-${choiceIndex}" value="${text(choice || '')}" /></label>`).join('')}
+            ${choices.slice(0, 4).map((choice, choiceIndex) => `<label>Choice ${String.fromCharCode(65 + choiceIndex)}<textarea rows="3" name="question-choice-${index}-${choiceIndex}">${text(choice || '')}</textarea></label>`).join('')}
             <label>Correct Choice
               <select name="question-answer-${index}">
                 <option value="0" ${Number(question.answer || 0) === 0 ? 'selected' : ''}>A</option>
@@ -1692,9 +1809,40 @@ async function refreshStudentFeed() {
       classId: studentClassId,
       studentId: QUEST_BACKEND_CONFIG.demoStudentId || 'student-aria'
     });
+
+    const studioRows = await dataService.getTeacherQuestStudio({ classId: studentClassId });
+    const studioVisibleRows = studioRows.filter((row) => String(row.accessMode || '').toLowerCase() !== 'archived');
+
+    const missingQuestIds = [...new Set(
+      [...studentQuestFeed.map((entry) => entry.quest?.id || entry.questId), ...studioVisibleRows.map((row) => row.id)]
+        .filter(Boolean)
+        .filter((questId) => !getQuest(questId))
+    )];
+
+    if (!missingQuestIds.length) {
+      serviceCatalogQuests = [];
+      return;
+    }
+
+    const details = await Promise.all(
+      missingQuestIds.map(async (questId) => {
+        try {
+          return await dataService.getTeacherQuest({ questId });
+        } catch (error) {
+          console.warn(`Unable to hydrate service quest ${questId}`, error);
+          return null;
+        }
+      })
+    );
+
+    const studioById = new Map(studioVisibleRows.map((row) => [row.id, row]));
+    serviceCatalogQuests = details
+      .filter(Boolean)
+      .map((detail) => buildServiceQuestRuntimeFromContent({ ...detail.quest, ...(studioById.get(detail.quest.id) || {}) }, detail.published?.content || detail.draft?.content || {}));
   } catch (error) {
     console.warn('Unable to load student quest feed from data service', error);
     studentQuestFeed = [];
+    serviceCatalogQuests = [];
   }
 }
 
@@ -1763,7 +1911,7 @@ function renderTeacherQuestStudioSection() {
           <thead><tr><th>Quest</th><th>Type</th><th>Access</th><th>Versions</th><th>Actions</th></tr></thead>
           <tbody>${teacherStudioSnapshot.map((quest) => `<tr>
             <td><b>${text(quest.title)}</b><small>${text(quest.slug)}</small></td>
-            <td>${text(quest.questType)}</td>
+            <td>${text(formatQuestStudioTypeLabel(quest))}</td>
             <td>${teacherBadge(quest.accessMode)}</td>
             <td>v${quest.latestVersion} (${quest.versionCount})</td>
             <td class="teacher-actions-inline">
@@ -1955,8 +2103,30 @@ function openQuestTemplatePicker() {
 
 function collectBuilderQuestionsFromForm(form, templateKey, assessmentLabel) {
   const entries = Object.fromEntries(new FormData(form).entries());
-  const total = Math.max(1, Number(entries.questionCount || 1));
+  const total = Math.max(1, Number(entries['question-count'] || entries.questionCount || 1));
   const style = getAssessmentStyle(assessmentLabel);
+  const questions = [];
+  for (let index = 0; index < total; index += 1) {
+    const prompt = String(entries[`question-prompt-${index}`] || '').trim();
+    if (!prompt) continue;
+    const label = String(entries[`question-label-${index}`] || (style.mode === 'boss' ? `Part ${index + 1}` : `Q${index + 1}`));
+    const maxPoints = Math.max(1, Number(entries[`question-max-${index}`] || 1));
+    const base = {
+      id: String(entries[`question-id-${index}`] || (style.mode === 'boss' ? `part-${index + 1}` : `q${index + 1}`)),
+      label,
+      prompt,
+      maxPoints,
+      responseType: style.mode === 'royale' || style.mode === 'vocab' ? 'multiple_choice' : 'textarea'
+    };
+    if (style.mode === 'royale' || style.mode === 'vocab') {
+      base.choices = [0, 1, 2, 3].map((choiceIndex) => String(entries[`question-choice-${index}-${choiceIndex}`] || `Choice ${String.fromCharCode(65 + choiceIndex)}`));
+      base.answer = Number(entries[`question-answer-${index}`] || 0);
+    }
+    questions.push(base);
+  }
+
+  if (questions.length) return questions;
+
   if (style.mode === 'vocab') return generatePlaceholderCards(total);
   if (style.mode === 'hipp') {
     return [
@@ -1981,9 +2151,15 @@ function extractBuilderDraftState(form) {
     templateKey,
     assessmentLabel,
     title: String(entries.title || ''),
+    subtitle: String(entries.subtitle || ''),
     xpReward: Number(entries.xpReward || 50),
     tokenReward: Number(entries.tokenReward || 2),
     questionCount: Math.max(1, Number(entries.questionCount || questions.length || 1)),
+    instructions: String(entries.instructions || ''),
+    sourceTitle: String(entries.sourceTitle || ''),
+    sourceCitation: String(entries.sourceCitation || ''),
+    sourceBody: String(entries.sourceBody || ''),
+    sourceUrl: String(entries.sourceUrl || ''),
     questions
   };
 }
@@ -1992,35 +2168,83 @@ async function openTeacherQuestBuilder({ questId = null, templateKey = 'royale',
   let builder;
   const liveQuest = questId ? getQuest(questId) : null;
   if (draftState) {
-    builder = { ...draftState };
+    builder = { ...draftState, questions: Array.isArray(draftState.questions) ? draftState.questions : [] };
   } else if (liveQuest) {
+    builder = buildDraftFromLiveQuest(questId) || normalizeTeacherQuestDraft({}, liveQuest);
     const meta = getQuestProgressionMeta(liveQuest);
-    builder = {
-      templateKey: liveQuest.mode === 'vocab' ? 'vocab' : liveQuest.mode === 'hipp' ? 'hipp' : liveQuest.mode === 'boss' ? 'boss' : 'royale',
-      title: liveQuest.title,
-      assessmentLabel: meta.assessmentLabel,
-      xpReward: meta.xpReward,
-      tokenReward: meta.tokenReward,
-      questionCount: meta.countValue
-    };
+    builder.assessmentLabel = normalizeAssessmentLabel(builder.assessmentLabel || meta.assessmentLabel || 'MCQ');
+    builder.tokenReward = Number(builder.tokenReward || meta.tokenReward || 3);
+    builder.questionCount = Math.max(1, Number(builder.questionCount || builder.questions?.length || meta.countValue || 1));
   } else if (questId) {
     const detail = await dataService.getTeacherQuest({ questId });
-    const assessmentLabel = normalizeAssessmentLabel(detail.published?.content?.assessments?.[0]?.label || 'MCQ');
-    builder = {
-      templateKey,
-      title: detail.quest?.title || 'Untitled Quest',
-      assessmentLabel,
-      xpReward: Number(detail.quest?.xpReward || 30),
-      tokenReward: 3,
-      questionCount: Number(detail.published?.content?.assessments?.[0]?.questions?.length || 4)
-    };
+    builder = normalizeTeacherQuestDraft(detail.draft?.content || detail.published?.content || {}, detail.quest);
+    builder.templateKey = builder.templateKey || templateKey;
+    builder.assessmentLabel = normalizeAssessmentLabel(builder.assessmentLabel || 'MCQ');
+    builder.tokenReward = Number(detail.published?.content?.rewards?.tokens || detail.draft?.content?.rewards?.tokens || builder.tokenReward || 3);
+    builder.questionCount = Math.max(1, Number(builder.questionCount || builder.questions?.length || 1));
   } else {
     const selected = String(templateKey || 'royale').toLowerCase();
-    const assessmentLabel = selected.includes('saq') ? 'SAQ' : selected.includes('leq') ? 'LEQ' : selected.includes('dbq') ? 'DBQ' : selected === 'hipp' ? 'HIPP' : selected === 'vocab' ? 'VOCAB' : 'MCQ';
-    builder = { templateKey: selected.includes('boss') ? 'boss' : selected, title: 'New Quest', assessmentLabel, xpReward: 30, tokenReward: 3, questionCount: 4 };
+    const chosenTemplate = getTemplateById(selected.includes('boss') ? 'boss' : selected);
+    builder = normalizeTeacherQuestDraft({
+      identity: {
+        title: chosenTemplate.defaults.title,
+        subtitle: chosenTemplate.defaults.subtitle,
+        questType: chosenTemplate.id,
+        location: 'Atlantic World',
+        xpReward: 30
+      },
+      assessments: [{
+        label: chosenTemplate.defaults.assessmentLabel,
+        instructions: chosenTemplate.defaults.instructions,
+        questions: chosenTemplate.defaults.questions
+      }],
+      sources: []
+    });
+    builder.assessmentLabel = selected.includes('saq') ? 'SAQ'
+      : selected.includes('leq') ? 'LEQ'
+        : selected.includes('dbq') ? 'DBQ'
+          : normalizeAssessmentLabel(builder.assessmentLabel || 'MCQ');
+    builder.templateKey = selected.includes('boss') ? 'boss' : chosenTemplate.id;
+    builder.tokenReward = Number(builder.tokenReward || 3);
+    builder.questionCount = Math.max(1, Number(builder.questions?.length || 4));
+    builder.xpReward = Number(builder.xpReward || 30);
+  }
+
+  builder.questions = Array.isArray(builder.questions) ? builder.questions : [];
+
+  if (addQuestion) {
+    const style = getAssessmentStyle(builder.assessmentLabel);
+    const nextIndex = builder.questions.length + 1;
+    builder.questions.push({
+      id: style.mode === 'boss' ? `part-${nextIndex}` : `q${nextIndex}`,
+      label: style.mode === 'boss' ? `Part ${nextIndex}` : `Q${nextIndex}`,
+      prompt: '',
+      choices: style.mode === 'royale' || style.mode === 'vocab' ? ['Choice A', 'Choice B', 'Choice C', 'Choice D'] : [],
+      answer: 0,
+      maxPoints: 1,
+      responseType: style.mode === 'royale' || style.mode === 'vocab' ? 'multiple_choice' : 'textarea'
+    });
+  }
+
+  if (Number.isInteger(removeQuestionIndex) && removeQuestionIndex >= 0) {
+    builder.questions = builder.questions.filter((_, index) => index !== removeQuestionIndex);
+  }
+
+  if (!builder.questions.length) {
+    const style = getAssessmentStyle(builder.assessmentLabel);
+    builder.questions = style.mode === 'hipp'
+      ? [
+        { id: 'h', label: 'Historical Situation', prompt: '', choices: [], answer: 0, maxPoints: 1, responseType: 'textarea' },
+        { id: 'i', label: 'Intended Audience', prompt: '', choices: [], answer: 0, maxPoints: 1, responseType: 'textarea' },
+        { id: 'p1', label: 'Purpose', prompt: '', choices: [], answer: 0, maxPoints: 1, responseType: 'textarea' },
+        { id: 'p2', label: 'Point of View', prompt: '', choices: [], answer: 0, maxPoints: 1, responseType: 'textarea' }
+      ]
+      : [{ id: 'q1', label: style.mode === 'boss' ? 'Part 1' : 'Q1', prompt: '', choices: style.mode === 'royale' || style.mode === 'vocab' ? ['Choice A', 'Choice B', 'Choice C', 'Choice D'] : [], answer: 0, maxPoints: 1, responseType: style.mode === 'royale' || style.mode === 'vocab' ? 'multiple_choice' : 'textarea' }];
   }
 
   const assessmentOptions = ['MCQ', 'SAQ', 'LEQ', 'DBQ', 'HIPP', 'VOCAB', 'TIMELINE', 'PRIMARY'];
+  builder.questionCount = Math.max(1, Number(builder.questions.length || builder.questionCount || 1));
+  const sourceOptions = SOURCES.map((source) => `<option value="${source.id}">${text(source.title)} (${text(source.date)})</option>`).join('');
   activeTeacherEditQuestId = questId;
   const builderMode = getAssessmentStyle(builder.assessmentLabel).mode;
   $('#modal-layer').innerHTML = `
@@ -2034,6 +2258,7 @@ async function openTeacherQuestBuilder({ questId = null, templateKey = 'royale',
         <button class="close-button" data-close-modal>×</button>
       </header>
       <form id="teacher-quest-builder-form" class="teacher-quest-builder-form" data-edit-quest-id="${questId || ''}" data-template-key="${builder.templateKey}">
+        <input type="hidden" name="question-count" value="${builder.questions.length}" />
         <input type="hidden" name="template-key" value="${builder.templateKey}" />
         <section class="teacher-builder-block">
           <h3>Quest Identity</h3>
@@ -2048,7 +2273,36 @@ async function openTeacherQuestBuilder({ questId = null, templateKey = 'royale',
             <label>XP Reward<input type="number" min="0" name="xpReward" value="${Number(builder.xpReward || 30)}" /></label>
             <label>Archive Tokens<input type="number" min="0" max="10" name="tokenReward" value="${Number(builder.tokenReward || 3)}" /></label>
           </div>
+          <div class="teacher-builder-grid">
+            <label>Assessment Instructions<input name="instructions" value="${text(builder.instructions || '')}" /></label>
+          </div>
           <p class="qp-level-meta">Teachers can drag map markers directly on the atlas after save/publish.</p>
+        </section>
+
+        <section class="teacher-builder-block">
+          <h3>Primary Source Document</h3>
+          <label>Load from existing library
+            <select id="teacher-source-library-select">
+              <option value="">Select a source to prefill</option>
+              ${sourceOptions}
+            </select>
+          </label>
+          <div class="teacher-builder-grid">
+            <label>Source Title<input name="sourceTitle" value="${text(builder.sourceTitle || '')}" /></label>
+            <label>Source Citation<input name="sourceCitation" value="${text(builder.sourceCitation || '')}" /></label>
+          </div>
+          <label>Source URL<input name="sourceUrl" value="${text(builder.sourceUrl || '')}" /></label>
+          <label>Quoted / excerpted text<textarea name="sourceBody" rows="4">${text(builder.sourceBody || '')}</textarea></label>
+        </section>
+
+        <section class="teacher-builder-block">
+          <div class="teacher-builder-block-head">
+            <h3>Questions</h3>
+            <button type="button" data-teacher-action="add-builder-question">Add Question</button>
+          </div>
+          <div class="teacher-builder-question-list">
+            ${renderQuestionEditorRows(builder.questions, getAssessmentStyle(builder.assessmentLabel).mode === 'boss' ? 'boss' : getAssessmentStyle(builder.assessmentLabel).mode)}
+          </div>
         </section>
 
         <footer class="teacher-builder-footer">
@@ -2411,6 +2665,18 @@ function initializeEvents() {
       openTeacherSubmissionGrader(activeTeacherSubmissionId).catch((error) => console.error(error));
     }
 
+    if (event.target.id === 'teacher-source-library-select') {
+      const sourceId = event.target.value;
+      const source = SOURCES.find((item) => item.id === sourceId);
+      if (!source) return;
+      const form = $('#teacher-quest-builder-form');
+      if (!form) return;
+      if (form.elements.sourceTitle) form.elements.sourceTitle.value = source.title || '';
+      if (form.elements.sourceCitation) form.elements.sourceCitation.value = source.citation || source.date || '';
+      if (form.elements.sourceBody) form.elements.sourceBody.value = source.classroomExcerpt || source.description || '';
+      if (form.elements.sourceUrl) form.elements.sourceUrl.value = source.sourceUrl || '';
+    }
+
   });
 
   document.addEventListener('submit', (event) => {
@@ -2420,14 +2686,24 @@ function initializeEvents() {
       const saveMode = event.submitter?.dataset.saveMode || 'draft';
       const draftState = extractBuilderDraftState(form);
       const style = getAssessmentStyle(draftState.assessmentLabel);
-      const templateKey = style.mode === 'boss' ? 'boss' : style.mode;
+      const selectedTemplate = String(draftState.templateKey || '').toLowerCase();
+      const templateKey = selectedTemplate.includes('boss') ? 'boss' : (style.mode === 'boss' ? 'boss' : style.mode);
       const questions = collectBuilderQuestionsFromForm(form, templateKey, draftState.assessmentLabel);
+      const source = draftState.sourceTitle || draftState.sourceCitation || draftState.sourceBody
+        ? {
+          id: `teacher-source-${Math.random().toString(36).slice(2, 6)}`,
+          title: draftState.sourceTitle,
+          citation: draftState.sourceCitation,
+          body: draftState.sourceBody,
+          sourceUrl: draftState.sourceUrl
+        }
+        : null;
 
       const questTypeMap = { royale: 'evidence', hipp: 'hipp', vocab: 'vocabulary', boss: 'boss_battle' };
       const patch = {
         identity: {
           title: draftState.title,
-          subtitle: `${draftState.assessmentLabel} Challenge`,
+          subtitle: draftState.subtitle || `${draftState.assessmentLabel} Challenge`,
           questType: templateKey,
           xpReward: Number(draftState.xpReward || 30),
           location: 'Teacher Positioned',
@@ -2443,12 +2719,12 @@ function initializeEvents() {
           heroDescription: `Teacher-authored ${draftState.assessmentLabel} quest.`,
           theme: style.mode
         },
-        sources: [],
+        sources: source ? [source] : [],
         assessments: [{
           id: templateKey,
           label: draftState.assessmentLabel,
           maxPoints: questions.reduce((sum, question) => sum + Number(question.maxPoints || 1), 0),
-          instructions: `Complete this ${draftState.assessmentLabel} assessment.`,
+          instructions: draftState.instructions || `Complete this ${draftState.assessmentLabel} assessment.`,
           responseSettings: { autosave: true, allowResubmit: true },
           questions
         }],
@@ -2462,16 +2738,26 @@ function initializeEvents() {
           templateKey,
           identity: {
             title: draftState.title,
-            subtitle: `${draftState.assessmentLabel} Challenge`,
+            subtitle: draftState.subtitle || `${draftState.assessmentLabel} Challenge`,
             location: 'Teacher Positioned',
             xpReward: Number(draftState.xpReward || 30),
             heroKicker: `${draftState.assessmentLabel} Challenge`,
             heroDescription: `Teacher-authored ${draftState.assessmentLabel} quest.`,
             assessmentLabel: draftState.assessmentLabel,
-            instructions: `Complete this ${draftState.assessmentLabel} assessment.`
+            instructions: draftState.instructions || `Complete this ${draftState.assessmentLabel} assessment.`
           },
+          source,
           questions
         }).then(async (result) => {
+          if (saveMode === 'publish') {
+            await dataService.publishQuestVersion({ questId: result.quest.id, versionId: result.version.id, changeNote: 'Published from quest builder' });
+            await dataService.saveQuestAccessRule({
+              questId: result.quest.id,
+              classId: teacherActiveClassId,
+              rule: { accessMode: 'available', noteToStudent: '' }
+            });
+          }
+
           const customQuest = createTeacherQuestRuntime({
             id: result.quest.id,
             title: draftState.title,
@@ -2482,6 +2768,7 @@ function initializeEvents() {
             unlocked: saveMode !== 'draft'
           });
           upsertTeacherCustomQuest(customQuest);
+          await refreshStudentFeed();
           renderMap();
           updateHud();
           await renderTeacherDashboard();
@@ -2502,7 +2789,7 @@ function initializeEvents() {
           unlocked: existingQuest.unlocked !== false
         }));
       } else if (existingQuest) {
-        applyTeacherQuestOverrideFromDraft(editQuestId, draftState, questions, null);
+        applyTeacherQuestOverrideFromDraft(editQuestId, draftState, questions, source);
       }
 
       dataService.saveQuestDraft({
@@ -2518,7 +2805,13 @@ function initializeEvents() {
       }).then(async (snapshot) => {
         if (saveMode === 'publish') {
           await dataService.publishQuestVersion({ questId: editQuestId, versionId: snapshot.id, changeNote: 'Published from quest builder' });
+          await dataService.saveQuestAccessRule({
+            questId: editQuestId,
+            classId: teacherActiveClassId,
+            rule: { accessMode: 'available', noteToStudent: '' }
+          });
         }
+        await refreshStudentFeed();
         renderMap();
         updateHud();
         if (activeQuest?.id === editQuestId) {

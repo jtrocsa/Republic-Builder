@@ -301,6 +301,15 @@ details p { margin: 8px 0; line-height: 1.45; }.rights-note { color: #8b6f54; fo
 .quest-builder-question-head h4 { margin: 0; color: #345457; font-family: var(--serif); font-size: 18px; }
 .quest-builder-question-head button { padding: 5px 8px; border: 1px solid rgba(136,68,60,.3); border-radius: 8px; color: #7b4337; background: #f8e6dd; font-size: 11px; font-weight: 800; }
 .quest-builder-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.quest-builder-choice-grid label { align-items: start; }
+.quest-builder-choice-grid textarea {
+  min-height: 72px;
+  line-height: 1.45;
+  resize: vertical;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
 .teacher-builder-footer { display: flex; flex-wrap: wrap; gap: 8px; padding-top: 4px; }
 .teacher-builder-footer button { padding: 9px 12px; border: 1px solid rgba(48,82,76,.24); border-radius: 8px; color: #2a4a4d; background: #f2efe1; font-size: 12px; font-weight: 800; }
 
