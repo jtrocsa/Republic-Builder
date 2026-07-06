@@ -346,6 +346,16 @@ export const CHARACTER_BASE_MODELS = {
     basePath: './assets/characters/base/woman-neutral.png',
     skinMaskPath: './assets/characters/base/woman-skin-mask.png',
     skinMaskReady: false,
+    baseByTonePath: {
+      'tone-1': './assets/characters/base/tones/woman/tone-1.png',
+      'tone-2': './assets/characters/base/tones/woman/tone-2.png',
+      'tone-3': './assets/characters/base/tones/woman/tone-3.png',
+      'tone-4': './assets/characters/base/tones/woman/tone-4.png',
+      'tone-5': './assets/characters/base/tones/woman/tone-5.png',
+      'tone-6': './assets/characters/base/tones/woman/tone-6.png',
+      'tone-7': './assets/characters/base/tones/woman/tone-7.png',
+      'tone-8': './assets/characters/base/tones/woman/tone-8.png'
+    },
     fallbackSvgByTone: {
       'tone-1': './assets/characters/base/base-woman-tone-1.svg',
       'tone-2': './assets/characters/base/base-woman-tone-2.svg',
@@ -362,6 +372,16 @@ export const CHARACTER_BASE_MODELS = {
     basePath: './assets/characters/base/man-neutral.png',
     skinMaskPath: './assets/characters/base/man-skin-mask.png',
     skinMaskReady: false,
+    baseByTonePath: {
+      'tone-1': './assets/characters/base/tones/man/tone-1.png',
+      'tone-2': './assets/characters/base/tones/man/tone-2.png',
+      'tone-3': './assets/characters/base/tones/man/tone-3.png',
+      'tone-4': './assets/characters/base/tones/man/tone-4.png',
+      'tone-5': './assets/characters/base/tones/man/tone-5.png',
+      'tone-6': './assets/characters/base/tones/man/tone-6.png',
+      'tone-7': './assets/characters/base/tones/man/tone-7.png',
+      'tone-8': './assets/characters/base/tones/man/tone-8.png'
+    },
     fallbackSvgByTone: {
       'tone-1': './assets/characters/base/base-man-tone-1.svg',
       'tone-2': './assets/characters/base/base-man-tone-2.svg',

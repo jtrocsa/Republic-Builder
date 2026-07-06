@@ -129,6 +129,7 @@ export function getCharacterLayers(character) {
     layers.push({
       slot,
       assetPath: item.assetPath,
+      name: item.name,
       previewAssetPath: item.previewAssetPath || null,
       equipmentLayerAssetPath: item.equipmentLayerAssetPath || null,
       zIndex: item.equipOrder,
