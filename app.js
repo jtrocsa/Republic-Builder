@@ -250,6 +250,10 @@ import {
     $('#characterCreation').hidden = showDashboard;
   }
 
+  function goToUnit1() {
+    window.location.href = 'unit1.html';
+  }
+
   function updatePillars(changes = {}) {
     Object.entries(changes).forEach(([pillarId, amount]) => {
       if (Object.prototype.hasOwnProperty.call(state.pillars, pillarId)) {
@@ -455,14 +459,7 @@ import {
 
   function render() {
     if (!state.characterCreated) return;
-    renderHeader();
-    renderPillars();
-    renderCharacterTraits();
-    renderQuests($('.filter-chip.selected')?.dataset.filter || 'all');
-    renderInventory();
-    renderProgressionRail();
-    renderDailyBonus();
-    saveState();
+    goToUnit1();
   }
 
   function openModal(modal) {
@@ -963,8 +960,7 @@ import {
 
     editingCharacter = false;
     saveState();
-    setAppVisibility(true);
-    render();
+    goToUnit1();
     showToast(isNewCharacter ? `${state.character.name} founded ${state.republicName}.` : 'Founder profile updated.');
   }
 
@@ -997,6 +993,10 @@ import {
         grid.classList.remove('refreshing');
         showToast('A fresh set of quests has appeared.');
       }, 220);
+    });
+
+    $('#openUnit1MapButton')?.addEventListener('click', () => {
+      window.location.href = 'unit1.html';
     });
 
     $('#submitAnswerButton').addEventListener('click', resolveQuest);
@@ -1111,8 +1111,7 @@ import {
 
   bindEvents();
   if (state.characterCreated) {
-    setAppVisibility(true);
-    render();
+    goToUnit1();
   } else {
     openCharacterForge(false);
   }

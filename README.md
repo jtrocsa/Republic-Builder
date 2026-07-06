@@ -1,6 +1,6 @@
 # Republic Builder
 
-A visual, classroom-focused AP U.S. History RPG prototype. Students create a founder, build a fictional republic across the nine APUSH units, complete historically grounded quests, earn artifacts, and eventually practice writing through DBQ boss battles.
+A visual, classroom-focused AP U.S. History RPG prototype. Students create a founder, then enter Unit 1: Atlantic Crossroads as the first playable historical expedition map, with later units intended to swap in their own maps and quests.
 
 This is a **front-end starter**, built with HTML, CSS, JavaScript, SVG assets, and browser-local saves. It is ready for GitHub Pages.
 
@@ -11,7 +11,7 @@ This is a **front-end starter**, built with HTML, CSS, JavaScript, SVG assets, a
 - Six capped character traits: Intellect, Industry, Influence, Courage, Diplomacy, and Integrity
 - Eight professions with balanced starting advantages
 - SVG paper-doll layers for hat, shirt/tunic, pants, socks, and shoes
-- A quest dashboard with XP, Republic Points, Republic Pillars, inventory, Unit 1–9 progression, daily bonus, and demo teacher controls
+- A Unit 1 Atlantic Crossroads quest map with XP, inventory, source archive, and writing-battle progression
 - A repeatable content model in `data.js`
 - A swappable save adapter in `storage.js`
 
@@ -65,6 +65,7 @@ Read: [Progress Saving and Future Accounts](docs/PERSISTENCE_ARCHITECTURE.md)
 Build reusable engines, not isolated activities:
 
 - A new quest should be a new data object.
+- Each unit should have its own map and quest board rather than a single permanent dashboard.
 - A new DBQ boss battle should use the same writing/rubric infrastructure with different documents.
 - A new profession or era outfit should be content in `data.js` plus an asset—not a rewrite of game logic.
 - A future database should replace the save adapter—not force a redesign of the game.

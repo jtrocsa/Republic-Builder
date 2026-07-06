@@ -1,5 +1,7 @@
-import { UNIT, QUESTS, SOURCES, SKILLS, RUBRICS } from './data.js';
-import { loadState, saveState } from './store.js';
+import { UNIT, QUESTS, SOURCES, SKILLS, RUBRICS } from './quest%20data.js';
+import { loadState, saveState } from './quest%20store.js';
+import { DEFAULT_STORAGE_KEY, loadProfile } from '../src/services/characterProfile.js';
+import { PROFESSION_BY_ID } from '../src/data/professions.js';
 
 let state = loadState();
 let activeQuest = null;
@@ -8,6 +10,12 @@ let royaleIndex = 0;
 let royaleScore = 0;
 let vocabIndex = 0;
 let vocabScore = 0;
+const CORE_STATE_KEY = 'republic-builder-state-v2';
+const RUBRIC_ASSETS = [
+  { id: 'saq', title: 'SAQ Rubric', file: 'APUSH%20Rubrics/SAQ_Rubric.pdf', type: 'pdf', note: '3-point short-answer scoring structure.' },
+  { id: 'leq', title: 'LEQ Rubric', file: 'APUSH%20Rubrics/LEQ%20Rubric.webp', type: 'image', note: '6-point long-essay scoring structure.' },
+  { id: 'dbq', title: 'DBQ Rubric', file: 'APUSH%20Rubrics/DBQ%20Rubric.png', type: 'image', note: '7-point document-based question scoring structure.' }
+];
 
 const $ = (selector, parent = document) => parent.querySelector(selector);
 const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
@@ -20,6 +28,65 @@ function getQuest(id) {
   return QUESTS.find((quest) => quest.id === id);
 }
 
+function readCoreState() {
+  try {
+    return JSON.parse(localStorage.getItem(CORE_STATE_KEY) || 'null');
+  } catch {
+    return null;
+  }
+}
+
+function titleCaseFromSlug(value = '') {
+  return String(value)
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function getPlayerAdapter() {
+  const profile = loadProfile(DEFAULT_STORAGE_KEY);
+  const coreState = readCoreState();
+  const character = coreState?.character || {};
+  const identity = profile?.identity || {};
+  const townRaw = identity.town || character.town || 'Frontier Outpost';
+  const professionId = identity.professionId || character.profession || '';
+  const profession = PROFESSION_BY_ID[professionId];
+  const starterCount = Array.isArray(profile?.inventory?.starterItems) ? profile.inventory.starterItems.length : 0;
+
+  return {
+    name: identity.name || character.name || 'Unnamed Founder',
+    pronouns: identity.pronouns || 'Pronouns not set',
+    profession: profession?.label || titleCaseFromSlug(professionId || 'independent scholar'),
+    settlement: titleCaseFromSlug(townRaw),
+    gender: identity.gender || character.gender || 'neutral',
+    outfit: identity.outfit || character.outfit || null,
+    starterItemCount: starterCount
+  };
+}
+
+function renderPortrait(player) {
+  const portrait = $('#hud-portrait');
+  if (!portrait) return;
+
+  const gender = String(player.gender || 'neutral').toLowerCase();
+  const baseAsset = gender === 'man' ? 'assets/character/base/man.svg' : gender === 'woman' ? 'assets/character/base/woman.svg' : 'assets/character/base/neutral.svg';
+  const outfit = player.outfit || {};
+  const layerAssets = [
+    ['base', baseAsset],
+    ['socks', outfit.socks ? `assets/character/wardrobe/socks/${outfit.socks}.svg` : ''],
+    ['pants', outfit.pants ? `assets/character/wardrobe/pants/${outfit.pants}.svg` : ''],
+    ['shoes', outfit.shoes ? `assets/character/wardrobe/shoes/${outfit.shoes}.svg` : ''],
+    ['shirt', outfit.shirt ? `assets/character/wardrobe/shirts/${outfit.shirt}.svg` : ''],
+    ['hat', outfit.hat ? `assets/character/wardrobe/hats/${outfit.hat}.svg` : '']
+  ];
+
+  const layers = layerAssets
+    .filter(([, path]) => path)
+    .map(([slot, path]) => `<img class="avatar-layer avatar-layer-${slot}" src="${path}" alt="" aria-hidden="true" loading="lazy" />`)
+    .join('');
+
+  portrait.innerHTML = layers || '<div class="portrait-fallback" aria-hidden="true"><div class="portrait-hair"></div><div class="portrait-face"></div><div class="portrait-tunic"></div></div>';
+}
+
 function setDispatch(title, copy) {
   state.dispatch = { title, copy };
   saveState(state);
@@ -28,15 +95,23 @@ function setDispatch(title, copy) {
 }
 
 function updateHud() {
+  const player = getPlayerAdapter();
   const completedCount = Object.keys(state.completed).length;
   const totalQuestCount = QUESTS.length;
   const percent = Math.round((completedCount / totalQuestCount) * 100);
+
+  $('#hud-player-name').textContent = player.name;
+  $('#hud-pronouns').textContent = player.pronouns;
+  $('#hud-profession').textContent = player.profession;
+  $('#hud-settlement').textContent = player.settlement;
+  renderPortrait(player);
+
   $('#quest-progress-label').textContent = `${completedCount} of ${totalQuestCount} quests completed`;
   $('#unit-progress-bar').style.width = `${percent}%`;
   $('#xp-label').textContent = `${state.xp} / 500 XP`;
   $('#xp-bar').style.width = `${Math.min((state.xp / 500) * 100, 100)}%`;
   $('#player-level').textContent = Math.max(1, Math.floor(state.xp / 100) + 1);
-  $('#inventory-count').textContent = state.inventory.length;
+  $('#inventory-count').textContent = state.inventory.length + player.starterItemCount;
   $('#source-count-badge').textContent = SOURCES.length;
   $('#archive-header-count').textContent = SOURCES.length;
 
@@ -63,11 +138,19 @@ function renderTopicChips() {
 
 function renderMap() {
   $('#map-quests').innerHTML = QUESTS.map((quest) => {
+    const unlocked = quest.unlocked !== false;
     const done = Boolean(state.completed[quest.id]);
+    const questType = quest.mode === 'hipp'
+      ? 'HIPP Challenge'
+      : quest.mode === 'royale'
+        ? 'Evidence Royale'
+        : quest.mode === 'vocab'
+          ? 'Vocabulary Bounty'
+          : 'Boss Battle';
     return `
-      <button class="map-quest ${quest.mode} ${done ? 'completed' : ''}" data-quest-id="${quest.id}" style="left:${quest.coordinates.left}; top:${quest.coordinates.top};" aria-label="Open ${text(quest.title)}">
+      <button class="map-quest ${quest.mode} ${done ? 'completed' : ''} ${unlocked ? 'unlocked' : 'locked'}" data-quest-id="${quest.id}" style="left:${quest.coordinates.left}; top:${quest.coordinates.top};" aria-label="Open ${text(quest.title)}" ${unlocked ? '' : 'disabled'}>
         <span class="quest-beacon">${quest.icon}</span>
-        <span class="quest-label"><b>${text(quest.shortTitle)}</b><em>${quest.mode === 'hipp' ? 'HIPP Challenge' : quest.mode === 'royale' ? 'Evidence Royale' : quest.mode === 'vocab' ? 'Vocabulary Bounty' : 'Boss Battle'}</em></span>
+        <span class="quest-label"><b>${text(quest.shortTitle)}</b><em>${questType}</em><em>${text(quest.location)} · ${quest.xp} XP · ${done ? 'Completed' : unlocked ? 'Unlocked' : 'Locked'}</em></span>
         ${done ? '<span class="quest-check">✓</span>' : ''}
       </button>`;
   }).join('');
@@ -288,6 +371,20 @@ function openRubricIndex() {
   existing.innerHTML = `
     <article class="small-modal">
       <header class="quest-modal-header"><div><p class="eyebrow">Official scoring structures</p><h2>APUSH Writing Rubrics</h2><p>Every Boss Battle uses the real 3-, 6-, and 7-point AP History structures.</p></div><button class="close-button" data-close-modal>×</button></header>
+      <div class="rubric-gallery">
+        ${RUBRIC_ASSETS.map((asset) => `
+          <button class="rubric-card" data-open-rubric="${asset.id}" type="button">
+            <div class="rubric-card-media ${asset.type}">
+              ${asset.type === 'pdf'
+                ? `<object data="${asset.file}" type="application/pdf" aria-label="${text(asset.title)} preview"></object><span class="rubric-card-fallback">PDF preview</span>`
+                : `<img src="${asset.file}" alt="${text(asset.title)} preview" loading="lazy" />`}
+            </div>
+            <div class="rubric-card-body">
+              <div><b>${text(asset.title)}</b><span>${asset.id.toUpperCase()}</span></div>
+              <p>${text(asset.note)}</p>
+            </div>
+          </button>`).join('')}
+      </div>
       <div class="rubric-index">${Object.entries(RUBRICS).map(([id, rubric]) => `<button data-open-rubric="${id}"><span>${rubric.total}</span><div><b>${text(rubric.title)}</b><small>${text(rubric.officialNote)}</small></div><em>View →</em></button>`).join('')}</div>
     </article>`;
 }
@@ -298,6 +395,15 @@ function openRubric(rubricId) {
   existing.innerHTML = `
     <article class="rubric-modal">
       <header class="quest-modal-header"><div><p class="eyebrow">Official scoring structure</p><h2>${text(rubric.title)} <span>${rubric.total} points</span></h2><p>${text(rubric.officialNote)}</p></div><button class="close-button" data-close-modal>×</button></header>
+      <div class="rubric-preview-strip">
+        ${RUBRIC_ASSETS.map((asset) => `
+          <figure class="rubric-preview ${asset.id === rubricId ? 'active' : ''}">
+            ${asset.type === 'pdf'
+              ? `<object data="${asset.file}" type="application/pdf" aria-label="${text(asset.title)} preview"></object>`
+              : `<img src="${asset.file}" alt="${text(asset.title)}" loading="lazy" />`}
+            <figcaption>${text(asset.title)}</figcaption>
+          </figure>`).join('')}
+      </div>
       <div class="rubric-list">${rubric.criteria.map((criterion) => `<article><div><b>${text(criterion.label)}</b><span>${criterion.points} pt${criterion.points > 1 ? 's' : ''}</span></div><p>${text(criterion.description)}</p></article>`).join('')}</div>
       <footer class="rubric-footer">Rubric wording is summarized for interface use. The package documentation links directly to the official APUSH Course and Exam Description, effective Fall 2026.</footer>
     </article>`;
@@ -352,6 +458,33 @@ function handleChoice(answerIndex) {
   const isRoyale = activeQuest.mode === 'royale';
   const item = isRoyale ? activeQuest.questions[royaleIndex] : activeQuest.cards[vocabIndex];
   const correct = answerIndex === item.answer;
+  const attemptKey = activeQuest.id;
+  const attemptState = state.attempts[attemptKey] || { choiceLog: [] };
+
+  attemptState.choiceLog = Array.isArray(attemptState.choiceLog) ? attemptState.choiceLog : [];
+  attemptState.choiceLog.push({
+    mode: activeQuest.mode,
+    round: isRoyale ? royaleIndex + 1 : vocabIndex + 1,
+    selectedIndex: answerIndex,
+    correctIndex: item.answer,
+    correct,
+    prompt: item.prompt || item.application || '',
+    savedAt: new Date().toISOString()
+  });
+
+  if (!isRoyale) {
+    attemptState.vocabMastery = attemptState.vocabMastery || {};
+    attemptState.vocabMastery[item.term] = {
+      mastered: correct,
+      selectedIndex: answerIndex,
+      correctIndex: item.answer,
+      savedAt: new Date().toISOString()
+    };
+  }
+
+  state.attempts[attemptKey] = attemptState;
+  saveState(state);
+
   if (correct) {
     if (isRoyale) royaleScore += 1;
     else vocabScore += 1;
