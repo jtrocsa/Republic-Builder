@@ -43,8 +43,11 @@ a { color: var(--teal); }
 .eyebrow { margin: 0 0 5px; font-size: 10px; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; opacity: .75; }
 .player-card h2 { margin: 0; font-family: var(--serif); font-size: 18px; letter-spacing: .01em; }
 .player-card p:not(.eyebrow) { margin: 4px 0 0; color: #b7d0cc; font-size: 11px; }
-.player-edit-link { display: inline-block; margin-top: 7px; color: #a8d9cf; font-size: 11px; font-weight: 700; text-decoration: none; border-bottom: 1px solid rgba(168, 217, 207, .4); }
-.player-edit-link:hover { color: #ddf2eb; border-bottom-color: rgba(221, 242, 235, .8); }
+.player-profile-actions { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.player-edit-link { display: inline-flex; align-items: center; justify-content: center; padding: 5px 8px; color: #d8ece7; border: 1px solid rgba(168, 217, 207, .45); border-radius: 8px; background: rgba(19, 62, 75, .35); font-size: 11px; font-weight: 700; }
+.player-edit-link:hover { color: #f2fbf8; border-color: rgba(221, 242, 235, .8); background: rgba(30, 90, 92, .5); }
+.player-edit-link:focus-visible { outline: 2px solid rgba(241, 217, 135, .85); outline-offset: 2px; }
+.player-gear-indicator { display: inline-flex; align-items: center; gap: 6px; color: #f4de9a; font-size: 10px; font-weight: 800; letter-spacing: .03em; text-transform: uppercase; }
 .level-panel { margin: 16px 7px 20px; }
 .level-row { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: #c8dcda; }
 .level-row strong { color: #f1d889; font-size: 14px; }
@@ -72,6 +75,11 @@ a { color: var(--teal); }
 .world-header { display: block; margin-bottom: 20px; padding: 16px 18px; border: 1px solid rgba(47,82,75,.16); border-radius: 16px; background: rgba(255,255,255,.56); box-shadow: 0 6px 24px rgba(31,70,63,.06); }
 .world-header h1 { margin: 0; color: #19363b; font-family: var(--serif); font-size: clamp(36px, 4.2vw, 60px); letter-spacing: -.04em; line-height: .94; }
 .world-subtitle { width: 100%; margin: 12px 0 0; color: var(--ink-soft); font-size: 14px; }
+#character-map-callout { margin-top: 12px; }
+.character-map-callout { display: inline-flex; align-items: center; gap: 10px; padding: 9px 12px; border: 1px solid rgba(190, 138, 53, .42); border-radius: 999px; color: #fcf6df; background: linear-gradient(135deg, rgba(24, 62, 75, .92), rgba(47, 98, 98, .88)); box-shadow: 0 8px 22px rgba(30, 65, 63, .18); }
+.character-map-callout button { padding: 6px 10px; border: 1px solid rgba(248, 233, 187, .45); border-radius: 999px; color: #18373e; background: #f3df9f; font-size: 11px; font-weight: 800; }
+.character-map-callout button:focus-visible { outline: 2px solid #f0ca67; outline-offset: 2px; }
+.character-map-callout .text-button { color: #f5e7bf; border-color: rgba(245, 231, 191, .35); background: rgba(255, 255, 255, .08); }
 .header-actions { display: flex; gap: 8px; align-items: center; }
 .header-button { display: inline-flex; align-items: center; gap: 9px; padding: 10px 13px; color: #31545a; border: 1px solid rgba(38,82,85,.2); border-radius: 10px; background: rgba(255,255,255,.5); font-size: 12px; font-weight: 700; box-shadow: 0 4px 12px rgba(54,77,68,.05); }
 .header-button span { display: inline-grid; place-items: center; min-width: 18px; height: 18px; color: #fff7da; border-radius: 99px; background: var(--teal); font-size: 10px; }
@@ -193,6 +201,21 @@ details p { margin: 8px 0; line-height: 1.45; }.rights-note { color: #8b6f54; fo
 .rubric-preview img, .rubric-preview object { display: block; width: 100%; height: 220px; border: 0; object-fit: cover; background: #f5f1e6; }
 .rubric-preview figcaption { padding: 8px 10px; color: #4e6565; font-size: 11px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; }
 .inventory-grid, .realm-grid, .help-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; padding: 24px; }.inventory-grid article, .realm-grid article, .help-grid article { padding: 16px; border: 1px solid #d6dcd2; border-radius: 11px; background: #fffdf7; }.inventory-grid article > span, .help-grid article > span { color: #bd8b36; font-size: 21px; }.inventory-grid h3, .help-grid h3 { margin: 8px 0 5px; color: #315155; font-family: var(--serif); font-size: 19px; }.inventory-grid p, .help-grid p { margin: 0; color: #6b7a78; font-size: 11px; line-height: 1.5; }.realm-grid article span { color: #74847d; font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }.realm-grid strong { display: block; margin: 7px 0 2px; color: #315e55; font-family: var(--serif); font-size: 31px; }.realm-grid p { margin: 0; color: #6b7c75; font-size: 11px; }.cooperative-note { margin: 0 24px 24px; padding: 12px; border-radius: 9px; color: #596f58; background: #e8efe3; font-size: 11px; line-height: 1.45; }.skills-large { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding: 24px; }.skills-large article { display: grid; grid-template-columns: 35px 1fr; gap: 10px; align-items: center; padding: 13px; border: 1px solid #d4ded5; border-radius: 10px; background: #fffdf8; }.skills-large article > span { display: grid; width: 34px; height: 34px; place-items: center; border-radius: 9px; color: #fff5d6; background: #33757a; }.skills-large h3 { margin: 0; color: #315052; font-family: var(--serif); font-size: 18px; }.skills-large p { margin: 2px 0 0; color: #6c807f; font-size: 11px; }.skill-track { margin-top: 7px; height: 6px; background: #e1e9e1; }.skill-track span { background: linear-gradient(90deg,#468f85,#a9d68a); }
+.store-item-art { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 3; margin-bottom: 8px; border: 1px solid rgba(56, 88, 82, .15); border-radius: 10px; background: linear-gradient(180deg, #fffdf6, #f2ead6); overflow: hidden; }
+.store-item-art img { width: 100%; height: 100%; object-fit: contain; }
+.store-item-art.is-missing { background: repeating-linear-gradient(135deg, #f7efdb 0 10px, #efe4cb 10px 20px); }
+.store-item-art.is-missing::after {
+  content: attr(data-slot) ' preview';
+  padding: 4px 8px;
+  border: 1px solid rgba(49, 78, 78, .2);
+  border-radius: 999px;
+  color: #355354;
+  background: rgba(255, 252, 244, .92);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
 
 @media (max-width: 1050px) { .app-shell { grid-template-columns: 235px minmax(0,1fr); }.hud-rail { padding: 20px 13px; }.game-main { padding: 28px 24px 45px; }.player-card { align-items: flex-start; }.player-card h2 { font-size: 16px; }.map-stage > img { min-height: 480px; }.map-quest { transform: translate(-50%, -50%) scale(.91); }.map-quest:hover { transform: translate(-50%, -50%) scale(.96); }.quest-layout.two-column { grid-template-columns: 1fr; }.source-card { max-width: 650px; } }
 @media (max-width: 760px) { .app-shell { display: block; }.hud-rail { position: relative; height: auto; padding: 16px; }.brand { margin-bottom: 13px; }.level-panel, .skills-card, .rail-footer { display: none; }.rail-nav { display: flex; overflow-x: auto; margin: 10px 0 0; }.rail-link { flex: 0 0 auto; width: auto; padding: 9px 10px; }.rail-link b { display: none; }.game-main { padding: 24px 14px 34px; }.world-header, .map-intro { display: block; }.header-actions { margin-top: 13px; }.unit-progress-card { grid-template-columns: 1fr; gap: 9px; }.map-panel { padding: 12px; border-radius: 17px; }.map-stage > img { min-height: 540px; object-fit: cover; object-position: 43% center; }.map-quest { transform: translate(-50%, -50%) scale(.7); }.map-quest:hover { transform: translate(-50%, -50%) scale(.75); }.map-legend { left: 9px; right: 9px; bottom: 9px; justify-content: center; }.drawer { width: 100vw; padding: 20px; }.archive-toolbar { display: block; }.archive-toolbar input { width: 100%; }.archive-toolbar > span { display: block; margin-top: 10px; }.modal-layer { padding: 0; }.quest-modal, .small-modal, .rubric-modal { max-height: 100vh; border-radius: 0; }.quest-modal-header { padding: 20px; }.quest-header-meta > span { display: none; }.quest-modal-body { padding: 17px; }.planning-grid, .dbq-document-grid, .inventory-grid, .realm-grid, .help-grid, .skills-large, .rubric-list article { grid-template-columns: 1fr; }.royale-footer { display: block; }.royale-footer span + span { display: block; margin-top: 4px; }.boss-tabs { overflow-x: auto; }.boss-tab { white-space: nowrap; }.rubric-list { padding: 17px; }.rubric-footer { padding: 0 17px 17px; } }

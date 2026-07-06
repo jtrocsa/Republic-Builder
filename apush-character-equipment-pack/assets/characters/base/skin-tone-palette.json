@@ -1,0 +1,78 @@
+{
+  "defaultSkinTone": "tone-4",
+  "skinTones": [
+    {
+      "id": "tone-1",
+      "label": "Skin Tone 1",
+      "swatch": "#F4D8C4",
+      "primary": "#F4D8C4",
+      "shadow": "#D5A889",
+      "accent": "#BD886F",
+      "mouth": "#8F5F4D"
+    },
+    {
+      "id": "tone-2",
+      "label": "Skin Tone 2",
+      "swatch": "#EFC6A6",
+      "primary": "#EFC6A6",
+      "shadow": "#CA936E",
+      "accent": "#B67A5B",
+      "mouth": "#8B5841"
+    },
+    {
+      "id": "tone-3",
+      "label": "Skin Tone 3",
+      "swatch": "#DDA77F",
+      "primary": "#DDA77F",
+      "shadow": "#B97858",
+      "accent": "#A65F46",
+      "mouth": "#7B4434"
+    },
+    {
+      "id": "tone-4",
+      "label": "Skin Tone 4",
+      "swatch": "#D89B75",
+      "primary": "#D89B75",
+      "shadow": "#C67F59",
+      "accent": "#B96F4E",
+      "mouth": "#8C4C3A"
+    },
+    {
+      "id": "tone-5",
+      "label": "Skin Tone 5",
+      "swatch": "#BD7955",
+      "primary": "#BD7955",
+      "shadow": "#95573D",
+      "accent": "#834631",
+      "mouth": "#633225"
+    },
+    {
+      "id": "tone-6",
+      "label": "Skin Tone 6",
+      "swatch": "#9C5E3E",
+      "primary": "#9C5E3E",
+      "shadow": "#774227",
+      "accent": "#65341F",
+      "mouth": "#4B2417"
+    },
+    {
+      "id": "tone-7",
+      "label": "Skin Tone 7",
+      "swatch": "#794026",
+      "primary": "#794026",
+      "shadow": "#562816",
+      "accent": "#452014",
+      "mouth": "#32160E"
+    },
+    {
+      "id": "tone-8",
+      "label": "Skin Tone 8",
+      "swatch": "#56271C",
+      "primary": "#56271C",
+      "shadow": "#38160E",
+      "accent": "#2C100A",
+      "mouth": "#1E0A06"
+    }
+  ],
+  "notes": "Every base variant shares the same 512x768 canvas and geometry. Skin tone is a free appearance selection, not an inventory item or store item."
+}

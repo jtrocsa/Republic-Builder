@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" width="512" height="768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Transportation: Bicycle</title>
+  <desc id="desc">Transportation cosmetic. Render behind the character layer on the shared 512 by 768 canvas.</desc>
+  <defs>
+    <linearGradient id="leatherGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d09a5c"/><stop offset=".55" stop-color="#9a6038"/><stop offset="1" stop-color="#643923"/></linearGradient>
+    <linearGradient id="clothGrad" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7e7"/><stop offset=".5" stop-color="#e5d4b8"/><stop offset="1" stop-color="#cdb68e"/></linearGradient>
+    <linearGradient id="navyGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#537895"/><stop offset="1" stop-color="#25465c"/></linearGradient>
+    <linearGradient id="denimGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#5e83a8"/><stop offset=".55" stop-color="#41648b"/><stop offset="1" stop-color="#29455f"/></linearGradient>
+    <linearGradient id="metalGrad" x1="0" x2="1"><stop stop-color="#fff2bb"/><stop offset=".4" stop-color="#d4ac4e"/><stop offset="1" stop-color="#885d21"/></linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1e252a" flood-opacity=".22"/></filter>
+    <filter id="tinyShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e252a" flood-opacity=".3"/></filter>
+  </defs>
+  <g id="transport-bicycle" stroke="#2d3740" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" filter="url(#softShadow)"><circle cx="166" cy="614" r="66" fill="none" stroke="#a9444f" stroke-width="12"/><circle cx="335" cy="614" r="66" fill="none" stroke="#a9444f" stroke-width="12"/><path d="M166 614 L224 504 L282 614 L166 614 L251 614 L224 504 L294 504 L334 614 M254 497 L270 474 M212 499 L184 484" fill="none" stroke="#be8a35" stroke-width="12" stroke-linejoin="round"/></g>
+</svg>

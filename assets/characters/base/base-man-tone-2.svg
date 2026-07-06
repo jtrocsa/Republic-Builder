@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" width="512" height="768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Base character model: man, skin tone 2</title>
+  <desc id="desc">Base character model with skin tone 2 and a transparent background. Use as the body layer for all cosmetics.</desc>
+  <defs>
+    <linearGradient id="leatherGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d09a5c"/><stop offset=".55" stop-color="#9a6038"/><stop offset="1" stop-color="#643923"/></linearGradient>
+    <linearGradient id="clothGrad" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7e7"/><stop offset=".5" stop-color="#e5d4b8"/><stop offset="1" stop-color="#cdb68e"/></linearGradient>
+    <linearGradient id="navyGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#537895"/><stop offset="1" stop-color="#25465c"/></linearGradient>
+    <linearGradient id="denimGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#5e83a8"/><stop offset=".55" stop-color="#41648b"/><stop offset="1" stop-color="#29455f"/></linearGradient>
+    <linearGradient id="metalGrad" x1="0" x2="1"><stop stop-color="#fff2bb"/><stop offset=".4" stop-color="#d4ac4e"/><stop offset="1" stop-color="#885d21"/></linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1e252a" flood-opacity=".22"/></filter>
+    <filter id="tinyShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e252a" flood-opacity=".3"/></filter>
+  </defs>
+  
+<g id="base-man" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#softShadow)">
+  <ellipse cx="256" cy="706" rx="142" ry="18" fill="#26333b" opacity=".16" stroke="none"/>
+  <!-- rear legs / underclothes -->
+  <path d="M212 409 L300 409 L314 622 Q310 658 286 670 L258 668 L252 500 L246 668 L219 670 Q196 656 198 621 Z" fill="#e4d9c7"/>
+  <path d="M207 410 L305 410 L306 474 L205 474 Z" fill="#d6c8b3"/>
+  <!-- arms -->
+  <path d="M207 270 Q170 286 157 345 L142 438 Q141 471 163 481 Q184 486 193 456 L210 377 L230 308 Z" fill="#efc6a6"/>
+  <path d="M306 270 Q343 286 355 345 L371 438 Q371 471 349 481 Q328 486 319 456 L301 377 L281 308 Z" fill="#efc6a6"/>
+  <!-- torso -->
+  <path d="M210 246 Q256 224 302 246 L323 410 Q310 431 256 435 Q202 431 189 410 Z" fill="#f1e7d5"/>
+  <path d="M205 250 Q255 224 307 250" fill="none" stroke="#c5ad8c" stroke-width="5"/>
+  <!-- neck -->
+  <path d="M234 210 L234 248 Q255 266 278 248 L278 210 Z" fill="#efc6a6"/>
+  <!-- head / ears -->
+  <path d="M192 151 Q192 91 255 83 Q320 91 320 151 Q317 220 256 228 Q195 220 192 151 Z" fill="#efc6a6"/>
+  <path d="M190 151 Q178 145 181 166 Q183 188 198 189" fill="#ca936e"/>
+  <path d="M322 151 Q334 145 331 166 Q329 188 314 189" fill="#ca936e"/>
+  <!-- hair -->
+  <path d="M193 153 Q186 102 211 77 Q253 40 301 78 Q327 104 319 151 L304 139 L298 113 Q268 132 225 117 L211 143 Z" fill="#4b3028"/>
+  <path d="M210 101 Q236 66 278 84" fill="none" stroke="#6b4335" stroke-width="10"/>
+  <!-- face -->
+  <path d="M219 158 Q232 151 244 158" fill="none" stroke="#2d3740" stroke-width="5"/>
+  <path d="M269 158 Q281 151 293 158" fill="none" stroke="#2d3740" stroke-width="5"/>
+  <circle cx="233" cy="160" r="3" fill="#24313b" stroke="none"/><circle cx="280" cy="160" r="3" fill="#24313b" stroke="none"/>
+  <path d="M254 165 L249 184 L260 185" fill="none" stroke="#b67a5b" stroke-width="4"/>
+  <path d="M235 198 Q255 209 277 198" fill="none" stroke="#8b5841" stroke-width="5"/>
+  <!-- hands -->
+  <path d="M142 438 Q129 458 142 476 Q154 491 170 480 L179 462 L168 450 Z" fill="#efc6a6"/>
+  <path d="M371 438 Q383 458 371 476 Q359 491 343 480 L334 462 L345 450 Z" fill="#efc6a6"/>
+</g>
+</svg>

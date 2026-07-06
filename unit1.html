@@ -14,13 +14,14 @@
       href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Spectral:ital,wght@0,400;0,500;0,600;0,700;1,500;1,600&display=swap"
       rel="stylesheet"
     />
+    <link rel="stylesheet" href="css/quest-character-system.css" />
     <link rel="stylesheet" href="css/quest-world.css" />
     <link rel="stylesheet" href="css/quest-progression.css" />
   </head>
   <body class="quest-game">
     <div class="app-shell quest-game">
       <aside class="hud-rail" aria-label="Unit 1 player HUD">
-        <a class="brand" href="features/character-forge/character-forge.html?edit=1" aria-label="Open the founder forge to edit your character">
+        <a class="brand" href="unit1.html" aria-label="Open Atlantic Crossroads home map">
           <span class="brand-mark">RB</span>
           <span><strong>Atlantic</strong><em>Crossroads</em></span>
         </a>
@@ -30,9 +31,12 @@
           <div>
             <p class="eyebrow">Unit 1 Expedition</p>
             <h2 id="hud-player-name">Unnamed Founder</h2>
-            <p><span id="hud-pronouns">Pronouns not set</span> · <span id="hud-profession">Independent Scholar</span></p>
-            <p id="hud-settlement">Frontier Outpost</p>
-            <a class="player-edit-link" href="features/character-forge/character-forge.html?edit=1">Edit Founder</a>
+            <p><span id="hud-pronouns">Pronouns not set</span> · <span id="hud-character-model">Model not set</span></p>
+            <p id="hud-skin-tone">Skin Tone 4</p>
+            <div class="player-profile-actions">
+              <button class="player-edit-link" data-action="open-customize" type="button">Customize</button>
+              <span class="player-gear-indicator" id="new-gear-indicator" hidden><span class="quest-character-new-dot" aria-hidden="true"></span> New Gear Available</span>
+            </div>
           </div>
         </section>
 
@@ -67,6 +71,7 @@
             <p class="eyebrow">Unit 1 · 1491-1607</p>
             <h1>Atlantic Crossroads</h1>
             <p class="world-subtitle">Chart encounters across the Atlantic World. Activities now use plain-language APUSH labels: MCQ Challenge, HIPP Source Analysis, Vocabulary Challenge, and Boss Battle mode tasks.</p>
+            <div id="character-map-callout"></div>
           </div>
         </header>
 

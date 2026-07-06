@@ -1,0 +1,45 @@
+<!-- Adapt to the repository's component framework; this is semantic markup, not a standalone page. -->
+<dialog class="quest-character-wizard" id="characterWizard" aria-labelledby="characterWizardTitle">
+  <div class="quest-character-wizard__layout">
+    <section class="quest-character-wizard__story" aria-label="American Chronicle introduction">
+      <p class="quest-character-wizard__eyebrow">American Chronicle</p>
+      <h1 id="characterWizardTitle">Create your historian.</h1>
+      <p>Your look is yours. Your badge case records what you earn. Every cosmetic can be equipped, unequipped, and collected through quests, badges, or the store.</p>
+    </section>
+    <section class="quest-character-wizard__form" data-character-page="1">
+      <p class="quest-character-wizard__eyebrow">Step 1 of 2</p>
+      <h2>Meet your historian</h2>
+      <label>Character name <input name="characterName" maxlength="32" required></label>
+      <fieldset>
+        <legend>Character model</legend>
+        <div class="quest-character-choice-row">
+          <label class="quest-character-choice"><input type="radio" name="characterSex" value="woman" checked><strong>Woman</strong><span>Uses the woman base model.</span></label>
+          <label class="quest-character-choice"><input type="radio" name="characterSex" value="man"><strong>Man</strong><span>Uses the man base model.</span></label>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Skin tone</legend>
+        <p class="quest-character-appearance-note">Skin tone can be changed later for free.</p>
+        <div class="quest-character-skin-tone-grid" role="radiogroup" aria-label="Skin tone">
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-1"><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#F4D8C4"></span><span>Skin Tone 1</span></label>
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-2"><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#EFC6A6"></span><span>Skin Tone 2</span></label>
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-3"><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#DDA77F"></span><span>Skin Tone 3</span></label>
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-4" checked><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#D89B75"></span><span>Skin Tone 4</span></label>
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-5"><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#BD7955"></span><span>Skin Tone 5</span></label>
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-6"><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#9C5E3E"></span><span>Skin Tone 6</span></label>
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-7"><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#794026"></span><span>Skin Tone 7</span></label>
+          <label class="quest-character-skin-tone"><input type="radio" name="characterSkinTone" value="tone-8"><span class="quest-character-skin-tone__swatch" style="--skin-swatch:#56271C"></span><span>Skin Tone 8</span></label>
+        </div>
+      </fieldset>
+      <label>Pronouns <input name="characterPronouns" maxlength="32" placeholder="she/her, he/him, they/them, or your own"></label>
+      <div class="quest-character-actions"><button type="button" class="quest-character-button" data-character-close>Not now</button><button type="button" class="quest-character-button quest-character-button--primary" data-character-next>Choose starter gear</button></div>
+    </section>
+    <section class="quest-character-wizard__form" data-character-page="2" hidden>
+      <p class="quest-character-wizard__eyebrow">Step 2 of 2</p>
+      <h2>Starter gear</h2>
+      <div class="quest-character-stage" data-character-preview aria-label="Starter character preview"></div>
+      <div class="quest-character-slot-grid" data-character-slot-grid></div>
+      <div class="quest-character-actions"><button type="button" class="quest-character-button" data-character-back>Back</button><button type="button" class="quest-character-button quest-character-button--gold" data-character-finish>Enter the map</button></div>
+    </section>
+  </div>
+</dialog>

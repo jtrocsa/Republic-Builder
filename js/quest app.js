@@ -1,7 +1,6 @@
 import { UNIT, QUESTS, SOURCES, SKILLS, RUBRICS } from './quest%20data.js';
 import { loadState, saveState } from './quest%20store.js';
-import { DEFAULT_STORAGE_KEY, loadProfile } from '../src/services/characterProfile.js';
-import { PROFESSION_BY_ID } from '../src/data/professions.js';
+import { DEFAULT_STORAGE_KEY, loadProfile, saveProfile } from '../src/services/characterProfile.js';
 import { getDataService, getDataModeLabel } from './services/dataService.js';
 import { QUEST_BACKEND_CONFIG } from './config/quest-backend.config.js';
 import { DEFAULT_PROGRESSION_CONFIG, validateProgressionConfig } from './quest-progression-config.js';
@@ -18,6 +17,29 @@ import {
 } from './quest-progression-engine.js';
 import { ALL_STARTER_BADGES, GENERAL_BADGES, UNIT_1_BADGES } from './quest-badge-data.js';
 import { STARTER_STORE_ITEMS } from './quest-store-data.js';
+import {
+  CHARACTER_ITEM_CATALOG,
+  CHARACTER_SLOTS,
+  CHARACTER_SKIN_TONES,
+  CHARACTER_STARTER_LOADOUT,
+  CHARACTER_SYSTEM_DEFAULTS,
+  CHARACTER_DEFAULT_SKIN_TONE,
+  CHARACTER_BASE_MODELS
+} from './quest-character-items.js';
+import {
+  createNewCharacter,
+  migrateCharacterAppearance,
+  getCharacterSkinTone,
+  setCharacterSkinTone,
+  getCharacterItem,
+  ownsCharacterItem,
+  grantCharacterItem,
+  equipCharacterItem,
+  unequipCharacterSlot,
+  getSlotInventory,
+  markCharacterItemsSeen
+} from './quest-character-engine.js';
+import { renderCharacterStage } from './quest-character-renderer.js';
 
 let state = loadState();
 let activeQuest = null;
@@ -46,6 +68,11 @@ const PROGRESSION_STUDENT_ID = QUEST_BACKEND_CONFIG.demoStudentId || 'student-ar
 let progressionConfig = JSON.parse(JSON.stringify(DEFAULT_PROGRESSION_CONFIG));
 let studentProgress = createDefaultStudentProgress(PROGRESSION_STUDENT_ID);
 let pendingStorePurchaseId = null;
+let studentProfile = null;
+let activeCharacter = null;
+let activeCustomizeSlot = 'shirts';
+let characterWizardPage = 1;
+let characterWizardDraft = null;
 const LEGACY_TO_ACTIVITY_TYPE = Object.freeze({
   royale: 'MCQ Challenge',
   vocab: 'Vocabulary Challenge',
@@ -144,6 +171,34 @@ const RUBRIC_ASSETS = [
   { id: 'dbq', title: 'DBQ Rubric', file: 'APUSH%20Rubrics/DBQ%20Rubric.png', type: 'image', note: '7-point document-based question scoring structure.' }
 ];
 
+const CHARACTER_SLOT_LABELS = Object.freeze({
+  shoes: 'Shoes',
+  shirts: 'Shirt',
+  hats: 'Hat',
+  belts: 'Belt',
+  pants: 'Pants',
+  hands: 'Hand',
+  transportation: 'Transportation'
+});
+
+const BADGE_ITEM_REWARDS = Object.freeze({
+  'u1-atlantic-cartographer': 'hands-atlas',
+  'u1-three-worlds-interpreter': 'hands-rolled-map',
+  'u1-exchange-investigator': 'hands-compass',
+  'u1-colonial-sourcekeeper': 'hats-tricorn-hat',
+  'u1-foundations-of-america-seal': 'transportation-horse',
+  'mcq-mastery:gold': 'hats-laurel-of-learning',
+  'hipp-mastery:silver': 'hands-magnifying-glass',
+  'dbq-mastery:gold': 'hands-master-seal'
+});
+
+const QUEST_ITEM_REWARDS = Object.freeze({
+  'q-southwest-survey': 'hands-atlas',
+  'q-columbus-dispatch': 'hands-spyglass',
+  'q-virginia-royale': 'hats-newsboy-cap',
+  'q-empires-reckoning': 'transportation-covered-wagon'
+});
+
 const $ = (selector, parent = document) => parent.querySelector(selector);
 const $$ = (selector, parent = document) => [...parent.querySelectorAll(selector)];
 
@@ -153,6 +208,202 @@ function text(value = '') {
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function sanitizeCharacterName(value = '') {
+  return String(value || '').trim().slice(0, 32) || 'Historian';
+}
+
+function sanitizePronouns(value = '') {
+  return String(value || '').trim().slice(0, 32) || 'they/them';
+}
+
+function toCharacterModel(value = '') {
+  const normalized = String(value || '').toLowerCase();
+  return normalized === 'man' ? 'man' : 'woman';
+}
+
+function mapLegacyOutfitToEquipment(outfit = {}) {
+  const mapped = {
+    hats: null,
+    shirts: null,
+    belts: null,
+    pants: null,
+    shoes: null,
+    hands: null,
+    transportation: null
+  };
+
+  const legacyHat = String(outfit.hat || '').toLowerCase();
+  if (legacyHat && legacyHat !== 'hat-none') mapped.hats = 'hats-tricorn-hat';
+
+  const legacyShirt = String(outfit.shirt || '').toLowerCase();
+  if (legacyShirt) {
+    if (legacyShirt.includes('work')) mapped.shirts = 'shirts-work-shirt';
+    else if (legacyShirt.includes('vest') || legacyShirt.includes('linen')) mapped.shirts = 'shirts-colonial-waistcoat';
+  }
+
+  const legacyPants = String(outfit.pants || '').toLowerCase();
+  if (legacyPants) {
+    if (legacyPants.includes('work')) mapped.pants = 'pants-workwear-pants';
+    else if (legacyPants.includes('breeches') || legacyPants.includes('navy')) mapped.pants = 'pants-colonial-breeches';
+  }
+
+  const legacyShoes = String(outfit.shoes || '').toLowerCase();
+  if (legacyShoes) {
+    if (legacyShoes.includes('riding')) mapped.shoes = 'shoes-riding-boots';
+    else if (legacyShoes.includes('work')) mapped.shoes = 'shoes-frontier-boots';
+    else if (legacyShoes.includes('buckled')) mapped.shoes = 'shoes-colonial-buckles';
+  }
+
+  return mapped;
+}
+
+function mergeEquippedWithStarter(equipped = {}) {
+  const merged = { ...CHARACTER_STARTER_LOADOUT, ...(equipped || {}) };
+  for (const slot of Object.keys(CHARACTER_STARTER_LOADOUT)) {
+    if (merged[slot] === undefined) merged[slot] = CHARACTER_STARTER_LOADOUT[slot];
+  }
+  return merged;
+}
+
+function normalizeCharacterForLiveProfile(profile, progress) {
+  const existingIdentity = profile?.identity || {};
+  const coreCharacter = readCoreState()?.character || {};
+  const hasPriorCharacterData = Boolean(profile?.character || existingIdentity.name || coreCharacter.name);
+  if (!hasPriorCharacterData) return null;
+  const model = toCharacterModel(profile?.character?.baseModel || profile?.character?.identity?.sex || existingIdentity.gender || coreCharacter.gender);
+  const name = sanitizeCharacterName(profile?.character?.identity?.name || existingIdentity.name || coreCharacter.name || 'Historian');
+  const pronouns = sanitizePronouns(profile?.character?.identity?.pronouns || existingIdentity.pronouns || 'they/them');
+  const requestedTone = profile?.character?.appearance?.skinTone || profile?.appearance?.skinTone || coreCharacter.appearance?.skinTone || coreCharacter.skinTone || CHARACTER_DEFAULT_SKIN_TONE;
+
+  let character = profile?.character
+    ? migrateCharacterAppearance(profile.character)
+    : createNewCharacter({ name, sex: model, pronouns, skinTone: requestedTone });
+
+  const legacyMapped = mapLegacyOutfitToEquipment(existingIdentity.outfit || coreCharacter.outfit || {});
+  character.inventory = Array.from(new Set([
+    ...(Array.isArray(character.inventory) ? character.inventory : []),
+    ...(Array.isArray(progress.inventoryItemIds) ? progress.inventoryItemIds : []),
+    ...Object.values(CHARACTER_STARTER_LOADOUT).filter(Boolean),
+    ...Object.values(legacyMapped).filter(Boolean)
+  ]));
+
+  character.equipped = mergeEquippedWithStarter({
+    ...(character.equipped || {}),
+    ...(progress.equipped || {}),
+    ...legacyMapped
+  });
+
+  // Enforce slot correctness and safe starter fallback.
+  Object.entries(character.equipped).forEach(([slot, itemId]) => {
+    if (!itemId) return;
+    const item = getCharacterItem(itemId);
+    if (!item || item.slot !== slot || !character.inventory.includes(itemId)) {
+      character.equipped[slot] = CHARACTER_STARTER_LOADOUT[slot] || null;
+    }
+  });
+
+  character.appearance = { ...(character.appearance || {}), skinTone: getCharacterSkinTone(character) };
+  character.identity = { ...(character.identity || {}), name, pronouns, sex: model };
+  character.baseModel = model;
+  character.schemaVersion = Math.max(Number(character.schemaVersion || 1), CHARACTER_SYSTEM_DEFAULTS.schemaVersion);
+  return character;
+}
+
+function persistCharacterProfile(syncProgress = true) {
+  if (!studentProfile || !activeCharacter) return;
+  studentProfile.character = clone(activeCharacter);
+  studentProfile.identity = {
+    ...(studentProfile.identity || {}),
+    name: activeCharacter.identity?.name,
+    gender: activeCharacter.baseModel,
+    pronouns: activeCharacter.identity?.pronouns,
+    outfit: studentProfile.identity?.outfit || null
+  };
+  studentProfile.appearance = {
+    ...(studentProfile.appearance || {}),
+    skinTone: activeCharacter.appearance?.skinTone || CHARACTER_DEFAULT_SKIN_TONE
+  };
+  studentProfile.version = Math.max(Number(studentProfile.version || 1), 3);
+  saveProfile(studentProfile, DEFAULT_STORAGE_KEY);
+
+  if (syncProgress) {
+    const nextProgress = clone(studentProgress);
+    nextProgress.inventoryItemIds = Array.from(new Set(activeCharacter.inventory || []));
+    nextProgress.equipped = mergeEquippedWithStarter(activeCharacter.equipped || {});
+    saveStudentProgress(nextProgress);
+  }
+}
+
+function hydrateCharacterSystem() {
+  studentProfile = loadProfile(DEFAULT_STORAGE_KEY) || {};
+  activeCharacter = normalizeCharacterForLiveProfile(studentProfile, studentProgress);
+  if (activeCharacter) persistCharacterProfile(true);
+}
+
+function getCharacterNewItemCount(character = activeCharacter) {
+  if (!character) return 0;
+  const seen = new Set(character.seenItemIds || []);
+  const equipped = new Set(Object.values(character.equipped || {}).filter(Boolean));
+  return (character.inventory || []).filter((itemId) => !seen.has(itemId) && !equipped.has(itemId)).length;
+}
+
+function getCharacterRewardItemFromBadgeAward(award) {
+  if (!award?.badgeId) return null;
+  if (award.tierId && BADGE_ITEM_REWARDS[`${award.badgeId}:${award.tierId}`]) {
+    return BADGE_ITEM_REWARDS[`${award.badgeId}:${award.tierId}`];
+  }
+  return BADGE_ITEM_REWARDS[award.badgeId] || null;
+}
+
+function grantCharacterRewardItem(itemId, sourceText = 'Reward unlocked') {
+  if (!activeCharacter || !itemId) return null;
+  const item = getCharacterItem(itemId);
+  if (!item) return null;
+  const granted = grantCharacterItem(activeCharacter, itemId, sourceText);
+  activeCharacter = granted.character;
+  if (granted.changed) {
+    persistCharacterProfile(true);
+  }
+  return { item, granted: granted.changed };
+}
+
+function openGearRewardPopup(itemId, sourceLabel = 'New gear unlocked') {
+  const item = getCharacterItem(itemId);
+  if (!item) return;
+  openOverlay();
+  $('#modal-layer').innerHTML = `
+    <article class="small-modal">
+      <header class="quest-modal-header">
+        <div>
+          <p class="eyebrow">${text(sourceLabel)}</p>
+          <h2>New Gear Available</h2>
+          <p>${text(item.name)} · ${text(String(item.rarity || '').toUpperCase())}</p>
+        </div>
+        <button class="close-button" data-close-modal aria-label="Close">×</button>
+      </header>
+      <div class="quest-modal-body" style="display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr);gap:14px;align-items:start;">
+        <div id="reward-gear-preview" class="quest-character-stage" aria-label="Character preview"></div>
+        <div>
+          <p>${text(item.description || 'A new cosmetic item has been added to your inventory.')}</p>
+          <p class="qp-level-meta">Slot: ${text(CHARACTER_SLOT_LABELS[item.slot] || item.slot)}</p>
+          <p class="qp-level-meta">Rarity: ${text(String(item.rarity || '').toUpperCase())}</p>
+          <div class="quest-actions" style="margin-top:12px;">
+            <button class="primary-button" data-action="equip-character-item" data-item-id="${item.id}" type="button">Equip Now</button>
+            <button class="text-button" data-action="open-customize" type="button">Open Customize</button>
+          </div>
+        </div>
+      </div>
+    </article>`;
+  $('#modal-layer').classList.add('open');
+  $('#modal-layer').setAttribute('aria-hidden', 'false');
+  const previewCharacter = clone(activeCharacter || {});
+  if (previewCharacter?.equipped && item.slot) {
+    previewCharacter.equipped[item.slot] = item.id;
+  }
+  const preview = $('#reward-gear-preview');
+  if (preview && previewCharacter?.identity) renderCharacterStage(preview, previewCharacter, { label: 'Reward preview' });
 }
 
 function loadStudentProgress() {
@@ -987,48 +1238,31 @@ function titleCaseFromSlug(value = '') {
 }
 
 function getPlayerAdapter() {
-  const profile = loadProfile(DEFAULT_STORAGE_KEY);
-  const coreState = readCoreState();
-  const character = coreState?.character || {};
-  const identity = profile?.identity || {};
-  const townRaw = identity.town || character.town || 'Frontier Outpost';
-  const professionId = identity.professionId || character.profession || '';
-  const profession = PROFESSION_BY_ID[professionId];
-  const starterCount = Array.isArray(profile?.inventory?.starterItems) ? profile.inventory.starterItems.length : 0;
-
+  const character = activeCharacter || {};
+  const tone = getCharacterSkinTone(character);
+  const toneLabel = CHARACTER_SKIN_TONES.find((item) => item.id === tone)?.label || 'Skin Tone 4';
+  const model = toCharacterModel(character?.baseModel || character?.identity?.sex || 'woman');
+  const starterCount = Object.values(CHARACTER_STARTER_LOADOUT).filter((itemId) => (character.inventory || []).includes(itemId)).length;
   return {
-    name: identity.name || character.name || 'Unnamed Founder',
-    pronouns: identity.pronouns || 'Pronouns not set',
-    profession: profession?.label || titleCaseFromSlug(professionId || 'independent scholar'),
-    settlement: titleCaseFromSlug(townRaw),
-    gender: identity.gender || character.gender || 'neutral',
-    outfit: identity.outfit || character.outfit || null,
-    starterItemCount: starterCount
+    name: character.identity?.name || 'Unnamed Historian',
+    pronouns: character.identity?.pronouns || 'Pronouns not set',
+    model: CHARACTER_BASE_MODELS[model]?.label || 'Woman',
+    skinToneLabel: toneLabel,
+    starterItemCount: starterCount,
+    hasCharacter: Boolean(character.identity?.name)
   };
 }
 
 function renderPortrait(player) {
   const portrait = $('#hud-portrait');
   if (!portrait) return;
-
-  const gender = String(player.gender || 'neutral').toLowerCase();
-  const baseAsset = gender === 'man' ? 'assets/character/base/man.svg' : gender === 'woman' ? 'assets/character/base/woman.svg' : 'assets/character/base/neutral.svg';
-  const outfit = player.outfit || {};
-  const layerAssets = [
-    ['base', baseAsset],
-    ['socks', outfit.socks ? `assets/character/wardrobe/socks/${outfit.socks}.svg` : ''],
-    ['pants', outfit.pants ? `assets/character/wardrobe/pants/${outfit.pants}.svg` : ''],
-    ['shoes', outfit.shoes ? `assets/character/wardrobe/shoes/${outfit.shoes}.svg` : ''],
-    ['shirt', outfit.shirt ? `assets/character/wardrobe/shirts/${outfit.shirt}.svg` : ''],
-    ['hat', outfit.hat ? `assets/character/wardrobe/hats/${outfit.hat}.svg` : '']
-  ];
-
-  const layers = layerAssets
-    .filter(([, path]) => path)
-    .map(([slot, path]) => `<img class="avatar-layer avatar-layer-${slot}" src="${path}" alt="" aria-hidden="true" loading="lazy" />`)
-    .join('');
-
-  portrait.innerHTML = layers || '<div class="portrait-fallback" aria-hidden="true"><div class="portrait-hair"></div><div class="portrait-face"></div><div class="portrait-tunic"></div></div>';
+  if (!activeCharacter) {
+    portrait.innerHTML = '<div class="portrait-fallback" aria-hidden="true"><div class="portrait-hair"></div><div class="portrait-face"></div><div class="portrait-tunic"></div></div>';
+    return;
+  }
+  renderCharacterStage(portrait, activeCharacter, {
+    label: `${player.name} avatar preview`
+  });
 }
 
 function setDispatch(title, copy) {
@@ -1099,9 +1333,41 @@ function updateHud() {
 
   $('#hud-player-name').textContent = player.name;
   $('#hud-pronouns').textContent = player.pronouns;
-  $('#hud-profession').textContent = player.profession;
-  $('#hud-settlement').textContent = player.settlement;
+  const modelNode = $('#hud-character-model');
+  if (modelNode) modelNode.textContent = player.model;
+  const skinNode = $('#hud-skin-tone');
+  if (skinNode) skinNode.textContent = player.skinToneLabel;
   renderPortrait(player);
+
+  const newGearCount = getCharacterNewItemCount(activeCharacter);
+  const newGearIndicator = $('#new-gear-indicator');
+  if (newGearIndicator) {
+    newGearIndicator.hidden = newGearCount < 1;
+    if (newGearCount > 0) {
+      newGearIndicator.innerHTML = `<span class="quest-character-new-dot" aria-hidden="true"></span> New Gear Available (${newGearCount})`;
+    }
+  }
+
+  const calloutHost = $('#character-map-callout');
+  if (calloutHost) {
+    if (!activeCharacter?.identity?.name) {
+      calloutHost.innerHTML = `
+        <div class="character-map-callout" role="status" aria-live="polite">
+          <span>Create your historian to equip rewards and track cosmetics.</span>
+          <button data-action="open-character-wizard" type="button">Create Character</button>
+          <button class="text-button" data-action="dismiss-character-callout" type="button">Later</button>
+        </div>`;
+      if (state.dismissedCharacterCallout) calloutHost.innerHTML = '<div class="character-map-callout"><span>Customize is always available from your profile card.</span><button data-action="open-character-wizard" type="button">Create Character</button></div>';
+    } else if (newGearCount > 0) {
+      calloutHost.innerHTML = `
+        <div class="character-map-callout" role="status" aria-live="polite">
+          <span><span class="quest-character-new-dot" aria-hidden="true"></span> ${newGearCount} new gear item${newGearCount > 1 ? 's' : ''} ready to equip.</span>
+          <button data-action="open-customize" type="button">Customize</button>
+        </div>`;
+    } else {
+      calloutHost.innerHTML = '';
+    }
+  }
 
   $('#quest-progress-label').textContent = `${completedCount} of ${totalQuestCount} quests completed`;
   $('#unit-progress-bar').style.width = `${percent}%`;
@@ -1109,7 +1375,7 @@ function updateHud() {
   $('#xp-bar').style.width = `${Math.round(levelState.progressWithinLevel * 100)}%`;
   $('#player-level').textContent = levelState.level;
   const inventoryCount = $('#inventory-count');
-  if (inventoryCount) inventoryCount.textContent = String(studentProgress.inventoryItemIds.length);
+  if (inventoryCount) inventoryCount.textContent = String(activeCharacter?.inventory?.length || 0);
   const sourceCount = $('#source-count-badge');
   if (sourceCount) sourceCount.textContent = String(SOURCES.length);
   const archiveTokens = $('#archive-token-balance');
@@ -1605,6 +1871,20 @@ function completeQuest(quest, message, skillGains = {}) {
   });
   saveStudentProgress(completion.progress);
   const firstCompletion = completion.awarded;
+  const unlockedGear = [];
+
+  const questRewardItemId = QUEST_ITEM_REWARDS[quest.id];
+  if (questRewardItemId) {
+    const reward = grantCharacterRewardItem(questRewardItemId, `Quest reward: ${quest.title}`);
+    if (reward?.granted) unlockedGear.push(reward.item);
+  }
+
+  completion.badgeAwards.forEach((award) => {
+    const badgeItemId = getCharacterRewardItemFromBadgeAward(award);
+    if (!badgeItemId) return;
+    const reward = grantCharacterRewardItem(badgeItemId, `Badge reward: ${award.badgeId}`);
+    if (reward?.granted) unlockedGear.push(reward.item);
+  });
 
   state.completed[quest.id] = true;
   if (firstCompletion) {
@@ -1638,10 +1918,14 @@ function completeQuest(quest, message, skillGains = {}) {
   if (feedback) {
     showFeedback(
       feedback,
-      `${message} ${rewardSummary}${badgeMessages.length ? `<br /><strong>Badges:</strong> ${text(badgeMessages.join(', '))}` : ''}`,
+      `${message} ${rewardSummary}${badgeMessages.length ? `<br /><strong>Badges:</strong> ${text(badgeMessages.join(', '))}` : ''}${unlockedGear.length ? `<br /><strong>Gear:</strong> ${text(unlockedGear.map((item) => item.name).join(', '))}` : ''}`,
       firstCompletion ? 'correct' : 'notice',
       true
     );
+  }
+
+  if (unlockedGear.length) {
+    openGearRewardPopup(unlockedGear[0].id, 'Quest and Badge Rewards');
   }
 }
 
@@ -1653,14 +1937,193 @@ function showFeedback(selector, message, mode = 'notice', allowHtml = false) {
   element.innerHTML = allowHtml ? message : text(message);
 }
 
-function openInventory() {
-  const inventoryRows = studentProgress.inventoryItemIds.map((itemId) => STARTER_STORE_ITEMS.find((item) => item.id === itemId)).filter(Boolean);
-  const equippedIdSet = new Set(Object.values(studentProgress.equipped || {}).filter(Boolean));
+function getStarterSlotItem(slotId) {
+  return CHARACTER_STARTER_LOADOUT[slotId] || null;
+}
+
+function normalizeSlotChoice(character, slotId) {
+  if (!character || !slotId) return null;
+  const current = character.equipped?.[slotId];
+  if (current) return current;
+  if (slotId === 'hats' || slotId === 'transportation') return null;
+  return getStarterSlotItem(slotId);
+}
+
+function renderSkinToneSwatches(selectedTone = CHARACTER_DEFAULT_SKIN_TONE, inputName = 'character-skin-tone') {
+  return CHARACTER_SKIN_TONES.map((tone) => `
+    <label class="quest-character-skin-tone">
+      <input type="radio" name="${text(inputName)}" value="${tone.id}" ${tone.id === selectedTone ? 'checked' : ''} />
+      <span class="quest-character-skin-tone__swatch" style="--skin-swatch:${tone.swatch}"></span>
+      <span>${text(tone.label)}</span>
+    </label>`).join('');
+}
+
+function renderCharacterSlotGrid(character, selectedSlot = 'shirts', includeButtons = true) {
+  return CHARACTER_SLOTS.map((slot) => {
+    const equippedId = normalizeSlotChoice(character, slot.id);
+    const item = equippedId ? getCharacterItem(equippedId) : null;
+    const selected = slot.id === selectedSlot;
+    if (!includeButtons) {
+      return `<div class="quest-character-slot" aria-pressed="${selected ? 'true' : 'false'}"><strong>${text(CHARACTER_SLOT_LABELS[slot.id] || slot.label)}</strong><small>${text(item?.name || slot.emptyLabel)}</small></div>`;
+    }
+    return `<button type="button" class="quest-character-slot" data-character-slot="${slot.id}" aria-pressed="${selected ? 'true' : 'false'}"><strong>${text(CHARACTER_SLOT_LABELS[slot.id] || slot.label)}</strong><small>${text(item?.name || slot.emptyLabel)}</small></button>`;
+  }).join('');
+}
+
+function getCharacterWizardDraft() {
+  if (characterWizardDraft) return characterWizardDraft;
+  const baseModel = toCharacterModel(activeCharacter?.baseModel || activeCharacter?.identity?.sex || 'woman');
+  characterWizardDraft = {
+    name: sanitizeCharacterName(activeCharacter?.identity?.name || studentProfile?.identity?.name || ''),
+    sex: baseModel,
+    pronouns: sanitizePronouns(activeCharacter?.identity?.pronouns || studentProfile?.identity?.pronouns || 'they/them'),
+    skinTone: getCharacterSkinTone(activeCharacter || { appearance: { skinTone: CHARACTER_DEFAULT_SKIN_TONE } })
+  };
+  return characterWizardDraft;
+}
+
+function buildCharacterFromDraft(draft) {
+  const identity = {
+    name: sanitizeCharacterName(draft.name),
+    sex: toCharacterModel(draft.sex),
+    pronouns: sanitizePronouns(draft.pronouns)
+  };
+  if (!activeCharacter?.identity?.name) {
+    return createNewCharacter({
+      name: identity.name,
+      sex: identity.sex,
+      pronouns: identity.pronouns,
+      skinTone: draft.skinTone
+    });
+  }
+
+  let next = migrateCharacterAppearance(activeCharacter);
+  next.identity = { ...(next.identity || {}), ...identity, sex: identity.sex };
+  next.baseModel = identity.sex;
+  next = setCharacterSkinTone(next, draft.skinTone);
+  next.inventory = Array.from(new Set([...(next.inventory || []), ...Object.values(CHARACTER_STARTER_LOADOUT).filter(Boolean)]));
+  next.equipped = mergeEquippedWithStarter(next.equipped || {});
+  return next;
+}
+
+function renderCharacterWizardModal() {
+  const draft = getCharacterWizardDraft();
   openOverlay();
   $('#modal-layer').innerHTML = `
-    <article class="small-modal"><header class="quest-modal-header"><div><p class="eyebrow">Founder inventory</p><h2>Field Gear & Keepsakes</h2><p>Inventory stays empty until you purchase items in the Store.</p></div><button class="close-button" data-close-modal>×</button></header><div class="inventory-grid">${inventoryRows.map((item) => `<article><span>◌</span><h3>${text(item.name)}</h3><p>${text(item.description)}</p><button class="text-button" data-teacher-action="equip-store-item" data-item-id="${item.id}" type="button">${equippedIdSet.has(item.id) ? 'Equipped' : 'Equip'}</button></article>`).join('') || '<article><span>○</span><h3>No items yet</h3><p>Buy cosmetics from the Store to populate inventory.</p></article>'}</div></article>`;
+    <article class="quest-character-wizard" aria-label="Character creator">
+      <div class="quest-character-wizard__layout">
+        <section class="quest-character-wizard__story" aria-label="American Chronicle introduction">
+          <p class="quest-character-wizard__eyebrow">${text(CHARACTER_SYSTEM_DEFAULTS.gameTitle || 'American Chronicle')}</p>
+          <h1>Create your historian.</h1>
+          <p>The map remains your home base. Character setup unlocks gear rewards, equipment, and avatar customization.</p>
+          <div id="character-wizard-preview-page-1" class="quest-character-stage" style="margin-top:14px; max-width:260px;" aria-label="Live character preview"></div>
+        </section>
+        <section class="quest-character-wizard__form" data-character-page="1" ${characterWizardPage === 1 ? '' : 'hidden'}>
+          <p class="quest-character-wizard__eyebrow">Step 1 of 2</p>
+          <h2>Identity and appearance</h2>
+          <label>Character name <input id="wizard-character-name" maxlength="32" required value="${text(draft.name)}" /></label>
+          <fieldset>
+            <legend>Character model</legend>
+            <div class="quest-character-choice-row">
+              <label class="quest-character-choice"><input type="radio" name="wizard-character-sex" value="woman" ${draft.sex === 'woman' ? 'checked' : ''} /><strong>Woman</strong><span>Uses the woman base model.</span></label>
+              <label class="quest-character-choice"><input type="radio" name="wizard-character-sex" value="man" ${draft.sex === 'man' ? 'checked' : ''} /><strong>Man</strong><span>Uses the man base model.</span></label>
+            </div>
+          </fieldset>
+          <fieldset>
+            <legend>Skin tone</legend>
+            <p class="quest-character-appearance-note">Skin tone can be changed later for free.</p>
+            <div class="quest-character-skin-tone-grid" role="radiogroup" aria-label="Skin tone">${renderSkinToneSwatches(draft.skinTone, 'wizard-character-skin-tone')}</div>
+          </fieldset>
+          <label>Pronouns <input id="wizard-character-pronouns" maxlength="32" value="${text(draft.pronouns)}" placeholder="she/her, he/him, they/them, or your own" /></label>
+          <div class="quest-character-actions"><button type="button" class="quest-character-button" data-action="close-character-wizard">Not now</button><button type="button" class="quest-character-button quest-character-button--primary" data-action="wizard-next">Choose starter gear</button></div>
+        </section>
+        <section class="quest-character-wizard__form" data-character-page="2" ${characterWizardPage === 2 ? '' : 'hidden'}>
+          <p class="quest-character-wizard__eyebrow">Step 2 of 2</p>
+          <h2>Starter gear and equipment slots</h2>
+          <div id="character-wizard-preview-page-2" class="quest-character-stage" aria-label="Starter character preview"></div>
+          <div class="quest-character-slot-grid">${renderCharacterSlotGrid(buildCharacterFromDraft(draft), 'shirts', false)}</div>
+          <div class="quest-character-actions"><button type="button" class="quest-character-button" data-action="wizard-back">Back</button><button type="button" class="quest-character-button quest-character-button--gold" data-action="wizard-finish">Begin Journey</button></div>
+        </section>
+      </div>
+    </article>`;
   $('#modal-layer').classList.add('open');
   $('#modal-layer').setAttribute('aria-hidden', 'false');
+
+  const preview1 = $('#character-wizard-preview-page-1');
+  const preview2 = $('#character-wizard-preview-page-2');
+  const previewCharacter = buildCharacterFromDraft(draft);
+  if (preview1) renderCharacterStage(preview1, previewCharacter, { label: 'Identity preview' });
+  if (preview2) renderCharacterStage(preview2, previewCharacter, { label: 'Starter gear preview' });
+}
+
+function openCharacterWizard() {
+  characterWizardPage = 1;
+  characterWizardDraft = null;
+  renderCharacterWizardModal();
+}
+
+function openCustomize() {
+  if (!activeCharacter?.identity?.name) {
+    openCharacterWizard();
+    return;
+  }
+
+  activeCharacter = markCharacterItemsSeen(activeCharacter, activeCharacter.inventory || []);
+  persistCharacterProfile(true);
+
+  const selectedSlot = activeCustomizeSlot || 'shirts';
+  const slotLabel = CHARACTER_SLOT_LABELS[selectedSlot] || selectedSlot;
+  const slotItems = getSlotInventory(activeCharacter, selectedSlot);
+  const equippedId = normalizeSlotChoice(activeCharacter, selectedSlot);
+
+  openOverlay();
+  $('#modal-layer').innerHTML = `
+    <article class="small-modal">
+      <header class="quest-modal-header">
+        <div>
+          <p class="eyebrow">Customize</p>
+          <h2>${text(activeCharacter.identity?.name || 'Historian')} · Equipment</h2>
+          <p>Equip one item per slot. Skin tone is always free and separate from inventory.</p>
+        </div>
+        <button class="close-button" data-close-modal aria-label="Close">×</button>
+      </header>
+      <div class="quest-modal-body" style="display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:14px;align-items:start;">
+        <section>
+          <div id="customize-character-preview" class="quest-character-stage" aria-label="Live avatar preview"></div>
+          <div class="quest-character-appearance-panel" style="margin-top:10px;">
+            <p class="quest-character-appearance-note">Appearance: skin tone can be changed any time for free.</p>
+            <div class="quest-character-skin-tone-grid" role="radiogroup" aria-label="Skin tone appearance choices">${renderSkinToneSwatches(getCharacterSkinTone(activeCharacter), 'customize-skin-tone')}</div>
+          </div>
+        </section>
+        <section>
+          <div class="quest-character-slot-grid" style="margin-bottom:10px;">${renderCharacterSlotGrid(activeCharacter, selectedSlot, true)}</div>
+          <div class="teacher-builder-block">
+            <h3 style="font-size:20px;">${text(slotLabel)} inventory</h3>
+            <div class="inventory-grid">${slotItems.map((item) => `
+              <article>
+                <span>${item.rarity === 'legendary' ? '✦' : item.rarity === 'epic' ? '◆' : item.rarity === 'rare' ? '◈' : item.rarity === 'uncommon' ? '◌' : '○'}</span>
+                <h3>${text(item.name)}</h3>
+                <p>${text(item.description)}</p>
+                <p class="qp-level-meta">${text(String(item.rarity || '').toUpperCase())}</p>
+                <button class="text-button" data-action="equip-character-item" data-item-id="${item.id}" type="button">${equippedId === item.id ? 'Equipped' : 'Equip'}</button>
+              </article>`).join('') || '<article><span>○</span><h3>No owned items</h3><p>Earn or purchase items for this slot to equip them.</p></article>'}
+            </div>
+            <div class="quest-actions" style="margin-top:10px;">
+              <button class="text-button" data-action="unequip-character-slot" data-slot="${selectedSlot}" type="button">${selectedSlot === 'hats' || selectedSlot === 'transportation' ? 'Set empty' : 'Revert to starter item'}</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </article>`;
+  $('#modal-layer').classList.add('open');
+  $('#modal-layer').setAttribute('aria-hidden', 'false');
+  const preview = $('#customize-character-preview');
+  if (preview) renderCharacterStage(preview, activeCharacter, { label: `${activeCharacter.identity?.name || 'Historian'} equipment preview` });
+  updateHud();
+}
+
+function openInventory() {
+  openCustomize();
 }
 
 function getTierProgressText(badge, visual) {
@@ -1737,7 +2200,8 @@ function openBadgeCase() {
 
 function openStore() {
   openOverlay();
-  const ownedSet = new Set(studentProgress.inventoryItemIds || []);
+  const ownedSet = new Set(activeCharacter?.inventory || []);
+  const equippedSet = new Set(Object.values(activeCharacter?.equipped || {}).filter(Boolean));
   const items = STARTER_STORE_ITEMS.map((item) => {
     const owns = ownedSet.has(item.id);
     const hasBadge = !item.requiresBadgeId || studentProgress.earnedBadgeIds.includes(item.requiresBadgeId);
@@ -1745,16 +2209,26 @@ function openStore() {
     const lockedReason = !hasBadge ? `Requires ${item.requiresBadgeId}` : !canAfford ? 'Not enough Archive Tokens' : '';
     return `
       <article class="qp-card qp-quest-card" aria-label="Store item ${text(item.name)}">
-        <p class="qp-activity-type">${text(item.category)} · ${text(item.rarity)}</p>
+        <div class="store-item-art" aria-hidden="true" data-slot="${text(item.slot || item.category)}">
+          <img
+            src="${text(item.assetPath)}"
+            alt="${text(item.name)} preview"
+            loading="eager"
+            decoding="async"
+            onerror="this.style.display='none'; this.parentElement.classList.add('is-missing');"
+          />
+        </div>
+        <p class="qp-activity-type">${text(item.categoryLabel || CHARACTER_SLOT_LABELS[item.slot] || item.category)} · ${text(item.rarity)}</p>
         <h3>${text(item.name)}</h3>
         <p>${text(item.description)}</p>
         <div class="qp-quest-meta">
           <span class="qp-tag">Price: ${item.price} Tokens</span>
-          <span class="qp-tag">${item.cosmeticOnly ? 'Cosmetic' : 'Ungraded Tool'}</span>
+          <span class="qp-tag">Slot: ${text(item.categoryLabel || CHARACTER_SLOT_LABELS[item.slot] || item.category)}</span>
+          <span class="qp-tag">${equippedSet.has(item.id) ? 'Equipped' : owns ? 'Owned' : 'Purchasable'}</span>
           ${item.requiresBadgeId ? `<span class="qp-tag">Badge: ${text(item.requiresBadgeId)}</span>` : ''}
         </div>
         <div class="quest-actions" style="margin-top:10px;">
-          <button class="primary-button" ${owns ? 'disabled' : ''} data-teacher-action="buy-store-item" data-item-id="${item.id}" type="button">${owns ? 'Owned' : 'Purchase'}</button>
+          <button class="primary-button" ${owns || !hasBadge || !canAfford ? 'disabled' : ''} data-teacher-action="buy-store-item" data-item-id="${item.id}" type="button">${equippedSet.has(item.id) ? 'Equipped' : owns ? 'Owned' : 'Purchase'}</button>
           ${lockedReason ? `<span class="qp-level-meta">${text(lockedReason)}</span>` : ''}
         </div>
       </article>`;
@@ -1766,7 +2240,7 @@ function openStore() {
         <div>
           <p class="eyebrow">Archive Store</p>
           <h2>Spend Archive Tokens</h2>
-          <p>Archive Token balance: ${studentProgress.archiveTokens}. Purchases never reduce Historian XP.</p>
+          <p>Archive Token balance: ${studentProgress.archiveTokens}. Historian XP is permanent and never spendable.</p>
         </div>
         <button class="close-button" data-close-modal>×</button>
       </header>
@@ -2470,6 +2944,77 @@ function initializeEvents() {
     const action = event.target.closest('[data-action]')?.dataset.action;
     if (action === 'open-library') openLibrary();
     if (action === 'open-inventory') openInventory();
+    if (action === 'open-customize') openCustomize();
+    if (action === 'open-character-wizard') openCharacterWizard();
+    if (action === 'dismiss-character-callout') {
+      state.dismissedCharacterCallout = true;
+      saveState(state);
+      updateHud();
+    }
+    if (action === 'close-character-wizard') closeModal();
+    if (action === 'wizard-next') {
+      const draft = getCharacterWizardDraft();
+      draft.name = sanitizeCharacterName($('#wizard-character-name')?.value || draft.name);
+      draft.pronouns = sanitizePronouns($('#wizard-character-pronouns')?.value || draft.pronouns);
+      draft.sex = toCharacterModel($('input[name="wizard-character-sex"]:checked')?.value || draft.sex);
+      draft.skinTone = $('input[name="wizard-character-skin-tone"]:checked')?.value || draft.skinTone;
+      if (!draft.name) {
+        setDispatch('Character setup', 'Choose a character name before continuing.');
+      } else {
+        characterWizardPage = 2;
+        renderCharacterWizardModal();
+      }
+    }
+    if (action === 'wizard-back') {
+      characterWizardPage = 1;
+      renderCharacterWizardModal();
+    }
+    if (action === 'wizard-finish') {
+      const draft = getCharacterWizardDraft();
+      draft.name = sanitizeCharacterName($('#wizard-character-name')?.value || draft.name);
+      draft.pronouns = sanitizePronouns($('#wizard-character-pronouns')?.value || draft.pronouns);
+      draft.sex = toCharacterModel($('input[name="wizard-character-sex"]:checked')?.value || draft.sex);
+      draft.skinTone = $('input[name="wizard-character-skin-tone"]:checked')?.value || draft.skinTone;
+      activeCharacter = buildCharacterFromDraft(draft);
+      characterWizardDraft = null;
+      persistCharacterProfile(true);
+      closeModal();
+      updateHud();
+      renderMap();
+      setDispatch('Character Ready', `${activeCharacter.identity?.name || 'Your historian'} is ready for the map expedition.`);
+    }
+    if (action === 'equip-character-item') {
+      const itemId = event.target.closest('[data-item-id]')?.dataset.itemId;
+      if (itemId && activeCharacter) {
+        try {
+          activeCharacter = equipCharacterItem(activeCharacter, itemId);
+          persistCharacterProfile(true);
+          updateHud();
+          if ($('#customize-character-preview')) {
+            openCustomize();
+          } else {
+            closeModal();
+          }
+        } catch (error) {
+          console.warn('Unable to equip item', error);
+        }
+      }
+    }
+    if (action === 'unequip-character-slot') {
+      const slot = event.target.closest('[data-slot]')?.dataset.slot;
+      if (slot && activeCharacter) {
+        if (slot === 'hats' || slot === 'transportation') {
+          activeCharacter = unequipCharacterSlot(activeCharacter, slot);
+        } else {
+          const starterItemId = getStarterSlotItem(slot);
+          if (starterItemId && ownsCharacterItem(activeCharacter, starterItemId)) {
+            activeCharacter = equipCharacterItem(activeCharacter, starterItemId);
+          }
+        }
+        persistCharacterProfile(true);
+        openCustomize();
+      }
+    }
     if (action === 'open-leaderboard') openLeaderboard();
     if (action === 'open-skills') openSkills();
     if (action === 'open-help') openHelp();
@@ -2505,17 +3050,22 @@ function initializeEvents() {
       }
       if (actionName === 'equip-store-item') {
         const itemId = teacherActionButton.dataset.itemId;
-        const item = STARTER_STORE_ITEMS.find((row) => row.id === itemId);
-        if (itemId && item) {
-          const next = clone(studentProgress);
-          next.equipped = next.equipped || {};
-          next.equipped[item.category] = itemId;
-          saveStudentProgress(next);
-          openInventory();
-          updateHud();
+        if (itemId) {
+          try {
+            activeCharacter = equipCharacterItem(activeCharacter, itemId);
+            persistCharacterProfile(true);
+            openCustomize();
+            updateHud();
+          } catch (error) {
+            console.warn('Unable to equip store item', error);
+          }
         }
       }
       if (actionName === 'buy-store-item') {
+        if (!activeCharacter?.identity?.name) {
+          openCharacterWizard();
+          return;
+        }
         const itemId = teacherActionButton.dataset.itemId;
         pendingStorePurchaseId = itemId;
         const item = STARTER_STORE_ITEMS.find((row) => row.id === itemId);
@@ -2527,11 +3077,17 @@ function initializeEvents() {
             : preview.reason === 'badge_required'
               ? 'Badge prerequisite not met for this item.'
               : 'Item already owned.';
-          showFeedback('#vocab-feedback', reasonMessage, 'notice');
+          setDispatch('Store update', reasonMessage);
+          openStore();
           return;
         }
         saveStudentProgress(preview.progress);
-        openStore();
+        const grantResult = grantCharacterRewardItem(item.id, `Store purchase: ${item.name}`);
+        if (grantResult?.granted) {
+          openGearRewardPopup(item.id, 'Store Purchase Complete');
+        } else {
+          openStore();
+        }
         updateHud();
       }
       if (actionName === 'edit-active-quest' && activeQuest?.id) {
@@ -2622,6 +3178,12 @@ function initializeEvents() {
       }
     }
 
+    const characterSlotButton = event.target.closest('[data-character-slot]');
+    if (characterSlotButton) {
+      activeCustomizeSlot = characterSlotButton.dataset.characterSlot;
+      openCustomize();
+    }
+
     const teacherTabButton = event.target.closest('[data-teacher-tab]');
     if (teacherTabButton) {
       teacherActiveTab = teacherTabButton.dataset.teacherTab;
@@ -2655,6 +3217,31 @@ function initializeEvents() {
   });
 
   document.addEventListener('change', (event) => {
+    if (event.target.name === 'wizard-character-sex' || event.target.name === 'wizard-character-skin-tone' || event.target.id === 'wizard-character-name' || event.target.id === 'wizard-character-pronouns') {
+      const draft = getCharacterWizardDraft();
+      draft.sex = toCharacterModel($('input[name="wizard-character-sex"]:checked')?.value || draft.sex);
+      draft.skinTone = $('input[name="wizard-character-skin-tone"]:checked')?.value || draft.skinTone;
+      draft.name = sanitizeCharacterName($('#wizard-character-name')?.value || draft.name);
+      draft.pronouns = sanitizePronouns($('#wizard-character-pronouns')?.value || draft.pronouns);
+      const previewCharacter = buildCharacterFromDraft(draft);
+      const preview1 = $('#character-wizard-preview-page-1');
+      const preview2 = $('#character-wizard-preview-page-2');
+      if (preview1) renderCharacterStage(preview1, previewCharacter, { label: 'Identity preview' });
+      if (preview2) renderCharacterStage(preview2, previewCharacter, { label: 'Starter gear preview' });
+    }
+
+    if (event.target.name === 'customize-skin-tone' && activeCharacter) {
+      try {
+        activeCharacter = setCharacterSkinTone(activeCharacter, event.target.value);
+        persistCharacterProfile(true);
+        const preview = $('#customize-character-preview');
+        if (preview) renderCharacterStage(preview, activeCharacter, { label: `${activeCharacter.identity?.name || 'Historian'} equipment preview` });
+        updateHud();
+      } catch (error) {
+        console.warn('Unable to set skin tone', error);
+      }
+    }
+
     if (event.target.id === 'teacher-class-select') {
       teacherActiveClassId = event.target.value;
       renderTeacherDashboard().catch((error) => console.error(error));
@@ -2952,6 +3539,7 @@ async function init() {
   }
 
   loadStudentProgress();
+  hydrateCharacterSystem();
   // Keep legacy completion map synchronized for compatibility with existing teacher overrides.
   state.completed = state.completed || {};
   studentProgress.completedQuestIds.forEach((questId) => {

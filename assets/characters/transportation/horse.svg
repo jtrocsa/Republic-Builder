@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" width="512" height="768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Transportation: Horse</title>
+  <desc id="desc">Transportation cosmetic. Render behind the character layer on the shared 512 by 768 canvas.</desc>
+  <defs>
+    <linearGradient id="leatherGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d09a5c"/><stop offset=".55" stop-color="#9a6038"/><stop offset="1" stop-color="#643923"/></linearGradient>
+    <linearGradient id="clothGrad" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7e7"/><stop offset=".5" stop-color="#e5d4b8"/><stop offset="1" stop-color="#cdb68e"/></linearGradient>
+    <linearGradient id="navyGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#537895"/><stop offset="1" stop-color="#25465c"/></linearGradient>
+    <linearGradient id="denimGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#5e83a8"/><stop offset=".55" stop-color="#41648b"/><stop offset="1" stop-color="#29455f"/></linearGradient>
+    <linearGradient id="metalGrad" x1="0" x2="1"><stop stop-color="#fff2bb"/><stop offset=".4" stop-color="#d4ac4e"/><stop offset="1" stop-color="#885d21"/></linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1e252a" flood-opacity=".22"/></filter>
+    <filter id="tinyShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e252a" flood-opacity=".3"/></filter>
+  </defs>
+  <g id="transport-horse" stroke="#2d3740" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" filter="url(#softShadow)"><path d="M84 600 Q101 536 151 523 Q188 501 226 526 L251 553 Q277 526 314 539 Q369 553 391 610 L379 643 L346 641 L336 594 L301 579 L278 619 L280 666 L255 670 L243 620 L220 583 L193 592 L178 649 L149 648 L150 600 L121 607 L113 642 L84 642 Z" fill="#9a6038"/>
+        <path d="M165 526 L151 482 L188 514 M203 532 L216 481 L238 536" fill="#c89055"/><path d="M264 555 Q315 517 349 555" fill="none" stroke="#c89055" stroke-width="14"/><circle cx="182" cy="546" r="5" fill="#24313b" stroke="none"/></g>
+</svg>

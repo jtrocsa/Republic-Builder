@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" width="512" height="768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Shoes: Colonial Buckles</title>
+  <desc id="desc">Layered APUSH character cosmetic. Transparent background; align with the shared 512 by 768 canvas.</desc>
+  <defs>
+    <linearGradient id="leatherGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d09a5c"/><stop offset=".55" stop-color="#9a6038"/><stop offset="1" stop-color="#643923"/></linearGradient>
+    <linearGradient id="clothGrad" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7e7"/><stop offset=".5" stop-color="#e5d4b8"/><stop offset="1" stop-color="#cdb68e"/></linearGradient>
+    <linearGradient id="navyGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#537895"/><stop offset="1" stop-color="#25465c"/></linearGradient>
+    <linearGradient id="denimGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#5e83a8"/><stop offset=".55" stop-color="#41648b"/><stop offset="1" stop-color="#29455f"/></linearGradient>
+    <linearGradient id="metalGrad" x1="0" x2="1"><stop stop-color="#fff2bb"/><stop offset=".4" stop-color="#d4ac4e"/><stop offset="1" stop-color="#885d21"/></linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1e252a" flood-opacity=".22"/></filter>
+    <filter id="tinyShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e252a" flood-opacity=".3"/></filter>
+  </defs>
+  <g id="shoes-colonial-buckles" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#tinyShadow)">
+      <path d="M184 632 Q202 617 232 627 L243 660 Q236 684 186 687 Q165 683 168 669 Z" fill="#21282d"/>
+      <path d="M280 627 Q310 617 328 632 L344 669 Q347 683 326 687 Q276 684 269 660 Z" fill="#21282d"/>
+      <path d="M174 671 Q205 679 243 660" fill="none" stroke="#be8a35" stroke-width="7"/>
+      <path d="M338 671 Q307 679 269 660" fill="none" stroke="#be8a35" stroke-width="7"/>
+      <rect x="205" y="651" width="22" height="15" rx="3" fill="url(#metalGrad)"/><rect x="285" y="651" width="22" height="15" rx="3" fill="url(#metalGrad)"/>
+    </g>
+</svg>

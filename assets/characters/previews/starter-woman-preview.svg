@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" width="512" height="768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Starter character preview: woman</title>
+  <desc id="desc">Composed preview showing the modular character asset system.</desc>
+  <defs>
+    <linearGradient id="leatherGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d09a5c"/><stop offset=".55" stop-color="#9a6038"/><stop offset="1" stop-color="#643923"/></linearGradient>
+    <linearGradient id="clothGrad" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7e7"/><stop offset=".5" stop-color="#e5d4b8"/><stop offset="1" stop-color="#cdb68e"/></linearGradient>
+    <linearGradient id="navyGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#537895"/><stop offset="1" stop-color="#25465c"/></linearGradient>
+    <linearGradient id="denimGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#5e83a8"/><stop offset=".55" stop-color="#41648b"/><stop offset="1" stop-color="#29455f"/></linearGradient>
+    <linearGradient id="metalGrad" x1="0" x2="1"><stop stop-color="#fff2bb"/><stop offset=".4" stop-color="#d4ac4e"/><stop offset="1" stop-color="#885d21"/></linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1e252a" flood-opacity=".22"/></filter>
+    <filter id="tinyShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e252a" flood-opacity=".3"/></filter>
+  </defs>
+  <rect x="0" y="0" width="512" height="768" rx="40" fill="#f4ecd9"/><path d="M24 690 Q256 620 488 690 V744 H24 Z" fill="#d9c6a6" opacity=".55"/>
+  
+<g id="base-woman" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#softShadow)">
+  <ellipse cx="256" cy="706" rx="142" ry="18" fill="#26333b" opacity=".16" stroke="none"/>
+  <!-- rear legs / underclothes -->
+  <path d="M212 409 L300 409 L314 622 Q310 658 286 670 L258 668 L252 500 L246 668 L219 670 Q196 656 198 621 Z" fill="#e4d9c7"/>
+  <path d="M207 410 L305 410 L306 474 L205 474 Z" fill="#d6c8b3"/>
+  <!-- arms -->
+  <path d="M207 270 Q170 286 157 345 L142 438 Q141 471 163 481 Q184 486 193 456 L210 377 L230 308 Z" fill="#d89b75"/>
+  <path d="M306 270 Q343 286 355 345 L371 438 Q371 471 349 481 Q328 486 319 456 L301 377 L281 308 Z" fill="#d89b75"/>
+  <!-- torso -->
+  <path d="M210 246 Q256 224 302 246 L323 410 Q310 431 256 435 Q202 431 189 410 Z" fill="#f1e7d5"/>
+  <path d="M205 250 Q255 224 307 250" fill="none" stroke="#c5ad8c" stroke-width="5"/>
+  <!-- neck -->
+  <path d="M234 210 L234 248 Q255 266 278 248 L278 210 Z" fill="#d89b75"/>
+  <!-- hair behind / head -->
+  <path d="M195 156 Q183 90 213 69 Q257 39 300 74 Q328 99 319 157 L315 209 Q300 229 286 223 L286 116 Q252 130 215 114 L213 222 Q195 223 190 206 Z" fill="#4b3028"/>
+  <path d="M192 151 Q192 91 255 83 Q320 91 320 151 Q317 220 256 228 Q195 220 192 151 Z" fill="#d89b75"/>
+  <path d="M190 151 Q178 145 181 166 Q183 188 198 189" fill="#c67f59"/>
+  <path d="M322 151 Q334 145 331 166 Q329 188 314 189" fill="#c67f59"/>
+  <!-- hair framing -->
+  <path d="M193 149 Q188 104 211 78 Q252 42 301 78 Q323 101 319 148 L306 135 Q295 111 280 106 Q256 125 224 113 L210 145 Z" fill="#4b3028"/>
+  <path d="M210 102 Q244 67 285 85" fill="none" stroke="#6b4335" stroke-width="10"/>
+  <!-- face -->
+  <path d="M219 158 Q232 151 244 158" fill="none" stroke="#2d3740" stroke-width="5"/>
+  <path d="M269 158 Q281 151 293 158" fill="none" stroke="#2d3740" stroke-width="5"/>
+  <circle cx="233" cy="160" r="3" fill="#24313b" stroke="none"/><circle cx="280" cy="160" r="3" fill="#24313b" stroke="none"/>
+  <path d="M254 165 L249 184 L260 185" fill="none" stroke="#b96f4e" stroke-width="4"/>
+  <path d="M235 198 Q255 209 277 198" fill="none" stroke="#8c4c3a" stroke-width="5"/>
+  <!-- hands -->
+  <path d="M142 438 Q129 458 142 476 Q154 491 170 480 L179 462 L168 450 Z" fill="#d89b75"/>
+  <path d="M371 438 Q383 458 371 476 Q359 491 343 480 L334 462 L345 450 Z" fill="#d89b75"/>
+</g>
+
+  <g id="pants-starter-wool-trousers" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#tinyShadow)">
+      <path d="M203 411 Q228 402 256 411 Q284 402 309 411 L319 617 Q309 649 285 663 L258 661 L252 490 L247 661 L220 663 Q196 649 193 617 Z" fill="#2a4c63"/>
+      <path d="M256 422 L252 655" fill="none" stroke="#4d7793" stroke-width="5" opacity=".75"/>
+      <path d="M205 451 Q256 465 307 451" fill="none" stroke="#4d7793" stroke-width="5" opacity=".75"/>
+      <path d="M221 477 L238 471 M291 477 L274 471" stroke="#4d7793" stroke-width="5" opacity=".7"/>
+    </g>
+
+  <g id="shoes-starter-leather-shoes" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#tinyShadow)">
+      <path d="M184 632 Q202 617 232 627 L243 660 Q236 684 186 687 Q165 683 168 669 Z" fill="#6c422f"/>
+      <path d="M280 627 Q310 617 328 632 L344 669 Q347 683 326 687 Q276 684 269 660 Z" fill="#6c422f"/>
+      <path d="M174 671 Q205 679 243 660" fill="none" stroke="#c89055" stroke-width="7"/>
+      <path d="M338 671 Q307 679 269 660" fill="none" stroke="#c89055" stroke-width="7"/>
+      <path d="M194 659 L224 645 M190 671 L228 654 M287 645 L317 659 M284 654 L322 671" fill="none" stroke="#f7f1e5" stroke-width="5"/>
+    </g>
+
+  <g id="shirt-starter-linen-tunic" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#tinyShadow)"><path d="M204 246 Q256 225 308 246 L334 337 L310 421 Q256 443 202 421 L178 337 Z" fill="#fff8e9"/>
+      <path d="M205 248 L228 306 L256 279 L285 306 L307 248" fill="none" stroke="#c89055" stroke-width="6"/>
+      <path d="M211 357 Q256 369 301 357" fill="none" stroke="#c89055" stroke-width="5" opacity=".75"/></g>
+
+  <g id="belt-starter-rope-belt" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#tinyShadow)"><path d="M184 403 Q256 424 328 403 L330 429 Q256 449 182 429 Z" fill="#c89055"/>
+        <rect x="239" y="410" width="34" height="26" rx="4" fill="#6c422f"/><rect x="248" y="416" width="16" height="14" rx="2" fill="#f4ecd9"/></g>
+
+  <g id="hand-starter-journal" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#tinyShadow)"><g transform="rotate(-12 356 448)"><rect x="323" y="400" width="73" height="99" rx="8" fill="#9a6038"/><path d="M337 402 V498" stroke="#be8a35" stroke-width="7"/><path d="M350 423 H378 M350 443 H378 M350 463 H378" stroke="#be8a35" stroke-width="4" opacity=".8"/></g></g>
+
+</svg>

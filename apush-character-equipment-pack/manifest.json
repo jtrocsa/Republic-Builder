@@ -1,0 +1,29 @@
+{
+  "package": "APUSH Character Equipment Pack",
+  "gameTitleDefault": "American Chronicle",
+  "baseModels": 2,
+  "equipmentSlots": [
+    "shoes",
+    "shirts",
+    "hats",
+    "belts",
+    "pants",
+    "hands",
+    "transportation"
+  ],
+  "assetCounts": {
+    "shoes": 11,
+    "pants": 11,
+    "shirts": 11,
+    "belts": 11,
+    "hats": 11,
+    "hands": 11,
+    "transportation": 11
+  },
+  "totalCosmeticSvgs": 77,
+  "notes": "All assets use a transparent 512 x 768 canvas. Skin tone is a free base-appearance setting; eight aligned variants are supplied for each model.",
+  "skinToneOptions": 8,
+  "baseAppearanceSvgs": 16,
+  "defaultSkinTone": "tone-4",
+  "totalSvgAssets": 95
+}

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" width="512" height="768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Transportation: Covered Wagon</title>
+  <desc id="desc">Transportation cosmetic. Render behind the character layer on the shared 512 by 768 canvas.</desc>
+  <defs>
+    <linearGradient id="leatherGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d09a5c"/><stop offset=".55" stop-color="#9a6038"/><stop offset="1" stop-color="#643923"/></linearGradient>
+    <linearGradient id="clothGrad" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7e7"/><stop offset=".5" stop-color="#e5d4b8"/><stop offset="1" stop-color="#cdb68e"/></linearGradient>
+    <linearGradient id="navyGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#537895"/><stop offset="1" stop-color="#25465c"/></linearGradient>
+    <linearGradient id="denimGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#5e83a8"/><stop offset=".55" stop-color="#41648b"/><stop offset="1" stop-color="#29455f"/></linearGradient>
+    <linearGradient id="metalGrad" x1="0" x2="1"><stop stop-color="#fff2bb"/><stop offset=".4" stop-color="#d4ac4e"/><stop offset="1" stop-color="#885d21"/></linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1e252a" flood-opacity=".22"/></filter>
+    <filter id="tinyShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e252a" flood-opacity=".3"/></filter>
+  </defs>
+  <g id="transport-covered-wagon" stroke="#2d3740" stroke-width="8" stroke-linejoin="round" stroke-linecap="round" filter="url(#softShadow)"><path d="M91 552 L176 491 L268 491 L350 552 L337 620 L108 620 Z" fill="#c89055"/><path d="M176 491 Q214 432 268 491" fill="#6c422f"/><path d="M112 551 H337 M161 491 V617 M274 491 V617" stroke="#6c422f" stroke-width="7"/><circle cx="151" cy="630" r="39" fill="#6c422f"/><circle cx="300" cy="630" r="39" fill="#6c422f"/><circle cx="151" cy="630" r="11" fill="url(#metalGrad)"/><circle cx="300" cy="630" r="11" fill="url(#metalGrad)"/></g>
+</svg>

@@ -1,0 +1,97 @@
+/* Modular character renderer: each asset uses the same 512×768 canvas. */
+:root {
+  --character-ink: #24313b;
+  --character-paper: #f5ecd9;
+  --character-paper-deep: #dfcba8;
+  --character-gold: #be8a35;
+  --character-teal: #2d7886;
+  --character-radius: 22px;
+}
+
+.quest-character-stage {
+  position: relative;
+  width: min(100%, 360px);
+  aspect-ratio: 2 / 3;
+  overflow: hidden;
+  isolation: isolate;
+  border: 2px solid rgba(36, 49, 59, .17);
+  border-radius: var(--character-radius);
+  background:
+    radial-gradient(circle at 50% 20%, rgba(255,255,255,.8), transparent 42%),
+    linear-gradient(180deg, #fdf8ee 0%, var(--character-paper) 75%, var(--character-paper-deep) 100%);
+  box-shadow: 0 18px 38px rgba(36, 49, 59, .16);
+}
+
+.quest-character-layer {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* Transportation is always behind the base model. */
+.quest-character-layer--transportation { z-index: 0; }
+.quest-character-layer--base { z-index: 1; }
+.quest-character-layer--pants { z-index: 2; }
+.quest-character-layer--shoes { z-index: 3; }
+.quest-character-layer--shirts { z-index: 4; }
+.quest-character-layer--belts { z-index: 5; }
+.quest-character-layer--hands { z-index: 6; }
+.quest-character-layer--hats { z-index: 7; }
+
+.quest-character-wizard {
+  width: min(1040px, calc(100vw - 32px));
+  min-height: min(720px, calc(100vh - 32px));
+  border: 0;
+  border-radius: 28px;
+  padding: 0;
+  overflow: hidden;
+  color: var(--character-ink);
+  background: var(--character-paper);
+  box-shadow: 0 28px 100px rgba(0,0,0,.36);
+}
+
+.quest-character-wizard::backdrop { background: rgba(21, 33, 40, .62); backdrop-filter: blur(4px); }
+.quest-character-wizard__layout { min-height: inherit; display: grid; grid-template-columns: minmax(0, 1fr) minmax(340px, .88fr); }
+.quest-character-wizard__story { padding: clamp(28px, 5vw, 66px); color: #fff8e9; background: linear-gradient(135deg, #1f3543, #2d7886 56%, #be8a35); position: relative; overflow: hidden; }
+.quest-character-wizard__story::after { content: ''; position: absolute; inset: auto -20% -42% -20%; height: 52%; background: radial-gradient(ellipse at center, rgba(244,236,217,.34), transparent 65%); transform: rotate(-7deg); }
+.quest-character-wizard__form { padding: clamp(26px, 5vw, 58px); display: grid; align-content: center; gap: 18px; }
+.quest-character-wizard__eyebrow { letter-spacing: .12em; text-transform: uppercase; font-size: .78rem; font-weight: 800; opacity: .84; }
+.quest-character-wizard h1 { margin: 6px 0 12px; max-width: 11ch; font-size: clamp(2.3rem, 5vw, 4.6rem); line-height: .94; }
+.quest-character-wizard p { max-width: 52ch; line-height: 1.55; }
+.quest-character-form-grid { display: grid; gap: 14px; }
+.quest-character-choice-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.quest-character-choice { position: relative; display: grid; min-height: 92px; gap: 5px; padding: 14px; border: 2px solid rgba(36,49,59,.16); border-radius: 16px; background: #fffaf0; cursor: pointer; }
+.quest-character-choice input { position: absolute; opacity: 0; inset: 0; }
+.quest-character-choice:has(input:checked) { border-color: var(--character-teal); box-shadow: 0 0 0 3px rgba(45,120,134,.16); }
+.quest-character-slot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.quest-character-slot { min-height: 72px; text-align: left; border: 1px solid rgba(36,49,59,.16); border-radius: 14px; padding: 12px; color: var(--character-ink); background: #fffaf0; cursor: pointer; }
+.quest-character-slot[aria-pressed='true'] { border-color: var(--character-gold); box-shadow: 0 0 0 3px rgba(190,138,53,.16); }
+.quest-character-new-dot { display: inline-block; width: .6rem; height: .6rem; border-radius: 999px; margin-left: .35rem; background: #d54b4b; }
+.quest-character-actions { display: flex; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.quest-character-button { border: 0; border-radius: 12px; padding: .86rem 1.1rem; font: inherit; font-weight: 800; cursor: pointer; color: #fff8e9; background: var(--character-ink); }
+.quest-character-button--primary { background: var(--character-teal); }
+.quest-character-button--gold { background: var(--character-gold); color: var(--character-ink); }
+.quest-character-map-callout { display: inline-flex; align-items: center; gap: .55rem; padding: .6rem .8rem; border: 1px solid rgba(190,138,53,.5); border-radius: 999px; color: #fff8e9; background: rgba(36,49,59,.82); box-shadow: 0 10px 24px rgba(0,0,0,.22); }
+
+@media (max-width: 760px) {
+  .quest-character-wizard { width: min(100vw - 16px, 560px); max-height: calc(100vh - 16px); overflow: auto; }
+  .quest-character-wizard__layout { grid-template-columns: 1fr; }
+  .quest-character-wizard__story { min-height: 260px; }
+  .quest-character-wizard h1 { max-width: 15ch; }
+}
+
+
+/* Free base-appearance picker. Skin tone is not an equipment slot or purchasable item. */
+.quest-character-appearance-note { margin: 0 0 .65rem; color: rgba(36,49,59,.76); font-size: .9rem; }
+.quest-character-skin-tone-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.quest-character-skin-tone { position: relative; display: grid; justify-items: center; gap: .45rem; min-height: 78px; padding: .6rem .35rem; border: 2px solid rgba(36,49,59,.16); border-radius: 14px; color: var(--character-ink); background: #fffaf0; cursor: pointer; font-size: .72rem; font-weight: 800; text-align: center; }
+.quest-character-skin-tone input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+.quest-character-skin-tone__swatch { width: 2.2rem; height: 2.2rem; border: 2px solid rgba(36,49,59,.32); border-radius: 999px; background: var(--skin-swatch); box-shadow: inset 0 1px 0 rgba(255,255,255,.38); }
+.quest-character-skin-tone:has(input:checked) { border-color: var(--character-teal); box-shadow: 0 0 0 3px rgba(45,120,134,.16); }
+.quest-character-skin-tone:has(input:focus-visible) { outline: 3px solid rgba(190,138,53,.48); outline-offset: 2px; }
+.quest-character-appearance-panel { display: grid; gap: 12px; padding: 14px; border: 1px solid rgba(36,49,59,.14); border-radius: 16px; background: rgba(255,250,240,.72); }
+@media (max-width: 420px) { .quest-character-skin-tone-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 768" width="512" height="768" role="img" aria-labelledby="title desc" preserveAspectRatio="xMidYMid meet">
+  <title id="title">Pants: Colonial Breeches</title>
+  <desc id="desc">Layered APUSH character cosmetic. Transparent background; align with the shared 512 by 768 canvas.</desc>
+  <defs>
+    <linearGradient id="leatherGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#d09a5c"/><stop offset=".55" stop-color="#9a6038"/><stop offset="1" stop-color="#643923"/></linearGradient>
+    <linearGradient id="clothGrad" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#fff7e7"/><stop offset=".5" stop-color="#e5d4b8"/><stop offset="1" stop-color="#cdb68e"/></linearGradient>
+    <linearGradient id="navyGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#537895"/><stop offset="1" stop-color="#25465c"/></linearGradient>
+    <linearGradient id="denimGrad" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#5e83a8"/><stop offset=".55" stop-color="#41648b"/><stop offset="1" stop-color="#29455f"/></linearGradient>
+    <linearGradient id="metalGrad" x1="0" x2="1"><stop stop-color="#fff2bb"/><stop offset=".4" stop-color="#d4ac4e"/><stop offset="1" stop-color="#885d21"/></linearGradient>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1e252a" flood-opacity=".22"/></filter>
+    <filter id="tinyShadow" x="-25%" y="-25%" width="150%" height="150%"><feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e252a" flood-opacity=".3"/></filter>
+  </defs>
+  <g id="pants-colonial-breeches" stroke="#2d3740" stroke-width="7" stroke-linejoin="round" stroke-linecap="round" filter="url(#tinyShadow)">
+      <path d="M204 411 Q228 402 256 411 Q284 402 308 411 L312 558 Q307 582 280 585 L276 640 L260 652 L251 640 L246 640 L235 652 L219 640 L219 585 Q194 582 199 558 Z" fill="#6c422f"/>
+      <path d="M256 422 L252 655" fill="none" stroke="#c89055" stroke-width="5" opacity=".75"/>
+      <path d="M205 451 Q256 465 307 451" fill="none" stroke="#c89055" stroke-width="5" opacity=".75"/>
+      <path d="M221 477 L238 471 M291 477 L274 471" stroke="#c89055" stroke-width="5" opacity=".7"/>
+    </g>
+</svg>
