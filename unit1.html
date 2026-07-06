@@ -32,6 +32,7 @@
             <h2 id="hud-player-name">Unnamed Founder</h2>
             <p><span id="hud-pronouns">Pronouns not set</span> · <span id="hud-profession">Independent Scholar</span></p>
             <p id="hud-settlement">Frontier Outpost</p>
+            <a class="player-edit-link" href="features/character-forge/character-forge.html?edit=1">Edit Founder</a>
           </div>
         </section>
 
@@ -46,21 +47,11 @@
         <nav class="rail-nav" aria-label="Unit actions">
           <button class="rail-link active" data-scroll-target="map-panel" type="button"><span>⌖</span> Atlas Map</button>
           <button class="rail-link" data-action="open-library" type="button"><span>▤</span> Field Archive <b id="source-count-badge">0</b></button>
+          <button class="rail-link" data-action="open-badge-case" type="button"><span>◉</span> Badges</button>
+          <button class="rail-link" data-action="open-store" type="button"><span>◌</span> Store</button>
           <button class="rail-link" data-action="open-rubrics" type="button"><span>✦</span> APUSH Rubrics</button>
-          <button class="rail-link" data-action="open-badge-case" type="button"><span>◉</span> Badge Case</button>
-          <button class="rail-link" data-action="open-store" type="button"><span>◌</span> Archive Store</button>
           <button class="rail-link" data-action="open-inventory" type="button"><span>▣</span> Inventory</button>
-          <button class="rail-link" data-action="open-skills" type="button"><span>◆</span> Historian Skills</button>
-          <button class="rail-link" data-action="open-leaderboard" type="button"><span>▥</span> Ledger</button>
         </nav>
-
-        <section class="skills-card" aria-labelledby="skill-ledger-title">
-          <div class="section-heading">
-            <span id="skill-ledger-title">Historian Skill Progress</span>
-            <button class="mini-button" data-action="open-skills" type="button" aria-label="Open full skill ledger">+</button>
-          </div>
-          <div id="skill-mini-list"></div>
-        </section>
 
         <footer class="rail-footer">
           <button class="teacher-mode" id="teacher-mode-toggle" type="button">Teacher mode: <span>off</span></button>
@@ -77,13 +68,6 @@
             <h1>Atlantic Crossroads</h1>
             <p class="world-subtitle">Chart encounters across the Atlantic World. Activities now use plain-language APUSH labels: MCQ Challenge, HIPP Source Analysis, Vocabulary Challenge, and Boss Battle mode tasks.</p>
           </div>
-          <div class="header-actions">
-            <a class="header-button" href="features/character-forge/character-forge.html?edit=1"><span>✎</span>Edit Founder</a>
-            <button class="header-button" data-action="open-library" type="button"><span>▤</span>Open Unit 1 Archive</button>
-            <button class="header-button" data-action="open-badge-case" type="button"><span>◉</span>Badge Case</button>
-            <button class="header-button" data-action="open-store" type="button"><span>◌</span>Store</button>
-            <button class="header-button icon-button" data-action="open-help" type="button" aria-label="Open Unit 1 quest guide">?</button>
-          </div>
         </header>
 
         <section class="qp-card qp-journey" id="historian-journey" aria-label="Historian Journey progression">
@@ -99,14 +83,6 @@
             <img src="assets/badges/ui/archive-token.svg" alt="Archive Token icon" />
             <span><strong id="archive-token-balance">0</strong> Archive Tokens</span>
           </div>
-        </section>
-
-        <section class="unit-progress-card" id="unit-progress-section" aria-label="Unit 1 topics">
-          <div>
-            <strong>Unit 1 Expedition Progress</strong>
-            <p id="quest-progress-label-secondary">Navigate each Atlantic landmark to unlock evidence and complete writing drafts.</p>
-          </div>
-          <div class="topic-chips" id="topic-chips"></div>
         </section>
 
         <section class="student-bulletin" id="student-bulletin" aria-labelledby="student-bulletin-heading">
@@ -135,68 +111,12 @@
           </div>
         </section>
 
-        <section class="bottom-grid" id="dispatch-section">
-          <article class="brief-card">
-            <div class="card-heading">
-              <div class="crest">✦</div>
-              <div>
-                <p class="eyebrow">Current dispatch</p>
-                <h2 id="dispatch-title">Begin Expedition</h2>
-              </div>
-            </div>
-            <p id="dispatch-copy">Select a map marker to open your first Unit 1 challenge and begin collecting Atlantic evidence.</p>
-            <div class="brief-actions">
-              <button class="primary-button" data-action="open-library" type="button">Enter Field Archive</button>
-              <button class="text-button" data-action="open-rubrics" type="button">Open APUSH Rubrics</button>
-            </div>
-          </article>
-
-          <article class="dispatch-card">
-            <div class="card-heading">
-              <div class="crest">▤</div>
-              <div>
-                <p class="eyebrow">Unit 1 source intelligence</p>
-                <h2>Field Archive Records</h2>
-              </div>
-            </div>
-            <p><b id="archive-header-count">0</b> primary-source records are indexed here with tags, citations, and quest links.</p>
-            <div class="quest-actions">
-              <button class="primary-button" data-action="open-library" type="button">Explore Atlantic Crossroads Archive</button>
-              <button class="text-button" data-action="open-help" type="button">How Unit 1 Quests Work</button>
-            </div>
-          </article>
-        </section>
-
-        <section class="rubric-panel" id="rubric-panel" aria-labelledby="rubric-heading">
+        <section class="mission-log" id="mission-log" aria-labelledby="mission-log-heading">
           <div class="section-heading section-heading-light">
-            <span id="rubric-heading">APUSH Rubrics</span>
-            <button class="mini-button" data-action="open-rubrics" type="button" aria-label="Open rubric gallery">+</button>
+            <span id="mission-log-heading">Mission Log</span>
           </div>
-          <div class="rubric-gallery-shell">
-            <button class="rubric-card" data-action="open-rubrics" type="button">
-              <div class="rubric-card-media pdf">
-                <object data="APUSH%20Rubrics/SAQ_Rubric.pdf" type="application/pdf" aria-label="SAQ rubric preview"></object>
-                <span class="rubric-card-fallback">SAQ preview</span>
-              </div>
-              <div class="rubric-card-body">
-                <div><b>SAQ Rubric</b><span>3 PT</span></div>
-                <p>Short-answer scoring structure for SAQ practice and boss-mode tasks.</p>
-              </div>
-            </button>
-            <button class="rubric-card" data-action="open-rubrics" type="button">
-              <div class="rubric-card-media image"><img src="APUSH%20Rubrics/LEQ%20Rubric.webp" alt="LEQ rubric preview" loading="lazy" /></div>
-              <div class="rubric-card-body">
-                <div><b>LEQ Rubric</b><span>6 PT</span></div>
-                <p>Long essay scoring structure for unit writing practice.</p>
-              </div>
-            </button>
-            <button class="rubric-card" data-action="open-rubrics" type="button">
-              <div class="rubric-card-media image"><img src="APUSH%20Rubrics/DBQ%20Rubric.png" alt="DBQ rubric preview" loading="lazy" /></div>
-              <div class="rubric-card-body">
-                <div><b>DBQ Rubric</b><span>7 PT</span></div>
-                <p>Document-based scoring structure with sourcing and complexity.</p>
-              </div>
-            </button>
+          <div id="mission-log-list" class="mission-log-list">
+            <p class="empty-note">No mission activity recorded yet.</p>
           </div>
         </section>
       </main>
