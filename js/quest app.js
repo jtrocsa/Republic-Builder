@@ -24,8 +24,11 @@ import {
   CHARACTER_STARTER_LOADOUT,
   CHARACTER_SYSTEM_DEFAULTS,
   CHARACTER_DEFAULT_SKIN_TONE,
-  CHARACTER_BASE_MODELS
-} from './quest-character-items.js';
+  CHARACTER_BASE_MODELS,
+  resolveCharacterItemId,
+  SLOT_INTERNAL_TO_CANONICAL,
+  SLOT_CANONICAL_TO_INTERNAL
+} from './quest-character-items-png.js';
 import {
   createNewCharacter,
   migrateCharacterAppearance,
@@ -182,21 +185,21 @@ const CHARACTER_SLOT_LABELS = Object.freeze({
 });
 
 const BADGE_ITEM_REWARDS = Object.freeze({
-  'u1-atlantic-cartographer': 'hands-atlas',
-  'u1-three-worlds-interpreter': 'hands-rolled-map',
-  'u1-exchange-investigator': 'hands-compass',
-  'u1-colonial-sourcekeeper': 'hats-tricorn-hat',
-  'u1-foundations-of-america-seal': 'transportation-horse',
-  'mcq-mastery:gold': 'hats-laurel-of-learning',
-  'hipp-mastery:silver': 'hands-magnifying-glass',
-  'dbq-mastery:gold': 'hands-master-seal'
+  'u1-atlantic-cartographer': 'rolled-sea-chart',
+  'u1-three-worlds-interpreter': 'navigator-compass',
+  'u1-exchange-investigator': 'navigator-compass',
+  'u1-colonial-sourcekeeper': 'weathered-tricorn',
+  'u1-foundations-of-america-seal': 'bay-mare',
+  'mcq-mastery:gold': 'field-cartographer-cap',
+  'hipp-mastery:silver': 'brass-spyglass',
+  'dbq-mastery:gold': 'coastal-sloop'
 });
 
 const QUEST_ITEM_REWARDS = Object.freeze({
-  'q-southwest-survey': 'hands-atlas',
-  'q-columbus-dispatch': 'hands-spyglass',
-  'q-virginia-royale': 'hats-newsboy-cap',
-  'q-empires-reckoning': 'transportation-covered-wagon'
+  'q-southwest-survey': 'navigator-compass',
+  'q-columbus-dispatch': 'brass-spyglass',
+  'q-virginia-royale': 'field-cartographer-cap',
+  'q-empires-reckoning': 'covered-wagon'
 });
 
 const $ = (selector, parent = document) => parent.querySelector(selector);
@@ -225,74 +228,109 @@ function toCharacterModel(value = '') {
 
 function mapLegacyOutfitToEquipment(outfit = {}) {
   const mapped = {
-    hats: null,
-    shirts: null,
-    belts: null,
-    pants: null,
-    shoes: null,
-    hands: null,
-    transportation: null
+    hats: CHARACTER_STARTER_LOADOUT.hats,
+    shirts: CHARACTER_STARTER_LOADOUT.shirts,
+    belts: CHARACTER_STARTER_LOADOUT.belts,
+    pants: CHARACTER_STARTER_LOADOUT.pants,
+    shoes: CHARACTER_STARTER_LOADOUT.shoes,
+    hands: CHARACTER_STARTER_LOADOUT.hands,
+    transportation: CHARACTER_STARTER_LOADOUT.transportation
   };
 
   const legacyHat = String(outfit.hat || '').toLowerCase();
-  if (legacyHat && legacyHat !== 'hat-none') mapped.hats = 'hats-tricorn-hat';
+  if (legacyHat && legacyHat !== 'hat-none') mapped.hats = 'weathered-tricorn';
 
   const legacyShirt = String(outfit.shirt || '').toLowerCase();
   if (legacyShirt) {
-    if (legacyShirt.includes('work')) mapped.shirts = 'shirts-work-shirt';
-    else if (legacyShirt.includes('vest') || legacyShirt.includes('linen')) mapped.shirts = 'shirts-colonial-waistcoat';
+    if (legacyShirt.includes('work') || legacyShirt.includes('flannel')) mapped.shirts = 'frontier-flannel-shirt';
+    else if (legacyShirt.includes('vest') || legacyShirt.includes('linen')) mapped.shirts = 'homespun-linen-shirt';
   }
 
   const legacyPants = String(outfit.pants || '').toLowerCase();
   if (legacyPants) {
-    if (legacyPants.includes('work')) mapped.pants = 'pants-workwear-pants';
-    else if (legacyPants.includes('breeches') || legacyPants.includes('navy')) mapped.pants = 'pants-colonial-breeches';
+    if (legacyPants.includes('work') || legacyPants.includes('frontier')) mapped.pants = 'frontier-trail-trousers';
+    else if (legacyPants.includes('breeches') || legacyPants.includes('navy')) mapped.pants = 'colonial-field-breeches';
   }
 
   const legacyShoes = String(outfit.shoes || '').toLowerCase();
   if (legacyShoes) {
-    if (legacyShoes.includes('riding')) mapped.shoes = 'shoes-riding-boots';
-    else if (legacyShoes.includes('work')) mapped.shoes = 'shoes-frontier-boots';
-    else if (legacyShoes.includes('buckled')) mapped.shoes = 'shoes-colonial-buckles';
+    if (legacyShoes.includes('riding')) mapped.shoes = 'frontier-riding-boots';
+    else if (legacyShoes.includes('work')) mapped.shoes = 'frontier-riding-boots';
+    else if (legacyShoes.includes('buckled')) mapped.shoes = 'colonial-buckle-shoes';
   }
 
   return mapped;
 }
 
 function mergeEquippedWithStarter(equipped = {}) {
-  const merged = { ...CHARACTER_STARTER_LOADOUT, ...(equipped || {}) };
+  const resolvedEquipped = Object.fromEntries(
+    Object.entries(equipped || {}).map(([slot, itemId]) => [slot, resolveCharacterItemId(itemId)])
+  );
+  const merged = { ...CHARACTER_STARTER_LOADOUT, ...resolvedEquipped };
   for (const slot of Object.keys(CHARACTER_STARTER_LOADOUT)) {
     if (merged[slot] === undefined) merged[slot] = CHARACTER_STARTER_LOADOUT[slot];
   }
   return merged;
 }
 
+function toCanonicalEquipped(internalEquipped = {}) {
+  const equipped = {};
+  Object.entries(SLOT_INTERNAL_TO_CANONICAL).forEach(([internalSlot, canonicalSlot]) => {
+    equipped[canonicalSlot] = resolveCharacterItemId(internalEquipped?.[internalSlot]) || null;
+  });
+  return equipped;
+}
+
+function fromCanonicalEquipped(canonicalEquipped = {}) {
+  const equipped = {};
+  Object.entries(SLOT_CANONICAL_TO_INTERNAL).forEach(([canonicalSlot, internalSlot]) => {
+    equipped[internalSlot] = resolveCharacterItemId(canonicalEquipped?.[canonicalSlot]) || null;
+  });
+  return equipped;
+}
+
 function normalizeCharacterForLiveProfile(profile, progress) {
+  const v4 = profile?.characterV4 || null;
   const existingIdentity = profile?.identity || {};
   const coreCharacter = readCoreState()?.character || {};
-  const hasPriorCharacterData = Boolean(profile?.character || existingIdentity.name || coreCharacter.name);
+  const hasPriorCharacterData = Boolean(v4 || profile?.character || existingIdentity.name || coreCharacter.name);
   if (!hasPriorCharacterData) return null;
-  const model = toCharacterModel(profile?.character?.baseModel || profile?.character?.identity?.sex || existingIdentity.gender || coreCharacter.gender);
-  const name = sanitizeCharacterName(profile?.character?.identity?.name || existingIdentity.name || coreCharacter.name || 'Historian');
-  const pronouns = sanitizePronouns(profile?.character?.identity?.pronouns || existingIdentity.pronouns || 'they/them');
-  const requestedTone = profile?.character?.appearance?.skinTone || profile?.appearance?.skinTone || coreCharacter.appearance?.skinTone || coreCharacter.skinTone || CHARACTER_DEFAULT_SKIN_TONE;
+  const model = toCharacterModel(
+    v4?.character?.sex
+    || profile?.character?.baseModel
+    || profile?.character?.identity?.sex
+    || existingIdentity.gender
+    || coreCharacter.gender
+  );
+  const name = sanitizeCharacterName(v4?.character?.name || profile?.character?.identity?.name || existingIdentity.name || coreCharacter.name || 'Historian');
+  const pronouns = sanitizePronouns(v4?.character?.pronouns || profile?.character?.identity?.pronouns || existingIdentity.pronouns || 'they/them');
+  const requestedTone = v4?.character?.appearance?.skinTone || profile?.character?.appearance?.skinTone || profile?.appearance?.skinTone || coreCharacter.appearance?.skinTone || coreCharacter.skinTone || CHARACTER_DEFAULT_SKIN_TONE;
 
-  let character = profile?.character
+  const v4Owned = Array.isArray(v4?.inventory?.ownedItemIds) ? v4.inventory.ownedItemIds : [];
+  const v4Equipped = fromCanonicalEquipped(v4?.equipped || {});
+
+  let character = profile?.character && !v4
     ? migrateCharacterAppearance(profile.character)
     : createNewCharacter({ name, sex: model, pronouns, skinTone: requestedTone });
 
   const legacyMapped = mapLegacyOutfitToEquipment(existingIdentity.outfit || coreCharacter.outfit || {});
   character.inventory = Array.from(new Set([
     ...(Array.isArray(character.inventory) ? character.inventory : []),
+    ...v4Owned,
     ...(Array.isArray(progress.inventoryItemIds) ? progress.inventoryItemIds : []),
     ...Object.values(CHARACTER_STARTER_LOADOUT).filter(Boolean),
     ...Object.values(legacyMapped).filter(Boolean)
-  ]));
+  ].map((itemId) => resolveCharacterItemId(itemId)).filter(Boolean)));
 
   character.equipped = mergeEquippedWithStarter({
     ...(character.equipped || {}),
+    ...v4Equipped,
     ...(progress.equipped || {}),
     ...legacyMapped
+  });
+
+  Object.keys(character.equipped || {}).forEach((slot) => {
+    character.equipped[slot] = resolveCharacterItemId(character.equipped[slot]);
   });
 
   // Enforce slot correctness and safe starter fallback.
@@ -308,7 +346,30 @@ function normalizeCharacterForLiveProfile(profile, progress) {
   character.identity = { ...(character.identity || {}), name, pronouns, sex: model };
   character.baseModel = model;
   character.schemaVersion = Math.max(Number(character.schemaVersion || 1), CHARACTER_SYSTEM_DEFAULTS.schemaVersion);
+  character.characterVersion = Math.max(Number(character.characterVersion || 1), 4);
   return character;
+}
+
+function buildCharacterV4Snapshot(character) {
+  const equippedCanonical = toCanonicalEquipped(character.equipped || {});
+  const equippedSet = new Set(Object.values(character.equipped || {}).filter(Boolean));
+  const seen = new Set(character.seenItemIds || []);
+  return {
+    characterVersion: 4,
+    character: {
+      name: character.identity?.name || 'Historian',
+      sex: toCharacterModel(character.baseModel || character.identity?.sex || 'woman'),
+      pronouns: character.identity?.pronouns || 'they/them',
+      appearance: {
+        skinTone: getCharacterSkinTone(character)
+      }
+    },
+    inventory: {
+      ownedItemIds: Array.from(new Set((character.inventory || []).map((itemId) => resolveCharacterItemId(itemId)).filter(Boolean))),
+      newItemIds: (character.inventory || []).filter((itemId) => !seen.has(itemId) && !equippedSet.has(itemId)).map((itemId) => resolveCharacterItemId(itemId)).filter(Boolean)
+    },
+    equipped: equippedCanonical
+  };
 }
 
 function persistCharacterProfile(syncProgress = true) {
@@ -326,6 +387,8 @@ function persistCharacterProfile(syncProgress = true) {
     skinTone: activeCharacter.appearance?.skinTone || CHARACTER_DEFAULT_SKIN_TONE
   };
   studentProfile.version = Math.max(Number(studentProfile.version || 1), 3);
+  studentProfile.characterVersion = Math.max(Number(studentProfile.characterVersion || 1), 4);
+  studentProfile.characterV4 = buildCharacterV4Snapshot(activeCharacter);
   saveProfile(studentProfile, DEFAULT_STORAGE_KEY);
 
   if (syncProgress) {
@@ -384,8 +447,11 @@ function openGearRewardPopup(itemId, sourceLabel = 'New gear unlocked') {
         <button class="close-button" data-close-modal aria-label="Close">×</button>
       </header>
       <div class="quest-modal-body" style="display:grid;grid-template-columns:minmax(180px,260px) minmax(0,1fr);gap:14px;align-items:start;">
-        <div id="reward-gear-preview" class="quest-character-stage" aria-label="Character preview"></div>
+        <div class="store-item-art" data-slot="${text(item.slot)}" style="aspect-ratio:1/1;">
+          <img src="${text(item.previewAssetPath || item.assetPath)}" alt="${text(item.name)} preview" loading="eager" decoding="async" />
+        </div>
         <div>
+          <h3 style="margin:0 0 6px;">${text(item.name)}</h3>
           <p>${text(item.description || 'A new cosmetic item has been added to your inventory.')}</p>
           <p class="qp-level-meta">Slot: ${text(CHARACTER_SLOT_LABELS[item.slot] || item.slot)}</p>
           <p class="qp-level-meta">Rarity: ${text(String(item.rarity || '').toUpperCase())}</p>
@@ -398,12 +464,6 @@ function openGearRewardPopup(itemId, sourceLabel = 'New gear unlocked') {
     </article>`;
   $('#modal-layer').classList.add('open');
   $('#modal-layer').setAttribute('aria-hidden', 'false');
-  const previewCharacter = clone(activeCharacter || {});
-  if (previewCharacter?.equipped && item.slot) {
-    previewCharacter.equipped[item.slot] = item.id;
-  }
-  const preview = $('#reward-gear-preview');
-  if (preview && previewCharacter?.identity) renderCharacterStage(preview, previewCharacter, { label: 'Reward preview' });
 }
 
 function loadStudentProgress() {
@@ -1970,6 +2030,22 @@ function renderCharacterSlotGrid(character, selectedSlot = 'shirts', includeButt
   }).join('');
 }
 
+function renderStarterLoadoutCards(character, slotIds = []) {
+  return slotIds.map((slotId) => {
+    const itemId = normalizeSlotChoice(character, slotId);
+    const item = itemId ? getCharacterItem(itemId) : null;
+    return `
+      <article class="quest-character-loadout-card" aria-label="${text(CHARACTER_SLOT_LABELS[slotId] || slotId)} starter slot">
+        <div class="store-item-art" data-slot="${text(slotId)}" style="aspect-ratio: 1 / 1; margin-bottom: 8px;">
+          ${item ? `<img src="${text(item.previewAssetPath || item.assetPath)}" alt="${text(item.name)} preview" loading="lazy" decoding="async" />` : '<span>○</span>'}
+        </div>
+        <p class="eyebrow" style="margin:0;">${text(CHARACTER_SLOT_LABELS[slotId] || slotId)}</p>
+        <h3 style="margin:4px 0 0; font-size:16px;">${text(item?.name || 'Empty')}</h3>
+        <p style="margin:4px 0 0; font-size:11px;">${text(item?.description || 'No item selected.')}</p>
+      </article>`;
+  }).join('');
+}
+
 function getCharacterWizardDraft() {
   if (characterWizardDraft) return characterWizardDraft;
   const baseModel = toCharacterModel(activeCharacter?.baseModel || activeCharacter?.identity?.sex || 'woman');
@@ -2040,8 +2116,11 @@ function renderCharacterWizardModal() {
         <section class="quest-character-wizard__form" data-character-page="2" ${characterWizardPage === 2 ? '' : 'hidden'}>
           <p class="quest-character-wizard__eyebrow">Step 2 of 2</p>
           <h2>Starter gear and equipment slots</h2>
-          <div id="character-wizard-preview-page-2" class="quest-character-stage" aria-label="Starter character preview"></div>
-          <div class="quest-character-slot-grid">${renderCharacterSlotGrid(buildCharacterFromDraft(draft), 'shirts', false)}</div>
+          <div class="quest-character-loadout-layout">
+            <div class="quest-character-loadout-column">${renderStarterLoadoutCards(buildCharacterFromDraft(draft), ['hats', 'shirts', 'belts'])}</div>
+            <div id="character-wizard-preview-page-2" class="quest-character-stage" aria-label="Starter character preview"></div>
+            <div class="quest-character-loadout-column">${renderStarterLoadoutCards(buildCharacterFromDraft(draft), ['pants', 'shoes', 'hands', 'transportation'])}</div>
+          </div>
           <div class="quest-character-actions"><button type="button" class="quest-character-button" data-action="wizard-back">Back</button><button type="button" class="quest-character-button quest-character-button--gold" data-action="wizard-finish">Begin Journey</button></div>
         </section>
       </div>
@@ -2101,10 +2180,10 @@ function openCustomize() {
             <h3 style="font-size:20px;">${text(slotLabel)} inventory</h3>
             <div class="inventory-grid">${slotItems.map((item) => `
               <article>
-                <span>${item.rarity === 'legendary' ? '✦' : item.rarity === 'epic' ? '◆' : item.rarity === 'rare' ? '◈' : item.rarity === 'uncommon' ? '◌' : '○'}</span>
+                <div class="store-item-art" data-slot="${text(item.slot)}" style="aspect-ratio:1/1; margin-bottom:10px;"><img src="${text(item.previewAssetPath || item.assetPath)}" alt="${text(item.name)} preview" loading="lazy" decoding="async" /></div>
                 <h3>${text(item.name)}</h3>
                 <p>${text(item.description)}</p>
-                <p class="qp-level-meta">${text(String(item.rarity || '').toUpperCase())}</p>
+                <p class="qp-level-meta">${text(CHARACTER_SLOT_LABELS[item.slot] || item.slot)} · ${text(String(item.rarity || '').toUpperCase())}</p>
                 <button class="text-button" data-action="equip-character-item" data-item-id="${item.id}" type="button">${equippedId === item.id ? 'Equipped' : 'Equip'}</button>
               </article>`).join('') || '<article><span>○</span><h3>No owned items</h3><p>Earn or purchase items for this slot to equip them.</p></article>'}
             </div>
@@ -2161,6 +2240,9 @@ function openInventory() {
               <span class="qp-tag">${text(String(item.rarity || '').toUpperCase())}</span>
               ${equippedSet.has(item.id) ? '<span class="qp-tag">Equipped</span>' : '<span class="qp-tag">Owned</span>'}
             </div>
+            <div class="quest-actions" style="margin-top:8px;">
+              <button class="text-button" data-action="equip-character-item" data-item-id="${item.id}" type="button">${equippedSet.has(item.id) ? 'Equipped' : 'Equip'}</button>
+            </div>
           </article>`).join('') || '<article><span>○</span><h3>No owned items</h3><p>Earn gear from quests, badges, and the Archive Store.</p></article>'}
         </div>
       </div>
@@ -2171,17 +2253,6 @@ function openInventory() {
 }
 
 function renderItemPreviewStages(parent = document) {
-  if (!activeCharacter) return;
-  const slotCrop = {
-    hats: { x: 108, y: 34, w: 296, h: 228 },
-    shirts: { x: 96, y: 154, w: 320, h: 356 },
-    belts: { x: 132, y: 320, w: 248, h: 184 },
-    pants: { x: 96, y: 292, w: 320, h: 372 },
-    shoes: { x: 98, y: 486, w: 316, h: 248 },
-    hands: { x: 214, y: 264, w: 222, h: 280 },
-    transportation: { x: 18, y: 170, w: 476, h: 482 }
-  };
-  const defaultCrop = { x: 96, y: 144, w: 320, h: 420 };
   const previewTargets = $$('[data-item-preview-id]', parent);
   previewTargets.forEach((target) => {
     const itemId = target.dataset.itemPreviewId;
@@ -2194,51 +2265,14 @@ function renderItemPreviewStages(parent = document) {
       const slotClass = item.slot ? `store-item-art--slot-${item.slot}` : '';
       target.classList.remove('is-missing');
       target.className = `store-item-art ${slotClass}`.trim();
-      target.innerHTML = '<canvas class="item-preview-canvas" role="img"></canvas>';
-      target.setAttribute('aria-label', `${item.name} preview`);
-      const canvas = $('canvas', target);
-      const source = new Image();
-      source.decoding = 'async';
-      source.onload = () => {
-        if (!canvas) return;
-        const crop = slotCrop[item.slot] || defaultCrop;
-        canvas.width = 420;
-        canvas.height = 315;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
+      const previewPath = item.previewAssetPath || item.assetPath;
+      target.innerHTML = `<img class="item-preview-image" src="${text(previewPath)}" alt="${text(item.name)} preview" loading="eager" decoding="async" />`;
+      const image = $('img', target);
+      if (image) {
+        image.addEventListener('error', () => {
           target.classList.add('is-missing');
           target.innerHTML = '';
-          return;
-        }
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(
-          source,
-          crop.x,
-          crop.y,
-          crop.w,
-          crop.h,
-          0,
-          0,
-          canvas.width,
-          canvas.height
-        );
-        requestAnimationFrame(() => {
-          target.classList.remove('is-missing');
-        });
-      };
-      source.onerror = () => {
-        target.classList.add('is-missing');
-        target.innerHTML = '';
-      };
-      source.src = item.assetPath;
-      if (source.complete && source.naturalWidth > 0) {
-        requestAnimationFrame(() => {
-          target.classList.remove('is-missing');
-        });
-      }
-      if (source.complete && source.naturalWidth === 0) {
-          target.classList.add('is-missing');
-          target.innerHTML = '';
+        }, { once: true });
       }
     } catch {
       target.classList.add('is-missing');
@@ -2326,8 +2360,15 @@ function openStore() {
   const items = STARTER_STORE_ITEMS.map((item) => {
     const owns = ownedSet.has(item.id);
     const hasBadge = !item.requiresBadgeId || studentProgress.earnedBadgeIds.includes(item.requiresBadgeId);
+    const hasQuest = !item.requiresQuestId || studentProgress.completedQuestIds.includes(item.requiresQuestId);
     const canAfford = studentProgress.archiveTokens >= item.price;
-    const lockedReason = !hasBadge ? `Requires ${item.requiresBadgeId}` : !canAfford ? 'Not enough Archive Tokens' : '';
+    const lockedReason = !hasBadge
+      ? `Requires ${item.requiresBadgeId}`
+      : !hasQuest
+        ? `Requires quest ${item.requiresQuestId}`
+        : !canAfford
+          ? 'Not enough Archive Tokens'
+          : '';
     return `
       <article class="qp-card qp-quest-card" aria-label="Store item ${text(item.name)}">
         <div class="store-item-art" data-slot="${text(item.slot || item.category)}" data-item-preview-id="${text(item.id)}" aria-label="${text(item.name)} preview"></div>
@@ -2341,7 +2382,7 @@ function openStore() {
           ${item.requiresBadgeId ? `<span class="qp-tag">Badge: ${text(item.requiresBadgeId)}</span>` : ''}
         </div>
         <div class="quest-actions" style="margin-top:10px;">
-          <button class="primary-button" ${owns || !hasBadge || !canAfford ? 'disabled' : ''} data-teacher-action="buy-store-item" data-item-id="${item.id}" type="button">${equippedSet.has(item.id) ? 'Equipped' : owns ? 'Owned' : 'Purchase'}</button>
+          <button class="primary-button" ${owns || !hasBadge || !hasQuest || !canAfford ? 'disabled' : ''} data-teacher-action="buy-store-item" data-item-id="${item.id}" type="button">${equippedSet.has(item.id) ? 'Equipped' : owns ? 'Owned' : 'Purchase'}</button>
           ${lockedReason ? `<span class="qp-level-meta">${text(lockedReason)}</span>` : ''}
         </div>
       </article>`;

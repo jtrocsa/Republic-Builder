@@ -204,11 +204,7 @@ details p { margin: 8px 0; line-height: 1.45; }.rights-note { color: #8b6f54; fo
 .store-item-art { display: grid; place-items: center; width: 100%; aspect-ratio: 4 / 3; margin-bottom: 8px; border: 1px solid rgba(56, 88, 82, .15); border-radius: 10px; background: linear-gradient(180deg, #fffdf6, #f2ead6); overflow: hidden; }
 .store-item-art img { width: 100%; height: 100%; object-fit: contain; }
 .store-item-art .quest-character-stage { width: 100%; height: 100%; max-width: none; border: 0; border-radius: 0; box-shadow: none; background: transparent; }
-.store-item-art img.item-preview-layer {
-  object-fit: contain;
-  transform-origin: 50% 50%;
-}
-.store-item-art canvas.item-preview-canvas { display: block; width: 100%; height: 100%; }
+.store-item-art img.item-preview-image { width: 100%; height: 100%; object-fit: contain; }
 .store-item-art.is-missing { background: repeating-linear-gradient(135deg, #f7efdb 0 10px, #efe4cb 10px 20px); }
 .store-item-art.is-missing::after {
   content: attr(data-slot) ' preview';

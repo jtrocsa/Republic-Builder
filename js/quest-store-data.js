@@ -1,12 +1,12 @@
-import { CHARACTER_ITEM_CATALOG } from './quest-character-items.js';
+import { CHARACTER_ITEM_CATALOG } from './quest-character-items-png.js';
 
 const SLOT_LABELS = Object.freeze({
   shoes: 'Shoes',
-  shirts: 'Shirts',
-  hats: 'Hats',
-  belts: 'Belts',
+  shirts: 'Shirt',
+  hats: 'Hat',
+  belts: 'Belt',
   pants: 'Pants',
-  hands: 'Hand Items',
+  hands: 'Hand',
   transportation: 'Transportation'
 });
 
@@ -22,7 +22,9 @@ export const STARTER_STORE_ITEMS = CHARACTER_ITEM_CATALOG
     category: item.slot,
     categoryLabel: SLOT_LABELS[item.slot] || item.slot,
     slot: item.slot,
-    assetPath: item.assetPath,
+    assetPath: item.previewAssetPath || item.assetPath,
+    previewAssetPath: item.previewAssetPath || item.assetPath,
+    equipmentLayerAssetPath: item.equipmentLayerAssetPath || null,
     rarity: item.rarity,
     price: Number(item.price || 0),
     cosmeticOnly: true,

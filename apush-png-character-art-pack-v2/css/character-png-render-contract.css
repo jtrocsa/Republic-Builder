@@ -1,0 +1,30 @@
+/* Final PNG-paper-doll renderer. Use only after aligned full-canvas layer files exist. */
+.character-png-stack {
+  position: relative;
+  width: min(100%, 34rem);
+  aspect-ratio: 2 / 3;
+  isolation: isolate;
+}
+
+.character-png-layer,
+.character-png-skin-tint {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.character-png-skin-tint {
+  background: var(--skin-tone-color);
+  -webkit-mask-image: var(--skin-mask-url);
+  mask-image: var(--skin-mask-url);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-position: center;
+  mask-position: center;
+  mix-blend-mode: color;
+}

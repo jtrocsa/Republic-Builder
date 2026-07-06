@@ -11,11 +11,16 @@ import {
   CHARACTER_SYSTEM_DEFAULTS,
   CHARACTER_DEFAULT_SKIN_TONE,
   getCharacterBaseAsset,
-  isCharacterSkinTone
-} from './quest-character-items.js';
+  isCharacterSkinTone,
+  resolveCharacterItemId
+} from './quest-character-items-png.js';
 
 const itemById = new Map(CHARACTER_ITEM_CATALOG.map((item) => [item.id, item]));
 const validSlots = new Set(CHARACTER_SLOTS.map((slot) => slot.id));
+
+function toCanonicalItemId(itemId) {
+  return resolveCharacterItemId(itemId);
+}
 
 export function getCharacterSkinTone(character) {
   const requestedTone = character?.appearance?.skinTone || character?.skinTone;
@@ -66,33 +71,36 @@ export function setCharacterSkinTone(character, skinTone) {
 }
 
 export function getCharacterItem(itemId) {
-  return itemById.get(itemId) || null;
+  return itemById.get(toCanonicalItemId(itemId)) || null;
 }
 
 export function ownsCharacterItem(character, itemId) {
-  return Boolean(character?.inventory?.includes(itemId));
+  const canonical = toCanonicalItemId(itemId);
+  return Boolean(character?.inventory?.includes(canonical));
 }
 
 export function grantCharacterItem(character, itemId, reason = 'quest_reward') {
-  const item = getCharacterItem(itemId);
+  const canonicalId = toCanonicalItemId(itemId);
+  const item = getCharacterItem(canonicalId);
   if (!item) throw new Error(`Unknown character item: ${itemId}`);
-  if (ownsCharacterItem(character, itemId)) {
+  if (ownsCharacterItem(character, canonicalId)) {
     return { character, changed: false, reason: 'already_owned', item };
   }
   const next = structuredClone(character);
-  next.inventory.push(itemId);
+  next.inventory.push(canonicalId);
   next.seenItemIds = next.seenItemIds || [];
   next.updatedAt = new Date().toISOString();
   return { character: next, changed: true, reason, item };
 }
 
 export function equipCharacterItem(character, itemId) {
-  const item = getCharacterItem(itemId);
+  const canonicalId = toCanonicalItemId(itemId);
+  const item = getCharacterItem(canonicalId);
   if (!item) throw new Error(`Unknown character item: ${itemId}`);
   if (!validSlots.has(item.slot)) throw new Error(`Invalid character item slot: ${item.slot}`);
-  if (!ownsCharacterItem(character, itemId)) throw new Error('Students can only equip items they own.');
+  if (!ownsCharacterItem(character, canonicalId)) throw new Error('Students can only equip items they own.');
   const next = structuredClone(character);
-  next.equipped[item.slot] = itemId;
+  next.equipped[item.slot] = canonicalId;
   next.updatedAt = new Date().toISOString();
   return next;
 }
@@ -114,11 +122,18 @@ export function getCharacterLayers(character) {
     { slot: 'base', assetPath: baseAsset, zIndex: 1, id: `base-${baseModel}-${skinTone}`, skinTone }
   ];
   for (const slot of validSlots) {
-    const itemId = character.equipped?.[slot];
+    const itemId = toCanonicalItemId(character.equipped?.[slot]);
     if (!itemId) continue;
     const item = getCharacterItem(itemId);
     if (!item) continue;
-    layers.push({ slot, assetPath: item.assetPath, zIndex: item.equipOrder, id: item.id });
+    layers.push({
+      slot,
+      assetPath: item.assetPath,
+      previewAssetPath: item.previewAssetPath || null,
+      equipmentLayerAssetPath: item.equipmentLayerAssetPath || null,
+      zIndex: item.equipOrder,
+      id: item.id
+    });
   }
   return layers.filter((layer) => Boolean(layer.assetPath)).sort((a, b) => a.zIndex - b.zIndex);
 }
