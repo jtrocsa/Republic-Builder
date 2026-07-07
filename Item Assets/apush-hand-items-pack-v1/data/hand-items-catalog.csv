@@ -1,0 +1,11 @@
+id,name,slot,rarity,file,description
+rolled-sea-chart,Rolled Sea Chart,hand,common,assets/hand-items/01-rolled-sea-chart.png,"A weathered chart marked with coastlines, compass roses, and Atlantic routes, useful for navigators plotting passages between Europe, Africa, and the Americas."
+mariners-pocket-compass,Mariner's Pocket Compass,hand,common,assets/hand-items/02-mariners-pocket-compass.png,"A brass pocket compass with a hinged lid, the kind a sailor, pilot, or explorer might carry to keep a steady bearing at sea."
+celestial-astrolabe,Celestial Astrolabe,hand,rare,assets/hand-items/03-celestial-astrolabe.png,"An ornate brass astrolabe used to measure the altitude of stars and the sun, helping mariners estimate latitude on long Atlantic voyages."
+sealed-captains-letter,Sealed Captain's Letter,hand,common,assets/hand-items/04-sealed-captains-letter.png,"A folded parchment letter sealed in wax, carrying orders, reports, or private correspondence across ocean routes and colonial ports."
+captains-logbook,Captain's Logbook,hand,uncommon,assets/hand-items/05-captains-logbook.png,"A leather-bound maritime journal used to record winds, bearings, cargo, and daily events aboard an Atlantic vessel."
+brass-spyglass,Brass Spyglass,hand,uncommon,assets/hand-items/06-brass-spyglass.png,"A collapsible brass spyglass for scanning coastlines, distant sails, and harbor approaches during voyages of exploration and trade."
+cross-staff,Cross-Staff,hand,uncommon,assets/hand-items/07-cross-staff.png,"A wooden navigation instrument once used to measure the angle of celestial bodies, a practical tool for early modern seafarers."
+quill-and-ink-set,Quill and Ink Set,hand,common,assets/hand-items/08-quill-and-ink-set.png,"A feather quill, parchment, and bottle of ink—essential for drafting journals, maps, ship logs, and colonial correspondence."
+navigation-dividers,Navigation Dividers,hand,uncommon,assets/hand-items/09-navigation-dividers.png,"Brass dividers used to measure distances on charts, favored by navigators and cartographers mapping the Atlantic world."
+merchants-ledger,Merchant's Ledger,hand,common,assets/hand-items/10-merchants-ledger.png,"A worn leather ledger for recording debts, cargo, prices, and transactions in the bustling trade networks of the Atlantic economy."

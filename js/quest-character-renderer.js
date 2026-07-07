@@ -26,43 +26,34 @@ function renderLegacyLayers(container, layers) {
 
 function renderProxyItemLayers(container, layers) {
   const proxyLayout = {
-    hats: { z: 12, top: '14%', left: '84%', width: '16%', height: '13%', className: 'quest-character-proxy--hats' },
-    shirts: { z: 12, top: '14%', left: '16%', width: '16%', height: '13%', className: 'quest-character-proxy--shirts' },
-    belts: { z: 12, top: '32%', left: '16%', width: '16%', height: '13%', className: 'quest-character-proxy--belts' },
-    pants: { z: 12, top: '50%', left: '16%', width: '16%', height: '13%', className: 'quest-character-proxy--pants' },
-    shoes: { z: 12, top: '68%', left: '16%', width: '16%', height: '13%', className: 'quest-character-proxy--shoes' },
-    hands: { z: 12, top: '40%', left: '84%', width: '16%', height: '13%', className: 'quest-character-proxy--hands' },
-    transportation: { z: 12, top: '72%', left: '84%', width: '18%', height: '14%', className: 'quest-character-proxy--transportation' }
-  };
-  const slotLabel = {
-    hats: 'Hat',
-    shirts: 'Shirt',
-    belts: 'Belt',
-    pants: 'Pants',
-    shoes: 'Shoes',
-    hands: 'Hand',
-    transportation: 'Mount'
-  };
-
-  const makeChip = (layer, placement) => {
-    const chip = document.createElement('div');
-    chip.className = `quest-character-proxy-chip ${placement.className}`;
-    chip.style.zIndex = String(placement.z);
-    chip.style.top = placement.top;
-    chip.style.left = placement.left;
-    chip.style.width = placement.width;
-    chip.style.height = placement.height;
-    chip.dataset.slot = layer.slot;
-    chip.dataset.itemId = layer.id;
-    chip.textContent = slotLabel[layer.slot] || layer.slot;
-    chip.title = layer.name || slotLabel[layer.slot] || layer.slot;
-    return chip;
+    hats: { z: 7, top: '14%', left: '50%', width: '40%', height: '18%', className: 'quest-character-proxy--hats' },
+    shirts: { z: 4, top: '34%', left: '50%', width: '44%', height: '24%', className: 'quest-character-proxy--shirts' },
+    belts: { z: 5, top: '50%', left: '50%', width: '22%', height: '9%', className: 'quest-character-proxy--belts' },
+    pants: { z: 2, top: '63%', left: '50%', width: '36%', height: '22%', className: 'quest-character-proxy--pants' },
+    shoes: { z: 3, top: '89%', left: '50%', width: '22%', height: '12%', className: 'quest-character-proxy--shoes' },
+    hands: { z: 6, top: '50%', left: '66%', width: '18%', height: '15%', className: 'quest-character-proxy--hands' },
+    transportation: { z: 0, top: '74%', left: '50%', width: '44%', height: '22%', className: 'quest-character-proxy--transportation' }
   };
 
   layers.forEach((layer) => {
+    const preview = layer.previewAssetPath || layer.assetPath;
     const placement = proxyLayout[layer.slot];
-    if (!placement) return;
-    container.append(makeChip(layer, placement));
+    if (!placement || !preview) return;
+    const image = document.createElement('img');
+    image.className = `quest-character-proxy-layer ${placement.className}`;
+    image.src = preview;
+    image.alt = layer.name || layer.slot;
+    image.loading = 'eager';
+    image.decoding = 'async';
+    image.style.zIndex = String(placement.z);
+    image.style.top = placement.top;
+    image.style.left = placement.left;
+    image.style.width = placement.width;
+    image.style.height = placement.height;
+    image.dataset.slot = layer.slot;
+    image.dataset.itemId = layer.id;
+    image.dataset.itemName = layer.name || '';
+    container.append(image);
   });
 }
 

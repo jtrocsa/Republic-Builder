@@ -10,7 +10,7 @@
 
 .quest-character-stage {
   position: relative;
-  width: min(100%, 360px);
+  width: min(100%, 420px);
   aspect-ratio: 2 / 3;
   overflow: hidden;
   isolation: isolate;
@@ -61,12 +61,10 @@
   pointer-events: none;
   user-select: none;
   object-fit: contain;
-  padding: 4px;
-  border: 1px solid rgba(33, 58, 65, .16);
-  border-radius: 12px;
-  background: rgba(250, 245, 228, .86);
-  box-shadow: 0 3px 10px rgba(18, 32, 42, .14);
-  filter: saturate(1.02);
+  background: transparent;
+  border: 0;
+  box-shadow: 0 8px 18px rgba(18, 32, 42, .10);
+  filter: saturate(1.02) drop-shadow(0 4px 8px rgba(18, 32, 42, .08));
 }
 
 .quest-character-proxy-chip {

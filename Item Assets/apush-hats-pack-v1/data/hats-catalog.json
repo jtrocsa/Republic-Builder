@@ -1,0 +1,82 @@
+[
+  {
+    "id": "sailors-watch-cap",
+    "name": "Sailor's Watch Cap",
+    "slot": "hat",
+    "rarity": "common",
+    "file": "assets/hats/01-sailors-watch-cap.png",
+    "description": "A dark knitted wool cap worn low for warmth, suited to sailors standing watch in cold Atlantic winds and harbor weather."
+  },
+  {
+    "id": "travelers-broadbrim-hat",
+    "name": "Traveler's Broadbrim Hat",
+    "slot": "hat",
+    "rarity": "common",
+    "file": "assets/hats/02-travelers-broadbrim-hat.png",
+    "description": "A weathered brown felt hat with a broad brim, practical for travelers, riders, and overland journeys between coast and frontier."
+  },
+  {
+    "id": "naval-officers-tricorn",
+    "name": "Naval Officer's Tricorn",
+    "slot": "hat",
+    "rarity": "rare",
+    "file": "assets/hats/03-naval-officers-tricorn.png",
+    "description": "A navy tricorn trimmed in gold, fit for an officer tied to Atlantic trade, imperial fleets, or ceremonial naval service."
+  },
+  {
+    "id": "meetinghouse-broadbrim",
+    "name": "Meetinghouse Broadbrim",
+    "slot": "hat",
+    "rarity": "common",
+    "file": "assets/hats/04-meetinghouse-broadbrim.png",
+    "description": "A simple dark felt broadbrim with a tall crown and plain band, reflecting the restrained dress favored in many colonial communities."
+  },
+  {
+    "id": "surveyors-round-hat",
+    "name": "Surveyor's Round Hat",
+    "slot": "hat",
+    "rarity": "uncommon",
+    "file": "assets/hats/05-surveyors-round-hat.png",
+    "description": "A sturdy round felt hat with a leather band, suitable for surveyors, mapmakers, and practical men crossing fields and wooded tracts."
+  },
+  {
+    "id": "explorers-fur-cap",
+    "name": "Explorer's Fur Cap",
+    "slot": "hat",
+    "rarity": "uncommon",
+    "file": "assets/hats/06-explorers-fur-cap.png",
+    "description": "A fur-lined cap with leather reinforcing bands, useful for cold-weather expeditions, northern routes, and rugged exploration."
+  },
+  {
+    "id": "woven-plantation-hat",
+    "name": "Woven Plantation Hat",
+    "slot": "hat",
+    "rarity": "common",
+    "file": "assets/hats/07-woven-plantation-hat.png",
+    "description": "A wide woven straw hat for shade in warmer climates, suited to field labor, plantation work, and long days under southern sun."
+  },
+  {
+    "id": "courtiers-velvet-cap",
+    "name": "Courtier's Velvet Cap",
+    "slot": "hat",
+    "rarity": "rare",
+    "file": "assets/hats/08-courtiers-velvet-cap.png",
+    "description": "A richly embroidered velvet cap with gold ornamentation, suggesting the display of status and luxury within elite Atlantic society."
+  },
+  {
+    "id": "weathered-tricorn",
+    "name": "Weathered Tricorn",
+    "slot": "hat",
+    "rarity": "common",
+    "file": "assets/hats/09-weathered-tricorn.png",
+    "description": "A worn dark tricorn with brass edging, the sort of reliable hat a colonial traveler, militia member, or dockside worker might wear."
+  },
+  {
+    "id": "dark-felt-cavalier-hat",
+    "name": "Dark Felt Cavalier Hat",
+    "slot": "hat",
+    "rarity": "uncommon",
+    "file": "assets/hats/10-dark-felt-cavalier-hat.png",
+    "description": "A flat-crowned black felt hat with a wide brim, offering a bold silhouette reminiscent of older Atlantic fashions carried into the colonies."
+  }
+]

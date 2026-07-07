@@ -1,0 +1,11 @@
+id,name,slot,rarity,file,description
+bay-mare,Bay Mare,transportation,common,assets/transportation/01-bay-mare.png,"A sure-footed bay mare with a simple riding saddle, dependable for travel between settlements and inland trails."
+gray-gelding,Gray Gelding,transportation,common,assets/transportation/02-gray-gelding.png,"A calm gray gelding valued for steady work, road travel, and the long distances of the Atlantic frontier."
+chestnut-stallion,Chestnut Stallion,transportation,uncommon,assets/transportation/03-chestnut-stallion.png,"A spirited chestnut horse with the strength and speed to carry a rider across rough colonial roads."
+dappled-trail-horse,Dappled Trail Horse,transportation,uncommon,assets/transportation/04-dappled-trail-horse.png,"A dappled riding horse suited to explorers, messengers, and travelers moving beyond established settlements."
+pack-horse,Pack Horse,transportation,uncommon,assets/transportation/05-pack-horse.png,"A saddle-equipped pack horse prepared to carry supplies, maps, and trade goods overland."
+surveyors-mule,Surveyor's Mule,transportation,common,assets/transportation/06-surveyors-mule.png,"A hardy mule prized for balance and endurance when carrying instruments across uneven ground."
+coastal-pony,Coastal Pony,transportation,common,assets/transportation/07-coastal-pony.png,"A compact pony well suited to coastal paths, smaller settlements, and everyday travel along the Atlantic shore."
+merchants-wagon,Merchant's Wagon,transportation,rare,assets/transportation/08-merchants-wagon.png,"A covered wagon for moving cargo, household goods, and trade supplies between ports, markets, and inland communities."
+fishing-dory,Fishing Dory,transportation,uncommon,assets/transportation/09-fishing-dory.png,"A sturdy small wooden boat for coastal fishing, short harbor crossings, and work along Atlantic waterways."
+atlantic-sloop,Atlantic Sloop,transportation,rare,assets/transportation/10-atlantic-sloop.png,"A small sailing vessel prepared for coastal trade and exploration, carrying travelers between ports of the Atlantic world."

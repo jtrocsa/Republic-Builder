@@ -1,0 +1,82 @@
+[
+  {
+    "id": "rolled-sea-chart",
+    "name": "Rolled Sea Chart",
+    "slot": "hand",
+    "rarity": "common",
+    "file": "assets/hand-items/01-rolled-sea-chart.png",
+    "description": "A weathered chart marked with coastlines, compass roses, and Atlantic routes, useful for navigators plotting passages between Europe, Africa, and the Americas."
+  },
+  {
+    "id": "mariners-pocket-compass",
+    "name": "Mariner's Pocket Compass",
+    "slot": "hand",
+    "rarity": "common",
+    "file": "assets/hand-items/02-mariners-pocket-compass.png",
+    "description": "A brass pocket compass with a hinged lid, the kind a sailor, pilot, or explorer might carry to keep a steady bearing at sea."
+  },
+  {
+    "id": "celestial-astrolabe",
+    "name": "Celestial Astrolabe",
+    "slot": "hand",
+    "rarity": "rare",
+    "file": "assets/hand-items/03-celestial-astrolabe.png",
+    "description": "An ornate brass astrolabe used to measure the altitude of stars and the sun, helping mariners estimate latitude on long Atlantic voyages."
+  },
+  {
+    "id": "sealed-captains-letter",
+    "name": "Sealed Captain's Letter",
+    "slot": "hand",
+    "rarity": "common",
+    "file": "assets/hand-items/04-sealed-captains-letter.png",
+    "description": "A folded parchment letter sealed in wax, carrying orders, reports, or private correspondence across ocean routes and colonial ports."
+  },
+  {
+    "id": "captains-logbook",
+    "name": "Captain's Logbook",
+    "slot": "hand",
+    "rarity": "uncommon",
+    "file": "assets/hand-items/05-captains-logbook.png",
+    "description": "A leather-bound maritime journal used to record winds, bearings, cargo, and daily events aboard an Atlantic vessel."
+  },
+  {
+    "id": "brass-spyglass",
+    "name": "Brass Spyglass",
+    "slot": "hand",
+    "rarity": "uncommon",
+    "file": "assets/hand-items/06-brass-spyglass.png",
+    "description": "A collapsible brass spyglass for scanning coastlines, distant sails, and harbor approaches during voyages of exploration and trade."
+  },
+  {
+    "id": "cross-staff",
+    "name": "Cross-Staff",
+    "slot": "hand",
+    "rarity": "uncommon",
+    "file": "assets/hand-items/07-cross-staff.png",
+    "description": "A wooden navigation instrument once used to measure the angle of celestial bodies, a practical tool for early modern seafarers."
+  },
+  {
+    "id": "quill-and-ink-set",
+    "name": "Quill and Ink Set",
+    "slot": "hand",
+    "rarity": "common",
+    "file": "assets/hand-items/08-quill-and-ink-set.png",
+    "description": "A feather quill, parchment, and bottle of ink—essential for drafting journals, maps, ship logs, and colonial correspondence."
+  },
+  {
+    "id": "navigation-dividers",
+    "name": "Navigation Dividers",
+    "slot": "hand",
+    "rarity": "uncommon",
+    "file": "assets/hand-items/09-navigation-dividers.png",
+    "description": "Brass dividers used to measure distances on charts, favored by navigators and cartographers mapping the Atlantic world."
+  },
+  {
+    "id": "merchants-ledger",
+    "name": "Merchant's Ledger",
+    "slot": "hand",
+    "rarity": "common",
+    "file": "assets/hand-items/10-merchants-ledger.png",
+    "description": "A worn leather ledger for recording debts, cargo, prices, and transactions in the bustling trade networks of the Atlantic economy."
+  }
+]

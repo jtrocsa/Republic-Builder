@@ -1,0 +1,82 @@
+[
+  {
+    "id": "homespun-linen-shirt",
+    "name": "Homespun Linen Shirt",
+    "slot": "shirt",
+    "rarity": "common",
+    "file": "assets/shirts/01-homespun-linen-shirt.png",
+    "description": "A plain cream linen shirt with full sleeves and gathered cuffs, suitable for everyday wear among laborers, apprentices, and colonists in the Atlantic world."
+  },
+  {
+    "id": "harbor-poet-shirt",
+    "name": "Harbor Poet Shirt",
+    "slot": "shirt",
+    "rarity": "common",
+    "file": "assets/shirts/02-harbor-poet-shirt.png",
+    "description": "A loose-cut beige shirt with an open collar and billowing sleeves, the sort of practical but stylish garment a town clerk, sailor, or wandering writer might wear."
+  },
+  {
+    "id": "merchant-waistcoat-shirt",
+    "name": "Merchant Waistcoat Shirt",
+    "slot": "shirt",
+    "rarity": "uncommon",
+    "file": "assets/shirts/03-merchant-waistcoat-shirt.png",
+    "description": "A white linen shirt layered beneath a brown waistcoat, fit for a shopkeeper, trader, or prosperous colonial merchant conducting business in port towns."
+  },
+  {
+    "id": "governors-cravat-shirt",
+    "name": "Governor's Cravat Shirt",
+    "slot": "shirt",
+    "rarity": "rare",
+    "file": "assets/shirts/04-governors-cravat-shirt.png",
+    "description": "An elegant ivory shirt with pleated front panels, ruffled cuffs, and a formal cravat, suitable for a gentleman of rank or an official at a colonial gathering."
+  },
+  {
+    "id": "mariners-neckerchief-shirt",
+    "name": "Mariner's Neckerchief Shirt",
+    "slot": "shirt",
+    "rarity": "common",
+    "file": "assets/shirts/05-mariners-neckerchief-shirt.png",
+    "description": "A worn cream work shirt tied with a blue neckerchief, ideal for a sailor, dockhand, or traveler moving between ship and shore."
+  },
+  {
+    "id": "sailors-smock",
+    "name": "Sailor's Smock",
+    "slot": "shirt",
+    "rarity": "uncommon",
+    "file": "assets/shirts/06-sailors-smock.png",
+    "description": "A cream maritime smock with a navy sailor collar and necktie, inspired by seafaring dress and well suited to Atlantic crossings and naval life."
+  },
+  {
+    "id": "fishermans-work-smock",
+    "name": "Fisherman's Work Smock",
+    "slot": "shirt",
+    "rarity": "common",
+    "file": "assets/shirts/07-fishermans-work-smock.png",
+    "description": "A rugged blue work smock with large patch pockets and rope ties, built for fishermen, harbor workers, and labor in wet coastal conditions."
+  },
+  {
+    "id": "buckskin-fringe-shirt",
+    "name": "Buckskin Fringe Shirt",
+    "slot": "shirt",
+    "rarity": "uncommon",
+    "file": "assets/shirts/08-buckskin-fringe-shirt.png",
+    "description": "A tan buckskin shirt with fringe and leather ties, inspired by frontier and Indigenous-influenced clothing traditions adapted to travel and hunting."
+  },
+  {
+    "id": "burgundy-brocade-doublet",
+    "name": "Burgundy Brocade Doublet",
+    "slot": "shirt",
+    "rarity": "rare",
+    "file": "assets/shirts/09-burgundy-brocade-doublet.png",
+    "description": "A richly colored burgundy garment with brocade texture, gold-trim accents, and billowing sleeves, suited to a wealthy patron, courtly figure, or theatrical merchant."
+  },
+  {
+    "id": "ruffled-dress-shirt",
+    "name": "Ruffled Dress Shirt",
+    "slot": "shirt",
+    "rarity": "uncommon",
+    "file": "assets/shirts/10-ruffled-dress-shirt.png",
+    "description": "A crisp white shirt with ruffled chest detailing and lace-trimmed cuffs, reflecting the more formal fashions worn by gentlemen on ceremonial or social occasions."
+  }
+]

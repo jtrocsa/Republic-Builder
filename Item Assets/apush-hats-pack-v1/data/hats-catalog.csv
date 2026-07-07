@@ -1,0 +1,11 @@
+id,name,slot,rarity,file,description
+sailors-watch-cap,Sailor's Watch Cap,hat,common,assets/hats/01-sailors-watch-cap.png,"A dark knitted wool cap worn low for warmth, suited to sailors standing watch in cold Atlantic winds and harbor weather."
+travelers-broadbrim-hat,Traveler's Broadbrim Hat,hat,common,assets/hats/02-travelers-broadbrim-hat.png,"A weathered brown felt hat with a broad brim, practical for travelers, riders, and overland journeys between coast and frontier."
+naval-officers-tricorn,Naval Officer's Tricorn,hat,rare,assets/hats/03-naval-officers-tricorn.png,"A navy tricorn trimmed in gold, fit for an officer tied to Atlantic trade, imperial fleets, or ceremonial naval service."
+meetinghouse-broadbrim,Meetinghouse Broadbrim,hat,common,assets/hats/04-meetinghouse-broadbrim.png,"A simple dark felt broadbrim with a tall crown and plain band, reflecting the restrained dress favored in many colonial communities."
+surveyors-round-hat,Surveyor's Round Hat,hat,uncommon,assets/hats/05-surveyors-round-hat.png,"A sturdy round felt hat with a leather band, suitable for surveyors, mapmakers, and practical men crossing fields and wooded tracts."
+explorers-fur-cap,Explorer's Fur Cap,hat,uncommon,assets/hats/06-explorers-fur-cap.png,"A fur-lined cap with leather reinforcing bands, useful for cold-weather expeditions, northern routes, and rugged exploration."
+woven-plantation-hat,Woven Plantation Hat,hat,common,assets/hats/07-woven-plantation-hat.png,"A wide woven straw hat for shade in warmer climates, suited to field labor, plantation work, and long days under southern sun."
+courtiers-velvet-cap,Courtier's Velvet Cap,hat,rare,assets/hats/08-courtiers-velvet-cap.png,"A richly embroidered velvet cap with gold ornamentation, suggesting the display of status and luxury within elite Atlantic society."
+weathered-tricorn,Weathered Tricorn,hat,common,assets/hats/09-weathered-tricorn.png,"A worn dark tricorn with brass edging, the sort of reliable hat a colonial traveler, militia member, or dockside worker might wear."
+dark-felt-cavalier-hat,Dark Felt Cavalier Hat,hat,uncommon,assets/hats/10-dark-felt-cavalier-hat.png,"A flat-crowned black felt hat with a wide brim, offering a bold silhouette reminiscent of older Atlantic fashions carried into the colonies."

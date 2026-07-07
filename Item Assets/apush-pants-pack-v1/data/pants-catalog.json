@@ -1,0 +1,112 @@
+[
+  {
+    "id": "colonial-field-breeches",
+    "name": "Colonial Field Breeches",
+    "slot": "pants",
+    "rarity": "common",
+    "file": "assets/pants/01-colonial-field-breeches.png",
+    "description": "A pair of undyed linen knee breeches tied at the calf, practical for daily labor, travel, and life in an early Atlantic settlement.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/01-colonial-field-breeches.png"
+  },
+  {
+    "id": "sailors-canvas-slops",
+    "name": "Sailor\u2019s Canvas Slops",
+    "slot": "pants",
+    "rarity": "common",
+    "file": "assets/pants/02-sailors-canvas-slops.png",
+    "description": "Loose blue canvas slops with a buttoned fall front, made for sailors working the decks of merchant and fishing vessels.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/02-sailors-canvas-slops.png"
+  },
+  {
+    "id": "frontier-work-trousers",
+    "name": "Frontier Work Trousers",
+    "slot": "pants",
+    "rarity": "common",
+    "file": "assets/pants/03-frontier-work-trousers.png",
+    "description": "Durable brown trousers built for rough paths, field work, and travel between coastal settlements and inland routes.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/03-frontier-work-trousers.png"
+  },
+  {
+    "id": "leather-riding-breeches",
+    "name": "Leather Riding Breeches",
+    "slot": "pants",
+    "rarity": "uncommon",
+    "file": "assets/pants/04-leather-riding-breeches.png",
+    "description": "Supple leather knee breeches designed for riders, messengers, and surveyors who spent long days on horseback.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/04-leather-riding-breeches.png"
+  },
+  {
+    "id": "striped-dock-slops",
+    "name": "Striped Dock Slops",
+    "slot": "pants",
+    "rarity": "uncommon",
+    "file": "assets/pants/05-striped-dock-slops.png",
+    "description": "Blue-and-cream striped work slops associated with port labor and maritime trade, cut wide for practical movement.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/05-striped-dock-slops.png"
+  },
+  {
+    "id": "homespun-wool-trousers",
+    "name": "Homespun Wool Trousers",
+    "slot": "pants",
+    "rarity": "common",
+    "file": "assets/pants/06-homespun-wool-trousers.png",
+    "description": "Plain brown homespun trousers, mended and worn like those of a farmer, apprentice, or smallholder.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/06-homespun-wool-trousers.png"
+  },
+  {
+    "id": "white-linen-breeches",
+    "name": "White Linen Breeches",
+    "slot": "pants",
+    "rarity": "uncommon",
+    "file": "assets/pants/07-white-linen-breeches.png",
+    "description": "Fresh white linen knee breeches with a formal cut, appropriate for a church service, civic meeting, or town celebration.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/07-white-linen-breeches.png"
+  },
+  {
+    "id": "indigo-trader-trousers",
+    "name": "Indigo Trader Trousers",
+    "slot": "pants",
+    "rarity": "uncommon",
+    "file": "assets/pants/08-indigo-trader-trousers.png",
+    "description": "Deep indigo trousers with a sturdy buttoned front, fitting for a trader, ship\u2019s clerk, or prosperous dockside merchant.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/08-indigo-trader-trousers.png"
+  },
+  {
+    "id": "travelers-road-breeches",
+    "name": "Traveler\u2019s Road Breeches",
+    "slot": "pants",
+    "rarity": "common",
+    "file": "assets/pants/09-travelers-road-breeches.png",
+    "description": "Hard-wearing road breeches in weathered brown cloth, made for long walks, wagon routes, and changing weather.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/09-travelers-road-breeches.png"
+  },
+  {
+    "id": "merchants-dress-trousers",
+    "name": "Merchant\u2019s Dress Trousers",
+    "slot": "pants",
+    "rarity": "rare",
+    "file": "assets/pants/10-merchants-dress-trousers.png",
+    "description": "Well-kept cream trousers with a tailored waist, suited to a merchant presenting goods, accounts, or correspondence in town.",
+    "artStatus": "preview",
+    "equipmentLayerAssetPath": null,
+    "previewAssetPath": "assets/pants/10-merchants-dress-trousers.png"
+  }
+]

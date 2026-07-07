@@ -1,0 +1,11 @@
+id,name,slot,rarity,file,description
+colonial-buckle-shoes,Colonial Buckle Shoes,shoes,common,assets/shoes/01-colonial-buckle-shoes.png,"Sturdy black leather shoes with brass buckles, suitable for a colonial clerk, tradesman, or town resident in the Atlantic world."
+merchant-loafers,Merchant Loafers,shoes,common,assets/shoes/02-merchant-loafers.png,"Worn leather loafers fit for a dockside merchant or shopkeeper, practical for long hours on cobbled streets and countinghouse floors."
+naval-dress-shoes,Naval Dress Shoes,shoes,uncommon,assets/shoes/03-naval-dress-shoes.png,"Refined dark leather shoes styled for an officer or gentleman attached to Atlantic trade and naval service, polished for formal occasions."
+frontier-work-boots,Frontier Work Boots,shoes,common,assets/shoes/04-frontier-work-boots.png,"Heavy brown work boots built for rough roads, muddy crossings, and daily labor at the edge of settlement."
+beaded-moccasins,Beaded Moccasins,shoes,uncommon,assets/shoes/05-beaded-moccasins.png,"Soft leather moccasins with beadwork and fringe, inspired by Indigenous craftsmanship and well suited for travel over uneven ground."
+riding-boots,Riding Boots,shoes,uncommon,assets/shoes/06-riding-boots.png,"Tall leather boots made for horseback travel, favored by riders, surveyors, and travelers moving between ports and inland settlements."
+polished-monk-straps,Polished Monk Straps,shoes,rare,assets/shoes/07-polished-monk-straps.png,"Well-kept brown strap shoes with a polished finish, fitting for a prosperous merchant, lawyer, or educated gentleman in town."
+woven-moccasins,Woven Moccasins,shoes,uncommon,assets/shoes/08-woven-moccasins.png,"Lightweight woven leather shoes that suggest hand-crafted frontier wear, comfortable for travel and everyday movement."
+weathered-deck-shoes,Weathered Deck Shoes,shoes,common,assets/shoes/09-weathered-deck-shoes.png,"Sea-worn leather shoes suited to sailors and harbor workers, practical on wet planks, docks, and shipboard decks."
+fur-lined-winter-boots,Fur-Lined Winter Boots,shoes,rare,assets/shoes/10-fur-lined-winter-boots.png,"Thick leather boots lined with fur for cold-weather travel, ideal for northern colonies, wilderness routes, and winter expeditions."

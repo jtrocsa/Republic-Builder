@@ -15,7 +15,6 @@ const SLOT_LABELS = Object.freeze({
  * Source of truth is the character item catalog from the equipment pack.
  */
 export const STARTER_STORE_ITEMS = CHARACTER_ITEM_CATALOG
-  .filter((item) => item.acquisition === 'store')
   .map((item) => ({
     id: item.id,
     name: item.name,
@@ -26,12 +25,12 @@ export const STARTER_STORE_ITEMS = CHARACTER_ITEM_CATALOG
     previewAssetPath: item.previewAssetPath || item.assetPath,
     equipmentLayerAssetPath: item.equipmentLayerAssetPath || null,
     rarity: item.rarity,
-    price: Number(item.price || 0),
+    price: Number(item.price ?? 0),
     cosmeticOnly: true,
     repeatable: false,
     description: item.description,
-    requiresBadgeId: item.badgeRequirement && item.badgeRequirement !== 'configured-by-teacher' ? item.badgeRequirement : null,
-    requiresQuestId: item.questRequirement && item.questRequirement !== 'configured-by-teacher' ? item.questRequirement : null
+    requiresBadgeId: null,
+    requiresQuestId: null
   }));
 
 export function getStoreItemById(itemId, items = STARTER_STORE_ITEMS) {

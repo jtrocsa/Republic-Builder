@@ -2162,17 +2162,13 @@ function openCustomize() {
         <div>
           <p class="eyebrow">Customize</p>
           <h2>${text(activeCharacter.identity?.name || 'Historian')} · Equipment</h2>
-          <p>Equip one item per slot. Skin tone is always free and separate from inventory.</p>
+          <p>Equip one item per slot. Skin tone is set during character creation, not here.</p>
         </div>
         <button class="close-button" data-close-modal aria-label="Close">×</button>
       </header>
-      <div class="quest-modal-body" style="display:grid;grid-template-columns:minmax(240px,340px) minmax(0,1fr);gap:14px;align-items:start;">
+      <div class="quest-modal-body" style="display:grid;grid-template-columns:minmax(340px,420px) minmax(0,1fr);gap:18px;align-items:start;">
         <section>
-          <div id="customize-character-preview" class="quest-character-stage" aria-label="Live avatar preview"></div>
-          <div class="quest-character-appearance-panel" style="margin-top:10px;">
-            <p class="quest-character-appearance-note">Appearance: skin tone can be changed any time for free.</p>
-            <div class="quest-character-skin-tone-grid" role="radiogroup" aria-label="Skin tone appearance choices">${renderSkinToneSwatches(getCharacterSkinTone(activeCharacter), 'customize-skin-tone')}</div>
-          </div>
+          <div id="customize-character-preview" class="quest-character-stage" style="width:min(100%, 420px); margin:0 auto;" aria-label="Live avatar preview"></div>
         </section>
         <section>
           <div class="quest-character-slot-grid" style="margin-bottom:10px;">${renderCharacterSlotGrid(activeCharacter, selectedSlot, true)}</div>
@@ -2353,22 +2349,46 @@ function openBadgeCase() {
   $('#modal-layer').setAttribute('aria-hidden', 'false');
 }
 
+function getStorePriceOverrides() {
+  state.storePriceOverrides = state.storePriceOverrides && typeof state.storePriceOverrides === 'object' ? state.storePriceOverrides : {};
+  return state.storePriceOverrides;
+}
+
+function getStoreItemPrice(itemId, fallbackPrice = 0) {
+  const overrides = getStorePriceOverrides();
+  const overrideValue = overrides[itemId];
+  const parsedOverride = Number(overrideValue);
+  if (Number.isFinite(parsedOverride)) return Math.max(0, parsedOverride);
+  return Math.max(0, Number(fallbackPrice || 0));
+}
+
+function getResolvedStoreItems() {
+  return STARTER_STORE_ITEMS.map((item) => ({
+    ...item,
+    price: getStoreItemPrice(item.id, item.price)
+  }));
+}
+
+function setStoreItemPrice(itemId, price) {
+  if (!itemId) return;
+  const nextPrice = Math.max(0, Math.round(Number(price) || 0));
+  const overrides = getStorePriceOverrides();
+  overrides[itemId] = nextPrice;
+  state.storePriceOverrides = overrides;
+  saveState(state);
+}
+
 function openStore() {
   openOverlay();
   const ownedSet = new Set(activeCharacter?.inventory || []);
   const equippedSet = new Set(Object.values(activeCharacter?.equipped || {}).filter(Boolean));
-  const items = STARTER_STORE_ITEMS.map((item) => {
+  const items = getResolvedStoreItems().map((item) => {
     const owns = ownedSet.has(item.id);
-    const hasBadge = !item.requiresBadgeId || studentProgress.earnedBadgeIds.includes(item.requiresBadgeId);
-    const hasQuest = !item.requiresQuestId || studentProgress.completedQuestIds.includes(item.requiresQuestId);
     const canAfford = studentProgress.archiveTokens >= item.price;
-    const lockedReason = !hasBadge
-      ? `Requires ${item.requiresBadgeId}`
-      : !hasQuest
-        ? `Requires quest ${item.requiresQuestId}`
-        : !canAfford
-          ? 'Not enough Archive Tokens'
-          : '';
+    const lockedReason = !canAfford ? 'Not enough Archive Tokens' : '';
+    const priceEditor = state.teacherMode
+      ? `<label class="teacher-store-price" style="display:grid;gap:4px;max-width:140px;"><span class="qp-level-meta">Teacher price</span><input type="number" min="0" step="1" value="${item.price}" data-action="edit-store-price" data-item-id="${item.id}" /></label>`
+      : '';
     return `
       <article class="qp-card qp-quest-card" aria-label="Store item ${text(item.name)}">
         <div class="store-item-art" data-slot="${text(item.slot || item.category)}" data-item-preview-id="${text(item.id)}" aria-label="${text(item.name)} preview"></div>
@@ -2379,10 +2399,10 @@ function openStore() {
           <span class="qp-tag">Price: ${item.price} Tokens</span>
           <span class="qp-tag">Slot: ${text(item.categoryLabel || CHARACTER_SLOT_LABELS[item.slot] || item.category)}</span>
           <span class="qp-tag">${equippedSet.has(item.id) ? 'Equipped' : owns ? 'Owned' : 'Purchasable'}</span>
-          ${item.requiresBadgeId ? `<span class="qp-tag">Badge: ${text(item.requiresBadgeId)}</span>` : ''}
         </div>
+        ${priceEditor}
         <div class="quest-actions" style="margin-top:10px;">
-          <button class="primary-button" ${owns || !hasBadge || !hasQuest || !canAfford ? 'disabled' : ''} data-teacher-action="buy-store-item" data-item-id="${item.id}" type="button">${equippedSet.has(item.id) ? 'Equipped' : owns ? 'Owned' : 'Purchase'}</button>
+          <button class="primary-button" ${owns || !canAfford ? 'disabled' : ''} data-teacher-action="buy-store-item" data-item-id="${item.id}" type="button">${equippedSet.has(item.id) ? 'Equipped' : owns ? 'Owned' : 'Purchase'}</button>
           ${lockedReason ? `<span class="qp-level-meta">${text(lockedReason)}</span>` : ''}
         </div>
       </article>`;
@@ -2394,7 +2414,7 @@ function openStore() {
         <div>
           <p class="eyebrow">Archive Store</p>
           <h2>Spend Archive Tokens</h2>
-          <p>Archive Token balance: ${studentProgress.archiveTokens}. Historian XP is permanent and never spendable.</p>
+          <p>Archive Token balance: ${studentProgress.archiveTokens}. Historian XP is permanent and never spendable.${state.teacherMode ? ' Teacher Mode is on, so store prices can be edited inline.' : ''}</p>
         </div>
         <button class="close-button" data-close-modal>×</button>
       </header>
@@ -3223,15 +3243,13 @@ function initializeEvents() {
         }
         const itemId = teacherActionButton.dataset.itemId;
         pendingStorePurchaseId = itemId;
-        const item = STARTER_STORE_ITEMS.find((row) => row.id === itemId);
+        const item = getResolvedStoreItems().find((row) => row.id === itemId);
         if (!item) return;
-        const preview = spendArchiveTokens(studentProgress, itemId, { storeItems: STARTER_STORE_ITEMS, reason: `Purchased ${item.name}` });
+        const preview = spendArchiveTokens(studentProgress, itemId, { storeItems: getResolvedStoreItems(), reason: `Purchased ${item.name}` });
         if (!preview.purchased) {
           const reasonMessage = preview.reason === 'insufficient_tokens'
             ? 'Not enough Archive Tokens for this purchase.'
-            : preview.reason === 'badge_required'
-              ? 'Badge prerequisite not met for this item.'
-              : 'Item already owned.';
+            : 'Item already owned.';
           setDispatch('Store update', reasonMessage);
           openStore();
           return;
@@ -3247,6 +3265,10 @@ function initializeEvents() {
       }
       if (actionName === 'edit-active-quest' && activeQuest?.id) {
         openTeacherQuestBuilder({ questId: activeQuest.id }).catch((error) => console.error(error));
+      }
+      if (actionName === 'edit-store-price') {
+        setStoreItemPrice(teacherActionButton.dataset.itemId, teacherActionButton.value);
+        openStore();
       }
       if (actionName === 'choose-quest-template') {
         const templateKey = teacherActionButton.dataset.templateKey || 'royale';
@@ -3385,16 +3407,10 @@ function initializeEvents() {
       if (preview2) renderCharacterStage(preview2, previewCharacter, { label: 'Starter gear preview' });
     }
 
-    if (event.target.name === 'customize-skin-tone' && activeCharacter) {
-      try {
-        activeCharacter = setCharacterSkinTone(activeCharacter, event.target.value);
-        persistCharacterProfile(true);
-        const preview = $('#customize-character-preview');
-        if (preview) renderCharacterStage(preview, activeCharacter, { label: `${activeCharacter.identity?.name || 'Historian'} equipment preview` });
-        updateHud();
-      } catch (error) {
-        console.warn('Unable to set skin tone', error);
-      }
+    if (event.target.dataset.action === 'edit-store-price') {
+      setStoreItemPrice(event.target.dataset.itemId, event.target.value);
+      openStore();
+      return;
     }
 
     if (event.target.id === 'teacher-class-select') {
